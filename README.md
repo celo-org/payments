@@ -1,3 +1,3 @@
 # payments
 
-j
+TypeScript implementation of the Celo Payments Protocol
