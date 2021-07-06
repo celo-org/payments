@@ -42,7 +42,11 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@bitauth/libauth": "^1.17.1"
+    "@bitauth/libauth": "^1.17.1",
+    "@celo/base": "^1.2.1",
+    "@celo/connect": "^1.2.0",
+    "@types/isomorphic-fetch": "^0.0.35",
+    "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
