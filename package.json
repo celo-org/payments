@@ -35,22 +35,31 @@
     "doc:json": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --json build/docs/typedoc.json",
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "version": "standard-version",
-    "reset-hard": "git clean -dfx && git reset --hard && yarn",
     "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
+  },
+  "oclif": {
+    "commands": "build/main/cli/commands",
+    "bin": "payments",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
   },
   "dependencies": {
     "@bitauth/libauth": "^1.17.1",
-    "@celo/base": "^1.2.1",
+    "@celo/base": "^1.2.0",
     "@celo/connect": "^1.2.0",
+    "@celo/contractkit": "^1.2.0",
     "@types/isomorphic-fetch": "^0.0.35",
     "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
+    "@oclif/command": "^1.8.0",
+    "@oclif/plugin-help": "^3.2.2",
     "@types/node": "^16.0.0",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
@@ -69,7 +78,6 @@
     "open-cli": "^6.0.1",
     "prettier": "^2.1.1",
     "standard-version": "^9.0.0",
-    "ts-node": "^9.0.0",
     "typedoc": "^0.19.0",
     "typescript": "^4.0.2"
   },
@@ -80,7 +88,12 @@
     "!**/*.json",
     "CHANGELOG.md",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "/bin",
+    "/lib",
+    "!node_modules/**/*",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
   ],
   "ava": {
     "failFast": true,

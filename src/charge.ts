@@ -1,10 +1,7 @@
 import { Err, Ok } from '@celo/base';
-
-import { GetInfo } from './schemas';
+import { TransactionHandler } from './handlers/interface';
 import { fetchWithRetries, parseUri } from './helpers';
-
-type ComputeTransactionHash = (request: GetInfo) => Promise<string>;
-type SubmitTransaction = (request: GetInfo) => Promise<string>;
+import { GetInfo } from './schemas';
 
 enum AbortCode {
   reference_id_not_found = 'reference_id_not_found',
@@ -17,31 +14,35 @@ enum AbortCode {
 }
 
 /**
- * Implementation of the Celo Payments Protocol
+ * Charge object for use in the Celo Payments Protocol
  */
-export class Payments {
+export class Charge {
   private paymentInfo?: GetInfo;
 
+  /**
+   * Instantiates a new charge object for use in the Celo Payments Protocol
+   *
+   * @param baseUrl url of the payment service provider implementing the protocol
+   * @param referenceId reference ID of the charge
+   * @param transactionHandler handler to abstract away chain interaction semantics
+   */
   constructor(
     private baseUrl: string,
     private referenceId: string,
-    private computeTransactionHash: ComputeTransactionHash,
-    private submitTransaction: SubmitTransaction
+    private transactionHandler: TransactionHandler
   ) {}
 
-  static fromUri(
-    uri: string,
-    computeTransactionHash: ComputeTransactionHash,
-    submitTransaction: SubmitTransaction
-  ) {
-    // TODO: handle QR URI's
+  /**
+   * Instantiates a new charge object for use in the Celo Payments Protocol
+   * from a URI, often encoded as part of a QR code.
+   *
+   * @param uri encoded URI with `baseUrl` and `referenceId`
+   * @param transactionHandler handler to abstract away chain interaction semantics
+   * @returns an instance of the Payments class
+   */
+  static fromUri(uri: string, transactionHandler: TransactionHandler) {
     const { baseUrl, referenceId } = parseUri(uri);
-    return new Payments(
-      baseUrl,
-      referenceId,
-      computeTransactionHash,
-      submitTransaction
-    );
+    return new Charge(baseUrl, referenceId, transactionHandler);
   }
 
   /**
@@ -77,6 +78,11 @@ export class Payments {
     }
   }
 
+  /**
+   * Performs the GetInfo request of the Celo Payments Protocol.
+   *
+   * @returns
+   */
   async getInfo() {
     const response = await this.request(
       `/purchases/${this.referenceId}`,
@@ -91,8 +97,14 @@ export class Payments {
     return this.paymentInfo;
   }
 
+  /**
+   * Performs the InitCharge and ReadyForSettlement requests of the Celo Payments Protocol.
+   *
+   * @param kyc
+   * @returns
+   */
   async submit(kyc: { [x: string]: any }) {
-    const transactionHash = await this.computeTransactionHash(
+    const transactionHash = await this.transactionHandler.computeHash(
       this.paymentInfo!
     );
 
@@ -107,7 +119,7 @@ export class Payments {
     }
 
     try {
-      await this.submitTransaction(this.paymentInfo!);
+      await this.transactionHandler.submit(this.paymentInfo!);
     } catch (e) {
       // TODO: retries?
       await this.abort(AbortCode.unable_to_submit_transaction);
@@ -115,12 +127,13 @@ export class Payments {
     }
 
     await this.request(`/purchases/${this.referenceId}/confirmation`, 'GET');
-
     return result;
   }
 
   /**
    * Aborts a request
    */
-  abort(code: AbortCode) {}
+  abort(code: AbortCode) {
+    console.log(code);
+  }
 }

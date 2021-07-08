@@ -1,9 +1,5 @@
 import { Address } from '@celo/base';
-
-enum Currency {
-  cUSD = 'cUSD',
-  cEUR = 'cEUR',
-}
+import { StableToken } from '@celo/contractkit';
 
 export interface GetInfo {
   kyc_data_requirements: {
@@ -41,7 +37,7 @@ export interface GetInfo {
   };
   action: {
     amount: string;
-    currency: Currency;
+    currency: StableToken;
     action: 'charge';
     timestamp: string;
   };
