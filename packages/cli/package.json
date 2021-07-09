@@ -1,0 +1,23 @@
+{
+  "name": "@celo/payments-cli",
+  "version": "0.0.0",
+  "description": "CLI interface for the Celo Payments Protocol",
+  "license": "Apache",
+  "keywords": [
+    "Celo",
+    "CLI",
+    "payments"
+  ],
+  "oclif": {
+    "commands": "build/main/cli/commands",
+    "bin": "payments",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "dependencies": {
+    "@celo/payments-sdk": "*",
+    "@oclif/command": "^1.8.0",
+    "@oclif/plugin-help": "^3.2.2"
+  }
+}

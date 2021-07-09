@@ -1,0 +1,16 @@
+{
+  "name": "@celo/payments-server",
+  "scripts": {
+    "start": "ts-node ./bin/index.ts"
+  },
+  "dependencies": {
+    "@hapi/hapi": "^20.1.5",
+    "@types/hapi": "^18.0.6",
+    "ts-node": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/hapi__hapi": "^20.0.9",
+    "@types/node": "^16.3.0",
+    "typescript": "^4.3.5"
+  }
+}

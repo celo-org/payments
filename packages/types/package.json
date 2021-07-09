@@ -1,0 +1,10 @@
+{
+  "name": "@celo/payments-types",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@celo/contractkit": "^1.2.2"
+  }
+}

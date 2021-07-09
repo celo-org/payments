@@ -1,10 +1,9 @@
-import { newKit } from '@celo/contractkit';
-import { Command, flags } from '@oclif/command';
-import { Charge } from '../../charge';
-import { ContractKitTransactionHandler } from '../../handlers';
+import { newKit } from "@celo/contractkit";
+import { Command, flags } from "@oclif/command";
+import { Charge, ContractKitTransactionHandler } from "@celo/payments-sdk";
 
 export default class Init extends Command {
-  static description = 'describe the command here';
+  static description = "describe the command here";
 
   static examples = [
     `$ payments init --referenceId XXX --baseUrl https://psp.com --privateKey 0x...`,
@@ -12,23 +11,21 @@ export default class Init extends Command {
 
   static flags = {
     baseUrl: flags.string({
-      char: 'u',
-      description: 'URL of the payment service provider',
-      required: true,
+      char: "u",
+      description: "URL of the payment service provider",
     }),
     referenceId: flags.string({
-      char: 'r',
-      description: 'Reference ID of the purchase',
-      required: true,
+      char: "r",
+      description: "Reference ID of the purchase",
     }),
     privateKey: flags.string({
-      char: 'p',
-      description: 'Private key of the purchasee',
+      char: "p",
+      description: "Private key of the purchasee",
       required: true,
     }),
     rpcUrl: flags.string({
-      default: 'https://alfajores-forno.celo-testnet.org',
-      description: 'RPC URL of the node transactions are being submitted to',
+      default: "https://alfajores-forno.celo-testnet.org",
+      description: "RPC URL of the node transactions are being submitted to",
     }),
   };
 
