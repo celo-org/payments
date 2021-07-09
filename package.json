@@ -9,6 +9,7 @@
     "payments"
   ],
   "scripts": {
+    "build": "lerna run build",
     "postinstall": "lerna bootstrap"
   },
   "engines": {

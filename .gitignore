@@ -8,4 +8,5 @@ coverage
 *.log
 package-lock.json
 
-*.tsbuildinfog
+*.tsbuildinfo
+**/lib

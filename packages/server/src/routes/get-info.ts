@@ -3,7 +3,6 @@ import { GetInfo } from "@celo/payments-types";
 import { get } from "../storage";
 
 interface GetInfoRequest extends Request {
-  // ...GetInfo
   params: {
     id: string;
   };
