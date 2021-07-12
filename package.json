@@ -9,6 +9,7 @@
     "payments"
   ],
   "scripts": {
+    "clean": "rm -rf **/node_modules **/lib",
     "build": "lerna run build",
     "postinstall": "lerna bootstrap"
   },
