@@ -10,7 +10,7 @@
     "payments"
   ],
   "scripts": {
-    "clean": "rm -rf **/node_modules **/lib **/build",
+    "clean": "rm -rf node_modules packages/**/node_modules packages/**/lib packages/**/build",
     "build": "lerna run build",
     "postinstall": "lerna bootstrap",
     "start": "yarn lerna run start --stream",

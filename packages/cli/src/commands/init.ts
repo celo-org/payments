@@ -72,6 +72,5 @@ export default class Init extends Command {
     } else {
       await charge.abort(AbortCode.user_declined_payment);
     }
-    // TODO: continue this flow with prompts
   }
 }
