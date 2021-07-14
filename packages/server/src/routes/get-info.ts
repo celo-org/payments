@@ -1,5 +1,4 @@
-import { Request, RouteEventHandler, ResponseToolkit } from "@hapi/hapi";
-import { GetInfo } from "@celo/payments-types";
+import { Request, ResponseToolkit } from "@hapi/hapi";
 import { get } from "../storage";
 
 interface GetInfoRequest extends Request {
@@ -8,17 +7,13 @@ interface GetInfoRequest extends Request {
   };
 }
 
-export function getInfo(
-  req: GetInfoRequest,
-  res: ResponseToolkit
-): RouteEventHandler {
+export function getInfo(req: GetInfoRequest, res: ResponseToolkit) {
   const referenceId = req.params.id;
 
   const item = get(referenceId);
   if (item) {
-    res.response().code(404);
-    return;
+    return res.response(item).code(200);
   }
 
-  res.response(item).code(200);
+  return res.response().code(404);
 }

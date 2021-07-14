@@ -1,16 +1,18 @@
 import { Request, ResponseToolkit } from "@hapi/hapi";
-import { has } from "../storage";
+import { get } from "../storage";
 
-interface InitChargeRequest extends Request {
+interface AbortRequest extends Request {
   params: {
     id: string;
   };
+  body: {};
 }
 
-export function initCharge(req: InitChargeRequest, res: ResponseToolkit) {
+export function abort(req: AbortRequest, res: ResponseToolkit) {
   const referenceId = req.params.id;
 
-  if (!has(referenceId)) {
+  const item = get(referenceId);
+  if (!item) {
     return res.response().code(404);
   }
 

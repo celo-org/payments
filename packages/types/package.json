@@ -1,13 +1,15 @@
 {
   "name": "@celo/payments-types",
   "version": "0.0.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "files": [
     "lib"
   ],
   "scripts": {
-    "build": "tsc -b"
+    "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@celo/contractkit": "^1.2.2"
+    "@celo/contractkit": "1.2.0"
   }
 }

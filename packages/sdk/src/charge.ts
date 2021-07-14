@@ -1,17 +1,8 @@
 import { Err, Ok } from '@celo/base';
+import { AbortCode } from '@celo/payments-types';
 import { TransactionHandler } from './handlers/interface';
 import { fetchWithRetries, parseUri } from './helpers';
 import { GetInfo } from './schemas';
-
-enum AbortCode {
-  reference_id_not_found = 'reference_id_not_found',
-  risk_checks_failed = 'risk_checks_failed',
-  missing_information = 'missing_information',
-  payment_type_mismatch = 'payment_type_mismatch',
-  invalid_command_type = 'invalid_command_type',
-  unspecified_error = 'unspecified_error',
-  unable_to_submit_transaction = 'unable_to_submit_transaction',
-}
 
 /**
  * Charge object for use in the Celo Payments Protocol

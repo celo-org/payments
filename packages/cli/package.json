@@ -8,8 +8,12 @@
     "CLI",
     "payments"
   ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "cli": "yarn build && ./bin/run"
+  },
   "oclif": {
-    "commands": "build/main/cli/commands",
+    "commands": "lib/commands",
     "bin": "payments",
     "plugins": [
       "@oclif/plugin-help"
@@ -17,7 +21,9 @@
   },
   "dependencies": {
     "@celo/payments-sdk": "*",
+    "@celo/payments-types": "*",
     "@oclif/command": "^1.8.0",
-    "@oclif/plugin-help": "^3.2.2"
+    "@oclif/plugin-help": "^3.2.2",
+    "cli-ux": "^5.6.3"
   }
 }
