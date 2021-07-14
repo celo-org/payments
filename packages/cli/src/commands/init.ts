@@ -56,6 +56,8 @@ export default class Init extends Command {
     );
 
     kit.addAccount(privateKey);
+    const [defaultAccount] = await kit.getWallet().getAccounts();
+    kit.defaultAccount = defaultAccount;
 
     const charge = new Charge(
       baseUrl,

@@ -1,25 +1,10 @@
 import { Address } from "@celo/base";
 import { StableToken } from "@celo/contractkit";
+import { KYC } from "./kyc";
 
 export interface GetInfo {
   kyc_data_requirements: {
-    required_payer_data?: {
-      given_name: boolean;
-      surname: boolean;
-      address?: {
-        city: boolean;
-        country: boolean;
-        line1: boolean;
-        line2: false;
-        postal_code: boolean;
-        state: false;
-      };
-      national_id_data?: {
-        id_value: boolean;
-        country: boolean;
-        type: false;
-      };
-    };
+    required_payer_data?: KYC;
   };
   receiver: {
     account_address: Address;

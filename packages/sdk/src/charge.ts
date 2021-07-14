@@ -1,3 +1,4 @@
+import { ErrorResult } from '@celo/base';
 import { Err, Ok } from '@celo/base';
 import { AbortCode } from '@celo/payments-types';
 import { TransactionHandler } from './handlers/interface';
@@ -79,13 +80,9 @@ export class Charge {
    * @returns
    */
   async getInfo() {
-    const response = await this.request(
-      `/purchases/${this.referenceId}`,
-      'GET'
-    );
-    console.log(response);
+    const response = await this.request(`/payments/${this.referenceId}`, 'GET');
     if (!response.ok) {
-      throw new Error('');
+      throw new Error((response as ErrorResult<any>).error);
     }
 
     // TODO: schema validation
@@ -104,14 +101,17 @@ export class Charge {
       this.paymentInfo!
     );
 
-    const result = await this.request(
-      `/purchases/${this.referenceId}`,
+    const response = await this.request(
+      `/payments/${this.referenceId}`,
       'POST',
-      { kyc, transactionHash }
+      {
+        kyc,
+        transactionHash,
+      }
     );
     // TODO: schema validation
-    if (!result.ok) {
-      throw new Error('');
+    if (!response.ok) {
+      throw new Error('Invalid init charge response');
     }
 
     try {
@@ -122,14 +122,19 @@ export class Charge {
       throw new Error(AbortCode.unable_to_submit_transaction);
     }
 
-    await this.request(`/purchases/${this.referenceId}/confirmation`, 'GET');
-    return result;
+    await this.request(`/payments/${this.referenceId}/confirmation`, 'GET');
+    return response;
   }
 
   /**
    * Aborts a request
    */
-  abort(code: AbortCode) {
+  async abort(code: AbortCode, message?: string) {
+    await this.request(`/payments/${this.referenceId}/abort`, 'POST', {
+      referenceId: this.referenceId,
+      abort_code: code,
+      abort_message: message,
+    });
     console.log(code);
   }
 }

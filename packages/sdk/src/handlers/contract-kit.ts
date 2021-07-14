@@ -1,3 +1,4 @@
+import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
 import { GetInfo } from '../schemas';
 import { TransactionHandler } from './interface';
@@ -7,9 +8,21 @@ import { TransactionHandler } from './interface';
  * as its mechanism to compute transaction hashes and submit transactions.
  */
 export class ContractKitTransactionHandler implements TransactionHandler {
-  constructor(private kit: ContractKit) {}
+  private signedTransaction?: EncodedTransaction;
 
-  async computeHash(info: GetInfo) {
+  constructor(private kit: ContractKit) {
+    if (!kit.defaultAccount) {
+      throw new Error('Missing defaultAccount');
+    }
+  }
+
+  private async getSignedTransaction(
+    info: GetInfo
+  ): Promise<EncodedTransaction> {
+    if (this.signedTransaction) {
+      return this.signedTransaction;
+    }
+
     const wallet = this.kit.getWallet();
     if (!wallet) {
       throw new Error('Missing wallet');
@@ -18,38 +31,63 @@ export class ContractKitTransactionHandler implements TransactionHandler {
     const stable = await this.kit.contracts.getStableToken(
       info.action.currency as unknown as StableToken
     );
-    const { txo, defaultParams } = await stable.transfer(
+
+    const gasPriceMinimumWrapper =
+      await this.kit.contracts.getGasPriceMinimum();
+    const gasPriceMinimum = await gasPriceMinimumWrapper.gasPriceMinimum();
+
+    // const data = txo.encodeABI();
+    // const params = {
+    //   to: stableTokenAddress,
+    //   from: contractKit.kit.defaultAccount,
+    //   gasPrice: disbursement.gasPrice,
+    //   gas: disbursement.estimatedGasPerTransfer,
+    //   data,
+    //   chainId: contractKit.chainId,
+    //   nonce: transfers[i].nonce,
+    //   feeCurrency: stableTokenAddress,
+    //   gatewayFeeRecipient: '0x',
+    //   gatewayFee: '0x0',
+    //   common: '0x',
+    //   chain: '0x',
+    //   hardfork: '0x',
+    // };
+
+    const { txo } = await stable.transfer(
       info.receiver.account_address,
       this.kit.web3.utils.toWei(info.action.amount)
     );
 
-    const {
-      tx: { hash },
-    } = await wallet.signTransaction({
+    this.signedTransaction = await wallet.signTransaction({
       to: stable.address,
       from: this.kit.defaultAccount,
-      ...defaultParams,
+      gas: 100_000,
+      gasPrice: gasPriceMinimum.times(5).toString(),
+      chainId: await this.kit.connection.chainId(),
+      nonce: await this.kit.connection.getTransactionCount(
+        this.kit.defaultAccount
+      ),
       data: txo.encodeABI(),
+      feeCurrency: stable.address,
+      gatewayFeeRecipient: '0x',
+      gatewayFee: '0x0',
     });
 
+    return this.signedTransaction;
+  }
+
+  async computeHash(info: GetInfo) {
+    const {
+      tx: { hash },
+    } = await this.getSignedTransaction(info);
     return hash;
   }
 
   async submit(info: GetInfo) {
-    const wallet = this.kit.getWallet();
-    if (!wallet) {
-      throw new Error('Missing wallet');
-    }
-
-    const stable = await this.kit.contracts.getStableToken(
-      info.action.currency as unknown as StableToken
-    );
-    const { transactionHash } = await stable
-      .transfer(
-        info.receiver.account_address,
-        this.kit.web3.utils.toWei(info.action.amount)
-      )
-      .sendAndWaitForReceipt();
+    const { raw } = await this.getSignedTransaction(info);
+    const { transactionHash } = await (
+      await this.kit.connection.sendSignedTransaction(raw)
+    ).waitReceipt();
 
     return transactionHash;
   }

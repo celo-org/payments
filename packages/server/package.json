@@ -6,7 +6,8 @@
   },
   "dependencies": {
     "@celo/payments-types": "0.0.0",
-    "@hapi/hapi": "^20.1.5"
+    "@hapi/hapi": "^20.1.5",
+    "abi-decoder": "^2.4.0"
   },
   "devDependencies": {
     "ts-node-dev": "^1.1.8"
