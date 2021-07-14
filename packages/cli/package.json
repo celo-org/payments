@@ -9,7 +9,7 @@
     "payments"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -b .",
     "cli": "yarn build && ./bin/run"
   },
   "oclif": {
