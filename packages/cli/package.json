@@ -8,9 +8,12 @@
     "CLI",
     "payments"
   ],
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "build": "tsc -b .",
-    "cli": "yarn build && ./bin/run"
+    "cli": "./bin/run"
   },
   "oclif": {
     "commands": "lib/commands",

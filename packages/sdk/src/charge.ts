@@ -51,11 +51,15 @@ export class Charge {
     const response = await fetchWithRetries(`${this.baseUrl}${route}`, {
       method,
       body: body ? JSON.stringify(body) : undefined,
-      headers: {},
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        // TODO: Authentication
+      },
     });
+
     if (response.status >= 400) {
-      // TODO: handle errors
-      return Err(new Error(''));
+      return Err(new Error(await response.text()));
     }
 
     if (response.status === 204) {
@@ -79,6 +83,7 @@ export class Charge {
       `/purchases/${this.referenceId}`,
       'GET'
     );
+    console.log(response);
     if (!response.ok) {
       throw new Error('');
     }

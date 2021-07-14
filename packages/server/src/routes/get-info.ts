@@ -3,13 +3,14 @@ import { get } from "../storage";
 
 interface GetInfoRequest extends Request {
   params: {
-    id: string;
+    referenceId: string;
   };
 }
 
-export function getInfo(req: GetInfoRequest, res: ResponseToolkit) {
-  const referenceId = req.params.id;
-
+export function getInfo(
+  { params: { referenceId } }: GetInfoRequest,
+  res: ResponseToolkit
+) {
   const item = get(referenceId);
   if (item) {
     return res.response(item).code(200);

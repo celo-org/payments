@@ -1,6 +1,9 @@
 import fetch from 'isomorphic-fetch';
 
-export async function fetchWithRetries(info: RequestInfo, init?: RequestInit) {
+export async function fetchWithRetries(
+  info: RequestInfo,
+  init?: RequestInit
+): Promise<Response> {
   let lastResponse = null;
   for (let i = 0; i < 3; i++) {
     const response = await fetch(info, init);

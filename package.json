@@ -14,7 +14,7 @@
     "build": "lerna run build",
     "postinstall": "lerna bootstrap",
     "start": "yarn lerna run start --stream",
-    "cli": "yarn --cwd ./packages/cli cli"
+    "cli": "yarn build && yarn --cwd ./packages/cli cli"
   },
   "engines": {
     "node": ">=12"
