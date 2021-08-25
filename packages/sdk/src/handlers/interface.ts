@@ -1,4 +1,4 @@
-import { GetInfo } from '../schemas';
+import { PaymentInfo } from '../schemas';
 
 /**
  * Abstracts away complexity related to on chain interaction. Responsible
@@ -11,11 +11,11 @@ export interface BlockChainHandler {
    * This will be used to notify PSPs ahead of time for a transaction
    * hash they can listen for.
    */
-  computeTransactionHash: (tx: GetInfo) => Promise<string>;
+  computeTransactionHash: (tx: PaymentInfo) => Promise<string>;
   /**
    * Submit the transaction and return the hash for a given charge.
    */
-  submitTransaction: (tx: GetInfo) => Promise<string>;
+  submitTransaction: (tx: PaymentInfo) => Promise<string>;
   /**
    * Get the address of the sender submitting this transaction to the chain
    */

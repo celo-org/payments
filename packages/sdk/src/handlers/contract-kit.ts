@@ -1,7 +1,7 @@
 import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
-import { GetInfo } from '../schemas';
 import { BlockChainHandler } from './interface';
+import { PaymentInfo } from '../schemas';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
@@ -21,7 +21,7 @@ export class ContractKitTransactionHandler implements BlockChainHandler {
   }
 
   private async getSignedTransaction(
-    info: GetInfo
+    info: PaymentInfo
   ): Promise<EncodedTransaction> {
     if (this.signedTransaction) {
       return this.signedTransaction;
@@ -58,8 +58,8 @@ export class ContractKitTransactionHandler implements BlockChainHandler {
     // };
 
     const { txo } = await stable.transfer(
-      info.receiver.account_address,
-      this.kit.web3.utils.toWei(info.action.amount)
+      info.receiver.accountAddress,
+      this.kit.web3.utils.toWei(info.action.amount.toString())
     );
 
     this.signedTransaction = await wallet.signTransaction({
@@ -80,14 +80,14 @@ export class ContractKitTransactionHandler implements BlockChainHandler {
     return this.signedTransaction;
   }
 
-  async computeTransactionHash(info: GetInfo) {
+  async computeTransactionHash(info: PaymentInfo) {
     const {
       tx: { hash },
     } = await this.getSignedTransaction(info);
     return hash;
   }
 
-  async submitTransaction(info: GetInfo) {
+  async submitTransaction(info: PaymentInfo) {
     const { raw } = await this.getSignedTransaction(info);
     const { transactionHash } = await (
       await this.kit.connection.sendSignedTransaction(raw)

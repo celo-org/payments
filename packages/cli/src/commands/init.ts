@@ -1,7 +1,10 @@
 import { newKit } from "@celo/contractkit";
 import { Command, flags } from "@oclif/command";
-import { Charge, ContractKitTransactionHandler } from "@celo/payments-sdk";
-import { AbortCode } from "@celo/payments-types";
+import {
+  Charge,
+  ContractKitTransactionHandler,
+  PaymentInfo,
+} from "@celo/payments-sdk";
 import cli from "cli-ux";
 import { getAccount } from "../helpers";
 import { CeloAccountPrivateKeyFilePath } from "../helpers/create-account";
@@ -93,14 +96,14 @@ export default class Init extends Command {
     cli.info(`PSP API base url: ${charge.apiBase}`);
     cli.info(`Payment reference id: ${charge.referenceId}`);
 
-    const info = await charge.getInfo();
+    const info: PaymentInfo = await charge.getInfo();
     console.log(JSON.stringify(info, null, 2));
 
     const confirmed = await cli.confirm("Continue with payment?");
     if (confirmed) {
       await charge.submit({});
     } else {
-      await charge.abort(AbortCode.user_declined_payment);
+      await charge.abort(/*AbortCode.user_declined_payment*/);
     }
   }
 }

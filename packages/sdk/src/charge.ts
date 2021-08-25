@@ -1,15 +1,17 @@
-import { ErrorResult } from '@celo/base';
-import { Err, Ok } from '@celo/base';
-import { AbortCode, JsonRpcMethods } from '@celo/payments-types';
+import { Err, ErrorResult, Ok } from '@celo/base';
+import { AbortCode } from '@celo/payments-types';
 import { BlockChainHandler } from './handlers/interface';
-import { fetchWithRetries, parseUri } from './helpers';
-import { GetInfo } from './schemas';
+import { fetchWithRetries, parseDeepLink } from './helpers';
+import { PayerData, PaymentInfo } from './schemas';
+import { GetPaymentInfoParams } from './offchain-protocol/models/GetPaymentInfoParams';
+import { InitChargeParams } from './offchain-protocol/models/InitChargeParams';
+import { ReadyForSettlementParams } from './offchain-protocol/models/ReadyForSettlementParams';
 
 /**
  * Charge object for use in the Celo Payments Protocol
  */
 export class Charge {
-  private paymentInfo?: GetInfo;
+  private paymentInfo?: PaymentInfo;
 
   /**
    * Instantiates a new charge object for use in the Celo Payments Protocol
@@ -32,10 +34,7 @@ export class Charge {
    * @param chainHandler handler to abstract away chain interaction semantics
    * @returns an instance of the Payments class
    */
-  static fromDeepLink(
-    deepLink: string,
-    transactionHandler: BlockChainHandler
-  ) {
+  static fromDeepLink(deepLink: string, transactionHandler: BlockChainHandler) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
     return new Charge(apiBase, referenceId, transactionHandler);
   }
@@ -44,17 +43,15 @@ export class Charge {
    * Creates authenticated requests to the `apiBase`
    *
    * @param route the endpoint to hit
-   * @param method the HTTP method to use for the request
-   * @param body optional body of the HTTP request
+   * @param params the HTTP body with the JSON-RPC params of the request
    */
-  private async request(method: JsonRpcMethods, params: { [x: string]: any }) {
+  private async request<T>(params: T) {
     const response = await fetchWithRetries(`${this.apiBase}/rpc`, {
       method: 'POST',
       body: JSON.stringify({
         id: 0,
         jsonrpc: '2.0',
-        method,
-        params,
+        ...params,
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -83,16 +80,21 @@ export class Charge {
    *
    * @returns
    */
-  async getInfo() {
-    const response = await this.request(JsonRpcMethods.GetInfo, {
-      referenceId: this.referenceId,
-    });
+  async getInfo(): Promise<PaymentInfo> {
+    const getPaymentInfoParams: GetPaymentInfoParams = {
+      method: GetPaymentInfoParams.method.GET_PAYMENT_INFO,
+      params: {
+        referenceId: this.referenceId,
+      },
+    };
+
+    const response = await this.request(getPaymentInfoParams);
     if (!response.ok) {
       throw new Error((response as ErrorResult<any>).error);
     }
 
     // TODO: schema validation
-    this.paymentInfo = response.result as GetInfo;
+    this.paymentInfo = response.result as PaymentInfo;
     return this.paymentInfo;
   }
 
@@ -102,20 +104,29 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  async submit(payerData: { [x: string]: any }) {
+  async submit(payerData: PayerData) {
+    // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
+
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo!
     );
 
-    const response = await this.request(JsonRpcMethods.Init, {
-      referenceId: this.referenceId,
-      transactionHash,
-      sender: {
-        accountAddress: await this.chainHandler.getSendingAddress(),
-        payerData,
+    const initChargeParams: InitChargeParams = {
+      method: InitChargeParams.method.INIT_CHARGE,
+      params: {
+        sender: {
+          accountAddress: await this.chainHandler.getSendingAddress(),
+          payerData,
+        },
+        referenceId: this.referenceId,
+        /**
+         * Transaction hash (pre-calculated), in Hex format
+         */
+        transactionHash,
       },
-    });
-    // TODO: schema validation
+    };
+
+    const response = await this.request(initChargeParams);
     if (!response.ok) {
       throw new Error('Invalid init charge response');
     }
@@ -124,24 +135,29 @@ export class Charge {
       await this.chainHandler.submitTransaction(this.paymentInfo!);
     } catch (e) {
       // TODO: retries?
-      await this.abort(AbortCode.unable_to_submit_transaction);
+      // await this.abort(AbortCode.unable_to_submit_transaction);
       throw new Error(AbortCode.unable_to_submit_transaction);
     }
 
-    await this.request(JsonRpcMethods.Confirm, {
-      referenceId: this.referenceId,
-    });
+    const readyForSettlementParams: ReadyForSettlementParams = {
+      method: ReadyForSettlementParams.method.READY_FOR_SETTLEMENT,
+      params: {
+        referenceId: this.referenceId,
+      },
+    };
+
+    await this.request(readyForSettlementParams);
     return response;
   }
 
   /**
    * Aborts a request
    */
-  async abort(code: AbortCode, message?: string) {
-    await this.request(JsonRpcMethods.Abort, {
-      referenceId: this.referenceId,
-      abort_code: code,
-      abort_message: message,
-    });
+  async abort(/*code: AbortCode, message?: string*/) {
+    // await this.request(JsonRpcMethods.Abort, {
+    //   referenceId: this.referenceId,
+    //   abort_code: code,
+    //   abort_message: message,
+    // });
   }
 }
