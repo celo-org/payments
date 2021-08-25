@@ -41,6 +41,6 @@ export interface GetInfo {
     action: 'charge';
     timestamp: string;
   };
-  reference_id: string;
+  referenceId: string;
   description: string;
 }

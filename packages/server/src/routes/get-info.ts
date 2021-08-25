@@ -1,14 +1,9 @@
-import { Request, ResponseToolkit } from "@hapi/hapi";
+import { ResponseToolkit } from "@hapi/hapi";
 import { get } from "../storage";
-
-interface GetInfoRequest extends Request {
-  params: {
-    referenceId: string;
-  };
-}
+import { GetInfo } from "@celo/payments-types";
 
 export function getInfo(
-  { params: { referenceId } }: GetInfoRequest,
+  { params: { referenceId } }: GetInfo,
   res: ResponseToolkit
 ) {
   const item = get(referenceId);

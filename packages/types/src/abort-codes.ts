@@ -1,5 +1,5 @@
 export enum AbortCode {
-  reference_id_not_found = "reference_id_not_found",
+  referenceId_not_found = "referenceId_not_found",
   risk_checks_failed = "risk_checks_failed",
   missing_information = "missing_information",
   payment_type_mismatch = "payment_type_mismatch",

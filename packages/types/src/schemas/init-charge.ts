@@ -1,6 +1,14 @@
+import { JsonRpcMethods } from "../methods";
 import { KYC } from "./kyc";
 
 export interface InitCharge {
-  kyc: KYC;
-  transactionHash: string;
+  method: JsonRpcMethods.Init;
+  params: {
+    referenceId: string;
+    sender: {
+      accountAddress: string;
+      payerData: KYC;
+    };
+    transactionHash: string;
+  };
 }

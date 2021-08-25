@@ -1,20 +1,16 @@
-import { Request, ResponseToolkit } from "@hapi/hapi";
+import { ResponseToolkit } from "@hapi/hapi";
 import { newKit } from "@celo/contractkit";
 import { get } from "../storage";
 import AbiDecoder from "abi-decoder";
 import ERC20 from "../abis/ERC20.json";
+import { Confirm } from "@celo/payments-types";
 
 AbiDecoder.addABI(ERC20);
-interface ConfirmationRequest extends Request {
-  params: {
-    referenceId: string;
-  };
-}
 
 const kit = newKit("https://alfajores-forno.celo-testnet.org");
 
 export async function confirmation(
-  { params: { referenceId } }: ConfirmationRequest,
+  { params: { referenceId } }: Confirm,
   res: ResponseToolkit
 ) {
   console.log("confirmation", { referenceId });

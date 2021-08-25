@@ -1,28 +1,18 @@
-import { KYC } from "@celo/payments-types";
-import { Request, ResponseToolkit } from "@hapi/hapi";
+import { InitCharge } from "@celo/payments-types";
+import { ResponseToolkit } from "@hapi/hapi";
 import { get, has, update } from "../storage";
 
-interface InitChargeRequest extends Request {
-  params: {
-    referenceId: string;
-  };
-  payload: {
-    kyc: KYC;
-    transactionHash: string;
-  };
-}
-
-export function initCharge(
-  { params: { referenceId }, payload: { transactionHash } }: InitChargeRequest,
-  res: ResponseToolkit
-) {
-  if (!has(referenceId)) {
+export function initCharge({ params }: InitCharge, res: ResponseToolkit) {
+  if (!has(params.referenceId)) {
     return res.response().code(404);
   }
 
-  console.log("initCharge", { transactionHash });
+  console.log("initCharge", params);
 
-  update(referenceId, { ...get(referenceId), transactionHash });
+  update(params.referenceId, {
+    ...get(params.referenceId),
+    transactionHash: params.transactionHash,
+  });
 
   return res.response().code(204);
 }

@@ -1,19 +1,23 @@
 import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
 import { GetInfo } from '../schemas';
-import { TransactionHandler } from './interface';
+import { BlockChainHandler } from './interface';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
  * as its mechanism to compute transaction hashes and submit transactions.
  */
-export class ContractKitTransactionHandler implements TransactionHandler {
+export class ContractKitTransactionHandler implements BlockChainHandler {
   private signedTransaction?: EncodedTransaction;
 
   constructor(private kit: ContractKit) {
     if (!kit.defaultAccount) {
       throw new Error('Missing defaultAccount');
     }
+  }
+
+  getSendingAddress() {
+    return this.kit.defaultAccount!;
   }
 
   private async getSignedTransaction(
@@ -76,14 +80,14 @@ export class ContractKitTransactionHandler implements TransactionHandler {
     return this.signedTransaction;
   }
 
-  async computeHash(info: GetInfo) {
+  async computeTransactionHash(info: GetInfo) {
     const {
       tx: { hash },
     } = await this.getSignedTransaction(info);
     return hash;
   }
 
-  async submit(info: GetInfo) {
+  async submitTransaction(info: GetInfo) {
     const { raw } = await this.getSignedTransaction(info);
     const { transactionHash } = await (
       await this.kit.connection.sendSignedTransaction(raw)

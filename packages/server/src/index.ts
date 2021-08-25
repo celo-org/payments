@@ -1,5 +1,5 @@
 import * as Hapi from "@hapi/hapi";
-import { getInfo, initCharge, confirmation, abort } from "./routes";
+import { handle } from "./handler";
 
 export default async () => {
   const server = Hapi.server({
@@ -21,24 +21,9 @@ export default async () => {
   });
 
   server.route({
-    method: "GET",
-    path: "/payments/{referenceId}",
-    handler: getInfo,
-  });
-  server.route({
     method: "POST",
-    path: "/payments/{referenceId}",
-    handler: initCharge,
-  });
-  server.route({
-    method: "GET",
-    path: "/payments/{referenceId}/confirmation",
-    handler: confirmation,
-  });
-  server.route({
-    method: "POST",
-    path: "/payments/{referenceId}/abort",
-    handler: abort,
+    path: "/rpc",
+    handler: handle,
   });
 
   await server.start();

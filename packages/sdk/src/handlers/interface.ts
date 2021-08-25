@@ -19,5 +19,5 @@ export interface BlockChainHandler {
   /**
    * Get the address of the sender submitting this transaction to the chain
    */
-  getSendingAddress: () => Promise<string>;
+  getSendingAddress: () => string;
 }

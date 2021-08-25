@@ -1,16 +1,9 @@
 import { ErrorResult } from '@celo/base';
 import { Err, Ok } from '@celo/base';
-import { AbortCode } from '@celo/payments-types';
+import { AbortCode, JsonRpcMethods } from '@celo/payments-types';
 import { BlockChainHandler } from './handlers/interface';
 import { fetchWithRetries, parseUri } from './helpers';
 import { GetInfo } from './schemas';
-
-enum Methods {
-  GetInfo = 'getPaymentInfo',
-  Init = 'initCharge',
-  Confirm = 'readyForSettlement',
-  Abort = 'abort',
-}
 
 /**
  * Charge object for use in the Celo Payments Protocol
@@ -51,7 +44,7 @@ export class Charge {
    * @param method the HTTP method to use for the request
    * @param body optional body of the HTTP request
    */
-  private async request(method: Methods, params: { [x: string]: any }) {
+  private async request(method: JsonRpcMethods, params: { [x: string]: any }) {
     const response = await fetchWithRetries(`${this.baseUrl}`, {
       method: 'POST',
       body: JSON.stringify({
@@ -88,7 +81,7 @@ export class Charge {
    * @returns
    */
   async getInfo() {
-    const response = await this.request(Methods.GetInfo, {
+    const response = await this.request(JsonRpcMethods.GetInfo, {
       referenceId: this.referenceId,
     });
     if (!response.ok) {
@@ -111,7 +104,7 @@ export class Charge {
       this.paymentInfo!
     );
 
-    const response = await this.request(Methods.Init, {
+    const response = await this.request(JsonRpcMethods.Init, {
       referenceId: this.referenceId,
       transactionHash,
       sender: {
@@ -132,7 +125,9 @@ export class Charge {
       throw new Error(AbortCode.unable_to_submit_transaction);
     }
 
-    await this.request(Methods.Confirm, { referenceId: this.referenceId });
+    await this.request(JsonRpcMethods.Confirm, {
+      referenceId: this.referenceId,
+    });
     return response;
   }
 
@@ -140,7 +135,7 @@ export class Charge {
    * Aborts a request
    */
   async abort(code: AbortCode, message?: string) {
-    await this.request(Methods.Abort, {
+    await this.request(JsonRpcMethods.Abort, {
       referenceId: this.referenceId,
       abort_code: code,
       abort_message: message,

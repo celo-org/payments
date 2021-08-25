@@ -34,6 +34,6 @@ export const KYC = {
     action: "charge",
     timestamp: Date.now(),
   },
-  reference_id: "00000000-0000-0000-0000000001",
+  referenceId: "00000000-0000-0000-0000000001",
   description: "Mock purchase with lots of required KYC data",
 };

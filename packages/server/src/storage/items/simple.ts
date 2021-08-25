@@ -21,6 +21,6 @@ export const Simple = {
     action: "charge",
     timestamp: Date.now(),
   },
-  reference_id: "00000000-0000-0000-0000000000",
+  referenceId: "00000000-0000-0000-0000000000",
   description: "Mock purchase",
 };
