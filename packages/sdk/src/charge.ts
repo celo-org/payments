@@ -14,13 +14,13 @@ export class Charge {
   /**
    * Instantiates a new charge object for use in the Celo Payments Protocol
    *
-   * @param baseUrl url of the payment service provider implementing the protocol
+   * @param apiBase url of the payment service provider implementing the protocol
    * @param referenceId reference ID of the charge
    * @param chainHandler handler to abstract away chain interaction semantics
    */
   constructor(
-    private baseUrl: string,
-    private referenceId: string,
+    public apiBase: string,
+    public referenceId: string,
     private chainHandler: BlockChainHandler
   ) {}
 
@@ -28,24 +28,27 @@ export class Charge {
    * Instantiates a new charge object for use in the Celo Payments Protocol
    * from a URI, often encoded as part of a QR code.
    *
-   * @param uri encoded URI with `baseUrl` and `referenceId`
+   * @param deepLink encoded URI with `apiBase` and `referenceId`
    * @param chainHandler handler to abstract away chain interaction semantics
    * @returns an instance of the Payments class
    */
-  static fromUri(uri: string, chainHandler: BlockChainHandler) {
-    const { baseUrl, referenceId } = parseUri(uri);
-    return new Charge(baseUrl, referenceId, chainHandler);
+  static fromDeepLink(
+    deepLink: string,
+    transactionHandler: BlockChainHandler
+  ) {
+    const { apiBase, referenceId } = parseDeepLink(deepLink);
+    return new Charge(apiBase, referenceId, transactionHandler);
   }
 
   /**
-   * Creates authenticated requests to the `baseUrl`
+   * Creates authenticated requests to the `apiBase`
    *
    * @param route the endpoint to hit
    * @param method the HTTP method to use for the request
    * @param body optional body of the HTTP request
    */
   private async request(method: JsonRpcMethods, params: { [x: string]: any }) {
-    const response = await fetchWithRetries(`${this.baseUrl}/rpc`, {
+    const response = await fetchWithRetries(`${this.apiBase}/rpc`, {
       method: 'POST',
       body: JSON.stringify({
         id: 0,
