@@ -9,18 +9,18 @@ import {
 import { abort, confirmation, getInfo, initCharge } from "./routes";
 
 interface PaymentRequest extends Request {
-  body: Abort | InitCharge | GetInfo | Confirm;
+  payload: Abort | InitCharge | GetInfo | Confirm;
 }
 
-export function handle({ body }: PaymentRequest, res: ResponseToolkit) {
-  if (body.method === JsonRpcMethods.Abort) {
-    return abort(body, res);
-  } else if (body.method === JsonRpcMethods.GetInfo) {
-    return getInfo(body, res);
-  } else if (body.method === JsonRpcMethods.Confirm) {
-    return confirmation(body, res);
-  } else if (body.method === JsonRpcMethods.Init) {
-    return initCharge(body, res);
+export function handle({ payload }: PaymentRequest, res: ResponseToolkit) {
+  if (payload.method === JsonRpcMethods.Abort) {
+    return abort(payload, res);
+  } else if (payload.method === JsonRpcMethods.GetInfo) {
+    return getInfo(payload, res);
+  } else if (payload.method === JsonRpcMethods.Confirm) {
+    return confirmation(payload, res);
+  } else if (payload.method === JsonRpcMethods.Init) {
+    return initCharge(payload, res);
   } else {
     res.response(404).send();
   }
