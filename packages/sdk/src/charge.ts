@@ -45,7 +45,7 @@ export class Charge {
    * @param body optional body of the HTTP request
    */
   private async request(method: JsonRpcMethods, params: { [x: string]: any }) {
-    const response = await fetchWithRetries(`${this.baseUrl}`, {
+    const response = await fetchWithRetries(`${this.baseUrl}/rpc`, {
       method: 'POST',
       body: JSON.stringify({
         id: 0,
