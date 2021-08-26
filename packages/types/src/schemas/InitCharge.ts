@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { InitChargeParams } from './InitChargeParams';
+import type { InitChargeRequest } from './InitChargeRequest';
 import type { JsonRpcRequired } from './JsonRpcRequired';
 
-export type InitCharge = (JsonRpcRequired & InitChargeParams);
+export type InitCharge = (JsonRpcRequired & InitChargeRequest);

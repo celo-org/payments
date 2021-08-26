@@ -285,8 +285,16 @@ components:
     GetPaymentInfo:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcRequired"
-        - "$ref": "#/components/schemas/GetPaymentInfoParams"
+        - "$ref": "#/components/schemas/GetPaymentInfoRequest"
     GetPaymentInfoParams:
+      title: Parameters
+      type: object
+      required:
+        - referenceId
+      properties:
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+    GetPaymentInfoRequest:
       type: object
       properties:
         method:
@@ -295,13 +303,7 @@ components:
           enum:
             - getPaymentInfo
         params:
-          title: Parameters
-          type: object
-          required:
-            - referenceId
-          properties:
-            referenceId:
-              "$ref": "#/components/schemas/ReferenceId"
+          "$ref": "#/components/schemas/GetPaymentInfoParams"
     GetPaymentInfoResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcProtocol"
@@ -508,8 +510,24 @@ components:
     InitCharge:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcRequired"
-        - "$ref": "#/components/schemas/InitChargeParams"
+        - "$ref": "#/components/schemas/InitChargeRequest"
     InitChargeParams:
+      title: Parameters
+      type: object
+      required:
+        - sender
+        - referenceId
+        - transactionHash
+      properties:
+        sender:
+          "$ref": "#/components/schemas/PaymentSender"
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+        transactionHash:
+          type: string
+          format: hex
+          description: Transaction hash (pre-calculated), in Hex format
+    InitChargeRequest:
       type: object
       properties:
         method:
@@ -518,21 +536,7 @@ components:
           enum:
             - initCharge
         params:
-          title: Parameters
-          type: object
-          required:
-            - sender
-            - referenceId
-            - transactionHash
-          properties:
-            sender:
-              "$ref": "#/components/schemas/PaymentSender"
-            referenceId:
-              "$ref": "#/components/schemas/ReferenceId"
-            transactionHash:
-              type: string
-              format: hex
-              description: Transaction hash (pre-calculated), in Hex format
+          "$ref": "#/components/schemas/InitChargeParams"
     PaymentSender:
       type: object
       required:
@@ -551,8 +555,16 @@ components:
     ReadyForSettlement:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcRequired"
-        - "$ref": "#/components/schemas/ReadyForSettlementParams"
+        - "$ref": "#/components/schemas/ReadyForSettlementRequest"
     ReadyForSettlementParams:
+      title: Parameters
+      type: object
+      required:
+        - referenceId
+      properties:
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+    ReadyForSettlementRequest:
       type: object
       properties:
         method:
@@ -561,13 +573,7 @@ components:
           enum:
             - readyForSettlement
         params:
-          title: Parameters
-          type: object
-          required:
-            - referenceId
-          properties:
-            referenceId:
-              "$ref": "#/components/schemas/ReferenceId"
+          "$ref": "#/components/schemas/ReadyForSettlementParams"
     ReadyForSettlementResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcProtocol"

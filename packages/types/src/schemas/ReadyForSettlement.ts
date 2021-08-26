@@ -3,6 +3,6 @@
 /* eslint-disable */
 
 import type { JsonRpcRequired } from './JsonRpcRequired';
-import type { ReadyForSettlementParams } from './ReadyForSettlementParams';
+import type { ReadyForSettlementRequest } from './ReadyForSettlementRequest';
 
-export type ReadyForSettlement = (JsonRpcRequired & ReadyForSettlementParams);
+export type ReadyForSettlement = (JsonRpcRequired & ReadyForSettlementRequest);

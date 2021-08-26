@@ -1,11 +1,11 @@
 import {
-  GetPaymentInfoParams,
-  InitChargeParams,
-  ReadyForSettlementParams,
+  GetPaymentInfoRequest,
+  InitChargeRequest,
+  ReadyForSettlementRequest,
 } from "./schemas";
 
 export enum JsonRpcMethods {
-  GetInfo = GetPaymentInfoParams.method.GET_PAYMENT_INFO,
-  Init = InitChargeParams.method.INIT_CHARGE,
-  Confirm = ReadyForSettlementParams.method.READY_FOR_SETTLEMENT,
+  GetInfo = GetPaymentInfoRequest.method.GET_PAYMENT_INFO,
+  Init = InitChargeRequest.method.INIT_CHARGE,
+  Confirm = ReadyForSettlementRequest.method.READY_FOR_SETTLEMENT,
 }

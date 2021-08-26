@@ -3,11 +3,11 @@ import { BlockChainHandler } from './handlers/interface';
 import { fetchWithRetries, parseDeepLink } from './helpers';
 import {
   AbortCode,
-  GetPaymentInfoParams,
-  PaymentInfo,
-  InitChargeParams,
+  GetPaymentInfoRequest,
+  InitChargeRequest,
   PayerData,
-  ReadyForSettlementParams,
+  PaymentInfo,
+  ReadyForSettlementRequest,
 } from '@celo/payments-types';
 
 /**
@@ -84,14 +84,14 @@ export class Charge {
    * @returns
    */
   async getInfo(): Promise<PaymentInfo> {
-    const getPaymentInfoParams: GetPaymentInfoParams = {
-      method: GetPaymentInfoParams.method.GET_PAYMENT_INFO,
+    const getPaymentInfoRequest: GetPaymentInfoRequest = {
+      method: GetPaymentInfoRequest.method.GET_PAYMENT_INFO,
       params: {
         referenceId: this.referenceId,
       },
     };
 
-    const response = await this.request(getPaymentInfoParams);
+    const response = await this.request(getPaymentInfoRequest);
     if (!response.ok) {
       throw new Error((response as ErrorResult<any>).error);
     }
@@ -114,8 +114,8 @@ export class Charge {
       this.paymentInfo!
     );
 
-    const initChargeParams: InitChargeParams = {
-      method: InitChargeParams.method.INIT_CHARGE,
+    const initChargeRequest: InitChargeRequest = {
+      method: InitChargeRequest.method.INIT_CHARGE,
       params: {
         sender: {
           accountAddress: await this.chainHandler.getSendingAddress(),
@@ -129,7 +129,7 @@ export class Charge {
       },
     };
 
-    const response = await this.request(initChargeParams);
+    const response = await this.request(initChargeRequest);
     if (!response.ok) {
       throw new Error('Invalid init charge response');
     }
@@ -142,14 +142,14 @@ export class Charge {
       throw new Error(AbortCode.unable_to_submit_transaction);
     }
 
-    const readyForSettlementParams: ReadyForSettlementParams = {
-      method: ReadyForSettlementParams.method.READY_FOR_SETTLEMENT,
+    const readyForSettlementRequest: ReadyForSettlementRequest = {
+      method: ReadyForSettlementRequest.method.READY_FOR_SETTLEMENT,
       params: {
         referenceId: this.referenceId,
       },
     };
 
-    await this.request(readyForSettlementParams);
+    await this.request(readyForSettlementRequest);
     return response;
   }
 

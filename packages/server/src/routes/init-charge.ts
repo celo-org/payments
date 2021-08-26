@@ -1,8 +1,8 @@
-import { InitCharge } from "@celo/payments-types";
+import { InitChargeParams } from "@celo/payments-types";
 import { ResponseToolkit } from "@hapi/hapi";
 import { get, has, update } from "../storage";
 
-export function initCharge({ params }: InitCharge, res: ResponseToolkit) {
+export function initCharge(params: InitChargeParams, res: ResponseToolkit) {
   if (!has(params.referenceId)) {
     return res.response().code(404);
   }

@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { GetPaymentInfoParams } from './GetPaymentInfoParams';
+import type { GetPaymentInfoRequest } from './GetPaymentInfoRequest';
 import type { JsonRpcRequired } from './JsonRpcRequired';
 
-export type GetPaymentInfo = (JsonRpcRequired & GetPaymentInfoParams);
+export type GetPaymentInfo = (JsonRpcRequired & GetPaymentInfoRequest);
