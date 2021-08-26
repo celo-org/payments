@@ -14,6 +14,6 @@ export type RequiredPayerData = {
     givenName: boolean;
     surname: boolean;
     phoneNumber: boolean;
-    address?: RequiredAddressData;
-    nationalIdData?: RequiredNationalIdData;
+    address: RequiredAddressData;
+    nationalIdData: RequiredNationalIdData;
 }

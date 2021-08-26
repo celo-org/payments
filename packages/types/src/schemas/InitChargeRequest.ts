@@ -8,8 +8,8 @@ export type InitChargeRequest = {
     /**
      * Method name
      */
-    method?: InitChargeRequest.method;
-    params?: InitChargeParams;
+    method: InitChargeRequest.method;
+    params: InitChargeParams;
 }
 
 export namespace InitChargeRequest {

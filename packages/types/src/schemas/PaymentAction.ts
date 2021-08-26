@@ -2,6 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
+/**
+ * Information regarding the type of payment and payment amount
+ */
 export type PaymentAction = {
     /**
      * Amount of the transfer. Base units are the same as for on-chain transactions for this currency.

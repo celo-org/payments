@@ -8,8 +8,8 @@ export type GetPaymentInfoRequest = {
     /**
      * Method name
      */
-    method?: GetPaymentInfoRequest.method;
-    params?: GetPaymentInfoParams;
+    method: GetPaymentInfoRequest.method;
+    params: GetPaymentInfoParams;
 }
 
 export namespace GetPaymentInfoRequest {

@@ -11,14 +11,14 @@ export type BusinessData = {
     /**
      * Merchant's display name. Should be recognizable by the payer
      */
-    name?: string;
+    name: string;
     /**
      * The legal entity name
      */
-    legalName?: string;
+    legalName: string;
     /**
      * URL with the business logo
      */
     imageUrl?: string;
-    address?: Address;
+    address: Address;
 }

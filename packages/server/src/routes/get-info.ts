@@ -4,6 +4,7 @@ import { GetPaymentInfoParams } from "@celo/payments-types";
 
 export function getInfo(params: GetPaymentInfoParams, res: ResponseToolkit) {
   const item = get(params.referenceId);
+  console.log("get info request", { params });
   if (item) {
     return res.response(item).code(200);
   }

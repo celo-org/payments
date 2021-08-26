@@ -8,8 +8,8 @@ export type ReadyForSettlementRequest = {
     /**
      * Method name
      */
-    method?: ReadyForSettlementRequest.method;
-    params?: ReadyForSettlementParams;
+    method: ReadyForSettlementRequest.method;
+    params: ReadyForSettlementParams;
 }
 
 export namespace ReadyForSettlementRequest {

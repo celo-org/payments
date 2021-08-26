@@ -9,8 +9,11 @@ import type { RequiredPayerData } from './RequiredPayerData';
 
 export type PaymentInfo = {
     requiredPayerData?: RequiredPayerData;
-    receiver?: ReceiverData;
-    action?: PaymentAction;
-    referenceId?: ReferenceId;
+    receiver: ReceiverData;
+    action: PaymentAction;
+    referenceId: ReferenceId;
+    /**
+     * Description of the payment. To be displayed to the customer
+     */
     description?: string;
 }

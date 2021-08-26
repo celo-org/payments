@@ -296,6 +296,9 @@ components:
           "$ref": "#/components/schemas/ReferenceId"
     GetPaymentInfoRequest:
       type: object
+      required:
+        - method
+        - params
       properties:
         method:
           type: string
@@ -324,9 +327,21 @@ components:
           "$ref": "#/components/schemas/ReferenceId"
         description:
           type: string
+          description: Description of the payment. To be displayed to the customer
           example: payment request description
+      required:
+        - action
+        - receiver
+        - referenceId
     RequiredAddressData:
       type: object
+      required:
+        - city
+        - country
+        - line1
+        - line2
+        - postalCode
+        - state
       properties:
         city:
           type: boolean
@@ -348,11 +363,6 @@ components:
           default: false
     Address:
       type: object
-      required:
-        - city
-        - country
-        - line1
-        - postalCode
       properties:
         city:
           type: string
@@ -382,6 +392,10 @@ components:
           description: State, county, province, region
     RequiredNationalIdData:
       type: object
+      required:
+        - idValue
+        - country
+        - type
       properties:
         idValue:
           type: boolean
@@ -394,8 +408,6 @@ components:
           default: false
     NationalIdData:
       type: object
-      required:
-        - idValue
       properties:
         idValue:
           type: string
@@ -411,6 +423,12 @@ components:
           description: Indicates the type of the ID
     RequiredPayerData:
       type: object
+      required:
+        - givenName
+        - surname
+        - phoneNumber
+        - address
+        - nationalIdData
       description: |
         Defines which elements of the payer data are required for this payment.
         The absence of properties indicates their optionality
@@ -446,6 +464,10 @@ components:
           "$ref": "#/components/schemas/NationalIdData"
     BusinessData:
       type: object
+      required:
+        - name
+        - legalName
+        - address
       description: Includes the details of the merchant to be displayed to the payer
       properties:
         name:
@@ -465,6 +487,10 @@ components:
           "$ref": "#/components/schemas/Address"
     ReceiverData:
       type: object
+      required:
+        - accountAddress
+        - businessData
+      description: The details of the payment receiver (e.g. merchant)
       properties:
         accountAddress:
           type: string
@@ -480,6 +506,7 @@ components:
         - currency
         - action
         - timestamp
+      description: Information regarding the type of payment and payment amount
       properties:
         amount:
           type: integer
@@ -529,6 +556,9 @@ components:
           description: Transaction hash (pre-calculated), in Hex format
     InitChargeRequest:
       type: object
+      required:
+        - method
+        - params
       properties:
         method:
           type: string
@@ -539,6 +569,7 @@ components:
           "$ref": "#/components/schemas/InitChargeParams"
     PaymentSender:
       type: object
+      description: Minimal payer information required
       required:
         - accountAddress
         - payerData
@@ -566,6 +597,9 @@ components:
           "$ref": "#/components/schemas/ReferenceId"
     ReadyForSettlementRequest:
       type: object
+      required:
+        - method
+        - params
       properties:
         method:
           type: string

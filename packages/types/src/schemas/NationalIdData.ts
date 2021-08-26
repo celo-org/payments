@@ -6,7 +6,7 @@ export type NationalIdData = {
     /**
      * Indicates the national ID value - for example, a social security number
      */
-    idValue: string;
+    idValue?: string;
     /**
      * Two-letter (ISO country code)[https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2]
      */

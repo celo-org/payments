@@ -6,15 +6,15 @@ export type Address = {
     /**
      * The city, district, suburb, town, or village
      */
-    city: string;
+    city?: string;
     /**
      * Two-letter (ISO country code)[https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2]
      */
-    country: string;
+    country?: string;
     /**
      * Address line 1
      */
-    line1: string;
+    line1?: string;
     /**
      * Address line 2 - apartment, unit, etc.
      */
@@ -22,7 +22,7 @@ export type Address = {
     /**
      * ZIP or postal code
      */
-    postalCode: string;
+    postalCode?: string;
     /**
      * State, county, province, region
      */
