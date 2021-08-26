@@ -4,7 +4,7 @@ import { fetchWithRetries, parseDeepLink } from './helpers';
 import {
   AbortCode,
   GetPaymentInfoParams,
-  GetPaymentInfoResponseData as PaymentInfo,
+  PaymentInfo,
   InitChargeParams,
   PayerData,
   ReadyForSettlementParams,

@@ -1,7 +1,7 @@
 import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
 import { BlockChainHandler } from './interface';
-import { GetPaymentInfoResponseData as PaymentInfo } from '@celo/payments-types';
+import { PaymentInfo } from '@celo/payments-types';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit

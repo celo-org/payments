@@ -308,8 +308,8 @@ components:
         - type: object
           properties:
             result:
-              "$ref": "#/components/schemas/GetPaymentInfoResponseData"
-    GetPaymentInfoResponseData:
+              "$ref": "#/components/schemas/PaymentInfo"
+    PaymentInfo:
       type: object
       properties:
         requiredPayerData:

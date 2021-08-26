@@ -1,4 +1,4 @@
-import { PaymentInfo } from '../schemas';
+import { PaymentInfo } from '@celo/payments-types';
 
 /**
  * Abstracts away complexity related to on chain interaction. Responsible

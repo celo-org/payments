@@ -7,7 +7,7 @@ import type { ReceiverData } from './ReceiverData';
 import type { ReferenceId } from './ReferenceId';
 import type { RequiredPayerData } from './RequiredPayerData';
 
-export type GetPaymentInfoResponseData = {
+export type PaymentInfo = {
     requiredPayerData?: RequiredPayerData;
     receiver?: ReceiverData;
     action?: PaymentAction;

@@ -1,24 +1,18 @@
 import { Request, ResponseToolkit } from "@hapi/hapi";
 import {
-  Abort,
   InitCharge,
-  GetInfo,
+  GetPaymentInfo,
   JsonRpcMethods,
-  Confirm,
 } from "@celo/payments-types";
 import { abort, confirmation, getInfo, initCharge } from "./routes";
 
 interface PaymentRequest extends Request {
-  payload: Abort | InitCharge | GetInfo | Confirm;
+  payload: GetPaymentInfo | InitCharge;
 }
 
 export function handle({ payload }: PaymentRequest, res: ResponseToolkit) {
-  if (payload.method === JsonRpcMethods.Abort) {
-    return abort(payload, res);
-  } else if (payload.method === JsonRpcMethods.GetInfo) {
+  if (payload.method === JsonRpcMethods.GetInfo) {
     return getInfo(payload, res);
-  } else if (payload.method === JsonRpcMethods.Confirm) {
-    return confirmation(payload, res);
   } else if (payload.method === JsonRpcMethods.Init) {
     return initCharge(payload, res);
   } else {
