@@ -1,11 +1,11 @@
 import { newKit } from "@celo/contractkit";
+import cli from "cli-ux";
 import { Command, flags } from "@oclif/command";
 import {
   Charge,
   ContractKitTransactionHandler,
   PaymentInfo,
 } from "@celo/payments-sdk";
-import cli from "cli-ux";
 import { getAccount } from "../helpers";
 import { CeloAccountPrivateKeyFilePath } from "../helpers/create-account";
 

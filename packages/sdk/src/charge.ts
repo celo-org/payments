@@ -1,11 +1,14 @@
 import { Err, ErrorResult, Ok } from '@celo/base';
-import { AbortCode } from '@celo/payments-types';
 import { BlockChainHandler } from './handlers/interface';
 import { fetchWithRetries, parseDeepLink } from './helpers';
-import { PayerData, PaymentInfo } from './schemas';
-import { GetPaymentInfoParams } from './offchain-protocol/models/GetPaymentInfoParams';
-import { InitChargeParams } from './offchain-protocol/models/InitChargeParams';
-import { ReadyForSettlementParams } from './offchain-protocol/models/ReadyForSettlementParams';
+import {
+  AbortCode,
+  GetPaymentInfoParams,
+  GetPaymentInfoResponseData as PaymentInfo,
+  InitChargeParams,
+  PayerData,
+  ReadyForSettlementParams,
+} from '@celo/payments-types';
 
 /**
  * Charge object for use in the Celo Payments Protocol
