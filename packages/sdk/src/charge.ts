@@ -1,15 +1,20 @@
-import { ErrorResult } from '@celo/base';
-import { Err, Ok } from '@celo/base';
-import { AbortCode, JsonRpcMethods } from '@celo/payments-types';
-import { BlockChainHandler } from './handlers/interface';
+import { Err, ErrorResult, Ok } from '@celo/base';
+import {
+  AbortCode,
+  GetInfoResponse,
+  JsonRpcMethods,
+  KYC,
+  PaymentMessageRequest,
+} from '@celo/payments-types';
+import { ChainHandler } from './handlers/interface';
 import { fetchWithRetries, parseUri } from './helpers';
-import { GetInfo } from './schemas';
+import { buildTypedPaymentRequest } from './signing';
 
 /**
  * Charge object for use in the Celo Payments Protocol
  */
 export class Charge {
-  private paymentInfo?: GetInfo;
+  private paymentInfo?: GetInfoResponse;
 
   /**
    * Instantiates a new charge object for use in the Celo Payments Protocol
@@ -21,7 +26,7 @@ export class Charge {
   constructor(
     private baseUrl: string,
     private referenceId: string,
-    private chainHandler: BlockChainHandler
+    private chainHandler: ChainHandler
   ) {}
 
   /**
@@ -32,7 +37,7 @@ export class Charge {
    * @param chainHandler handler to abstract away chain interaction semantics
    * @returns an instance of the Payments class
    */
-  static fromUri(uri: string, chainHandler: BlockChainHandler) {
+  static fromUri(uri: string, chainHandler: ChainHandler) {
     const { baseUrl, referenceId } = parseUri(uri);
     return new Charge(baseUrl, referenceId, chainHandler);
   }
@@ -44,19 +49,23 @@ export class Charge {
    * @param method the HTTP method to use for the request
    * @param body optional body of the HTTP request
    */
-  private async request(method: JsonRpcMethods, params: { [x: string]: any }) {
+  private async request(message: PaymentMessageRequest) {
     const response = await fetchWithRetries(`${this.baseUrl}/rpc`, {
       method: 'POST',
       body: JSON.stringify({
         id: 0,
         jsonrpc: '2.0',
-        method,
-        params,
+        ...message,
       }),
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        // TODO: Authentication
+        Authorization: await this.chainHandler.signTypedPaymentRequest(
+          buildTypedPaymentRequest(
+            message,
+            await this.chainHandler.getChainId()
+          )
+        ),
       },
     });
 
@@ -81,15 +90,18 @@ export class Charge {
    * @returns
    */
   async getInfo() {
-    const response = await this.request(JsonRpcMethods.GetInfo, {
-      referenceId: this.referenceId,
+    const response = await this.request({
+      method: JsonRpcMethods.GetInfo,
+      params: {
+        referenceId: this.referenceId,
+      },
     });
     if (!response.ok) {
       throw new Error((response as ErrorResult<any>).error);
     }
 
     // TODO: schema validation
-    this.paymentInfo = response.result as GetInfo;
+    this.paymentInfo = response.result as GetInfoResponse;
     return this.paymentInfo;
   }
 
@@ -99,17 +111,20 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  async submit(payerData: { [x: string]: any }) {
+  async submit(payerData: KYC) {
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo!
     );
 
-    const response = await this.request(JsonRpcMethods.Init, {
-      referenceId: this.referenceId,
-      transactionHash,
-      sender: {
-        accountAddress: await this.chainHandler.getSendingAddress(),
-        payerData,
+    const response = await this.request({
+      method: JsonRpcMethods.Init,
+      params: {
+        transactionHash,
+        referenceId: this.referenceId,
+        sender: {
+          accountAddress: await this.chainHandler.getSendingAddress(),
+          payerData,
+        },
       },
     });
     // TODO: schema validation
@@ -125,8 +140,11 @@ export class Charge {
       throw new Error(AbortCode.unable_to_submit_transaction);
     }
 
-    await this.request(JsonRpcMethods.Confirm, {
-      referenceId: this.referenceId,
+    await this.request({
+      method: JsonRpcMethods.Confirm,
+      params: {
+        referenceId: this.referenceId,
+      },
     });
     return response;
   }
@@ -135,10 +153,13 @@ export class Charge {
    * Aborts a request
    */
   async abort(code: AbortCode, message?: string) {
-    await this.request(JsonRpcMethods.Abort, {
-      referenceId: this.referenceId,
-      abort_code: code,
-      abort_message: message,
+    await this.request({
+      method: JsonRpcMethods.Abort,
+      params: {
+        referenceId: this.referenceId,
+        abort_code: code,
+        abort_message: message,
+      },
     });
   }
 }

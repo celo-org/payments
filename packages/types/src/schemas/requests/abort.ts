@@ -1,7 +1,7 @@
-import { AbortCode } from "../abort-codes";
-import { JsonRpcMethods } from "../methods";
+import { AbortCode } from "../../abort-codes";
+import { JsonRpcMethods } from "../../methods";
 
-export interface Abort {
+export interface AbortRequest {
   method: JsonRpcMethods.Abort;
   params: {
     referenceId: string;

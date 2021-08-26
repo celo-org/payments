@@ -3,14 +3,14 @@ import { newKit } from "@celo/contractkit";
 import { get } from "../storage";
 import AbiDecoder from "abi-decoder";
 import ERC20 from "../abis/ERC20.json";
-import { Confirm } from "@celo/payments-types";
+import { ConfirmRequest } from "@celo/payments-types";
 
 AbiDecoder.addABI(ERC20);
 
 const kit = newKit("https://alfajores-forno.celo-testnet.org");
 
 export async function confirmation(
-  { params: { referenceId } }: Confirm,
+  { params: { referenceId } }: ConfirmRequest,
   res: ResponseToolkit
 ) {
   console.log("confirmation", { referenceId });

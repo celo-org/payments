@@ -1,13 +1,15 @@
 import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
-import { GetInfo } from '../schemas';
-import { BlockChainHandler } from './interface';
+import { ChainHandler } from './interface';
+import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
+import { serializeSignature } from '@celo/base';
+import { GetInfoResponse } from '@celo/payments-types';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
  * as its mechanism to compute transaction hashes and submit transactions.
  */
-export class ContractKitTransactionHandler implements BlockChainHandler {
+export class ContractKitTransactionHandler implements ChainHandler {
   private signedTransaction?: EncodedTransaction;
 
   constructor(private kit: ContractKit) {
@@ -21,7 +23,7 @@ export class ContractKitTransactionHandler implements BlockChainHandler {
   }
 
   private async getSignedTransaction(
-    info: GetInfo
+    info: GetInfoResponse
   ): Promise<EncodedTransaction> {
     if (this.signedTransaction) {
       return this.signedTransaction;
@@ -58,8 +60,8 @@ export class ContractKitTransactionHandler implements BlockChainHandler {
     // };
 
     const { txo } = await stable.transfer(
-      info.receiver.account_address,
-      this.kit.web3.utils.toWei(info.action.amount)
+      info.receiver.accountAddress,
+      this.kit.web3.utils.toWei(info.action.amount.toString())
     );
 
     this.signedTransaction = await wallet.signTransaction({
@@ -80,19 +82,29 @@ export class ContractKitTransactionHandler implements BlockChainHandler {
     return this.signedTransaction;
   }
 
-  async computeTransactionHash(info: GetInfo) {
+  async computeTransactionHash(info: GetInfoResponse) {
     const {
       tx: { hash },
     } = await this.getSignedTransaction(info);
     return hash;
   }
 
-  async submitTransaction(info: GetInfo) {
+  async submitTransaction(info: GetInfoResponse) {
     const { raw } = await this.getSignedTransaction(info);
     const { transactionHash } = await (
       await this.kit.connection.sendSignedTransaction(raw)
     ).waitReceipt();
 
     return transactionHash;
+  }
+
+  async signTypedPaymentRequest(typedData: EIP712TypedData) {
+    return serializeSignature(
+      await this.kit.signTypedData(this.kit.defaultAccount!, typedData)
+    );
+  }
+
+  async getChainId() {
+    return this.kit.web3.eth.getChainId();
   }
 }

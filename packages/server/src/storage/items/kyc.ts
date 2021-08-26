@@ -1,35 +1,43 @@
+import { GetInfoResponse } from "@celo/payments-types";
 import { ADDRESS } from "../../config";
 
-export const KYC = {
-  kyc_data_requirements: {
-    required_payer_data: {
-      given_name: true,
-      surname: true,
-      address: {
-        city: true,
-        country: true,
-        line1: true,
-        line2: false,
-        postal_code: true,
-        state: false,
-      },
-      national_id_data: {
-        id_value: true,
-        country: true,
-        type: true,
-      },
+export const KYC: GetInfoResponse = {
+  requiredPayerData: {
+    givenName: true,
+    surname: true,
+    phoneNumber: false,
+    address: {
+      city: true,
+      country: true,
+      line1: true,
+      line2: false,
+      postalCode: true,
+      state: false,
+    },
+    nationalIdData: {
+      idValue: true,
+      country: true,
+      type: true,
     },
   },
   receiver: {
-    account_address: ADDRESS,
-    business_data: {
+    accountAddress: ADDRESS,
+    businessData: {
       name: "Acme Autos",
-      legal_name: "Acme Autos LLC",
-      address: "1 Wei St",
+      legalName: "Acme Autos LLC",
+      imageUrl: "",
+      address: {
+        city: "Test",
+        country: "Test",
+        line1: "1",
+        line2: "2",
+        postalCode: "1",
+        state: "1",
+      },
     },
   },
   action: {
-    amount: "10",
+    amount: 10,
     currency: "cUSD",
     action: "charge",
     timestamp: Date.now(),

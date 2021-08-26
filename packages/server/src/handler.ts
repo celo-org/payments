@@ -1,15 +1,15 @@
 import { Request, ResponseToolkit } from "@hapi/hapi";
 import {
-  Abort,
-  InitCharge,
-  GetInfo,
+  AbortRequest,
+  InitChargeRequest,
+  GetInfoRequest,
   JsonRpcMethods,
-  Confirm,
+  ConfirmRequest,
 } from "@celo/payments-types";
 import { abort, confirmation, getInfo, initCharge } from "./routes";
 
 interface PaymentRequest extends Request {
-  payload: Abort | InitCharge | GetInfo | Confirm;
+  payload: AbortRequest | InitChargeRequest | GetInfoRequest | ConfirmRequest;
 }
 
 export function handle({ payload }: PaymentRequest, res: ResponseToolkit) {

@@ -70,6 +70,7 @@ export default class Init extends Command {
 
     const confirmed = await cli.confirm("Continue with payment?");
     if (confirmed) {
+      // @ts-ignore
       await charge.submit({});
     } else {
       await charge.abort(AbortCode.user_declined_payment);
