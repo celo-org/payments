@@ -617,17 +617,17 @@ components:
 
 tags:
   - name: Payments
-  - name: GetPaymentInfoModel
-    x-displayName: GetPaymentInfoRequest
+  - name: GetPaymentInfoRequest
+    x-displayName: GetPaymentInfoParams (GetPaymentInfo Request)
     description: <SchemaDefinition schemaRef="#/components/schemas/GetPaymentInfoParams"/>
-  - name: GetPaymentInfoResponseModel
-    x-displayName: GetPaymentInfoResponse
-    description: <SchemaDefinition schemaRef="#/components/schemas/GetPaymentInfoResponseData"/>
+  - name: GetPaymentInfoResponse
+    x-displayName: PaymentInfo (GetPaymentInfo Response)
+    description: <SchemaDefinition schemaRef="#/components/schemas/PaymentInfo"/>
   - name: InitChargeModel
-    x-displayName: InitChargeRequest
+    x-displayName: InitChargeParams (InitCharge Request)
     description: <SchemaDefinition schemaRef="#/components/schemas/InitChargeParams"/>
   - name: ReadyForSettlementModel
-    x-displayName: ReadyForSettlementRequest
+    x-displayName: ReadyForSettlementParams (ReadyForSettlement Request)
     description: <SchemaDefinition schemaRef="#/components/schemas/ReadyForSettlementParams"/>
 x-tagGroups:
   - name: Payments
@@ -636,7 +636,7 @@ x-tagGroups:
   - name: RequestModels
     x-displayName: Models
     tags:
-      - GetPaymentInfoModel
-      - GetPaymentInfoResponseModel
+      - GetPaymentInfoRequest
+      - GetPaymentInfoResponse
       - InitChargeModel
       - ReadyForSettlementModel
