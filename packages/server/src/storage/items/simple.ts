@@ -41,7 +41,7 @@ export const Simple: PaymentInfo = {
     },
   },
   action: {
-    amount: 10,
+    amount: 0.1,
     currency: PaymentAction.currency.C_USD,
     action: PaymentAction.action.CHARGE,
     timestamp: Date.now(),

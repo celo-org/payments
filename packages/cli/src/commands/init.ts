@@ -94,11 +94,24 @@ export default class Init extends Command {
     cli.info(`Payment reference id: ${charge.referenceId}`);
 
     const info: PaymentInfo = await charge.getInfo();
-    console.log(JSON.stringify(info, null, 2));
+    cli.info(JSON.stringify(info, null, 2));
 
     const confirmed = await cli.confirm("Continue with payment?");
+
+    const defaultPayerData = { phoneNumber: "12345678" };
+    await cli.info("The default payer data is:");
+    await cli.info(JSON.stringify(defaultPayerData, null, 2));
+
+    const customPayerData = await cli.prompt(
+      "Enter a payer data (json) or press <Enter> to skip",
+      { required: false, default: undefined }
+    );
+    if (customPayerData) {
+      // TODO: validate customPayerData is in a valid payer data structure
+    }
+
     if (confirmed) {
-      await charge.submit({});
+      await charge.submit(customPayerData ?? defaultPayerData);
     } else {
       await charge.abort(/*AbortCode.user_declined_payment*/);
     }

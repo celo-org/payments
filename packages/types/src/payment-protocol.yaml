@@ -235,6 +235,8 @@ components:
           properties:
             error:
               "$ref": "#/components/schemas/JsonRpcError"
+    Any:
+      description: something
     JsonRpcError:
       type: object
       required:
@@ -249,7 +251,7 @@ components:
           type: string
         data:
           oneOf:
-            - type: object
+            - "$ref": "#/components/schemas/Any"
             - type: string
             - type: array
             - type: boolean

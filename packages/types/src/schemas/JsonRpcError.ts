@@ -2,8 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Any } from './Any';
+
 export type JsonRpcError = {
     code: number;
     message?: string;
-    data?: (string | any[] | boolean | number);
+    data?: (Any | string | any[] | boolean | number);
 }

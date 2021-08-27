@@ -5,10 +5,17 @@ import {
   AbortCode,
   GetPaymentInfoRequest,
   InitChargeRequest,
+  JsonRpcErrorResponse,
   PayerData,
   PaymentInfo,
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
+import { randomInt } from 'crypto';
+
+interface JsonRpcErrorResult extends Error {
+  name: string;
+  message: string;
+}
 
 /**
  * Charge object for use in the Celo Payments Protocol
@@ -49,10 +56,11 @@ export class Charge {
    * @param params the HTTP body with the JSON-RPC params of the request
    */
   private async request<T>(params: T) {
-    const response = await fetchWithRetries(`${this.apiBase}/rpc`, {
+    const requestId = randomInt(281474976710655);
+    const request = {
       method: 'POST',
       body: JSON.stringify({
-        id: 0,
+        id: requestId,
         jsonrpc: '2.0',
         ...params,
       }),
@@ -61,10 +69,25 @@ export class Charge {
         Accept: 'application/json',
         // TODO: Authentication
       },
-    });
+    };
+    const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
+
+    const jsonResponse = await response.json();
+    if (jsonResponse.id !== requestId) {
+      return Err(
+        new Error(
+          `JsonRpc response id (${jsonResponse.id}) different from request (${requestId})`
+        )
+      );
+    }
 
     if (response.status >= 400) {
-      return Err(new Error(await response.text()));
+      const jsonError = jsonResponse as JsonRpcErrorResponse;
+      return Err<JsonRpcErrorResult>({
+        name: 'JsonRpcError',
+        message: jsonError.error.message,
+        ...jsonError.error,
+      });
     }
 
     if (response.status === 204) {
@@ -72,10 +95,19 @@ export class Charge {
     }
 
     try {
-      return Ok(await response.json());
+      return Ok(jsonResponse.result);
     } catch (e) {
       return Err(e);
     }
+  }
+
+  private async requestWithErrorHandling<T>(params: T) {
+    const response = await this.request(params);
+    if (!response.ok) {
+      const error = (response as ErrorResult<JsonRpcErrorResult>).error;
+      throw new Error(error.message);
+    }
+    return response;
   }
 
   /**
@@ -91,10 +123,7 @@ export class Charge {
       },
     };
 
-    const response = await this.request(getPaymentInfoRequest);
-    if (!response.ok) {
-      throw new Error((response as ErrorResult<any>).error);
-    }
+    const response = await this.requestWithErrorHandling(getPaymentInfoRequest);
 
     // TODO: schema validation
     this.paymentInfo = response.result as PaymentInfo;
@@ -114,6 +143,22 @@ export class Charge {
       this.paymentInfo!
     );
 
+    const response = await this.sendInitChargeRequest(
+      payerData,
+      transactionHash
+    );
+
+    await this.sendReadyForSettlementRequest();
+
+    await this.submitTransactionOnChain();
+
+    return response;
+  }
+
+  private async sendInitChargeRequest(
+    payerData: PayerData,
+    transactionHash: string
+  ) {
     const initChargeRequest: InitChargeRequest = {
       method: InitChargeRequest.method.INIT_CHARGE,
       params: {
@@ -122,26 +167,14 @@ export class Charge {
           payerData,
         },
         referenceId: this.referenceId,
-        /**
-         * Transaction hash (pre-calculated), in Hex format
-         */
         transactionHash,
       },
     };
 
-    const response = await this.request(initChargeRequest);
-    if (!response.ok) {
-      throw new Error('Invalid init charge response');
-    }
+    return await this.requestWithErrorHandling(initChargeRequest);
+  }
 
-    try {
-      await this.chainHandler.submitTransaction(this.paymentInfo!);
-    } catch (e) {
-      // TODO: retries?
-      // await this.abort(AbortCode.unable_to_submit_transaction);
-      throw new Error(AbortCode.unable_to_submit_transaction);
-    }
-
+  private async sendReadyForSettlementRequest() {
     const readyForSettlementRequest: ReadyForSettlementRequest = {
       method: ReadyForSettlementRequest.method.READY_FOR_SETTLEMENT,
       params: {
@@ -149,8 +182,17 @@ export class Charge {
       },
     };
 
-    await this.request(readyForSettlementRequest);
-    return response;
+    return await this.requestWithErrorHandling(readyForSettlementRequest);
+  }
+
+  private async submitTransactionOnChain() {
+    try {
+      await this.chainHandler.submitTransaction(this.paymentInfo!);
+    } catch (e) {
+      // TODO: retries?
+      // await this.abort(AbortCode.unable_to_submit_transaction);
+      throw new Error(AbortCode.unable_to_submit_transaction);
+    }
   }
 
   /**
