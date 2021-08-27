@@ -5,6 +5,7 @@ import {
   InitCharge,
   InitChargeParams,
   JsonRpcMethods,
+  ReadyForSettlement,
   ReadyForSettlementParams,
 } from "@celo/payments-types";
 import { getInfo, initCharge } from "./routes";
@@ -12,7 +13,7 @@ import { methodNotFound } from "./helpers/json-rpc-wrapper";
 import { expectPayment } from "./routes/expect-payment";
 
 interface PaymentRequest extends Request {
-  payload: GetPaymentInfo | InitCharge;
+  payload: GetPaymentInfo | InitCharge | ReadyForSettlement;
 }
 
 export function handle({ payload }: PaymentRequest, res: ResponseToolkit) {

@@ -1,5 +1,4 @@
 import { Err, ErrorResult, Ok } from '@celo/base';
-import { BlockChainHandler } from './handlers/interface';
 import { fetchWithRetries, parseDeepLink } from './helpers';
 import {
   AbortCode,
@@ -8,9 +7,12 @@ import {
   JsonRpcErrorResponse,
   PayerData,
   PaymentInfo,
+  PaymentMessageRequest,
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
 import { randomInt } from 'crypto';
+import { ChainHandler } from './handlers/interface';
+import { buildTypedPaymentRequest } from './signing';
 
 interface JsonRpcErrorResult extends Error {
   name: string;
@@ -33,7 +35,7 @@ export class Charge {
   constructor(
     public apiBase: string,
     public referenceId: string,
-    private chainHandler: BlockChainHandler
+    private chainHandler: ChainHandler
   ) {}
 
   /**
@@ -44,30 +46,34 @@ export class Charge {
    * @param chainHandler handler to abstract away chain interaction semantics
    * @returns an instance of the Payments class
    */
-  static fromDeepLink(deepLink: string, transactionHandler: BlockChainHandler) {
+  static fromDeepLink(deepLink: string, chainHandler: ChainHandler) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
-    return new Charge(apiBase, referenceId, transactionHandler);
+    return new Charge(apiBase, referenceId, chainHandler);
   }
 
   /**
    * Creates authenticated requests to the `apiBase`
    *
-   * @param route the endpoint to hit
-   * @param params the HTTP body with the JSON-RPC params of the request
+   * @param message the HTTP body with the JSON-RPC params of the request
    */
-  private async request<T>(params: T) {
+  private async request(message: PaymentMessageRequest) {
     const requestId = randomInt(281474976710655);
     const request = {
       method: 'POST',
       body: JSON.stringify({
         id: requestId,
         jsonrpc: '2.0',
-        ...params,
+        ...message,
       }),
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        // TODO: Authentication
+        Authorization: await this.chainHandler.signTypedPaymentRequest(
+          buildTypedPaymentRequest(
+            message,
+            await this.chainHandler.getChainId()
+          )
+        ),
       },
     };
     const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
@@ -101,7 +107,7 @@ export class Charge {
     }
   }
 
-  private async requestWithErrorHandling<T>(params: T) {
+  private async requestWithErrorHandling(params: PaymentMessageRequest) {
     const response = await this.request(params);
     if (!response.ok) {
       const error = (response as ErrorResult<JsonRpcErrorResult>).error;
@@ -138,7 +144,6 @@ export class Charge {
    */
   async submit(payerData: PayerData) {
     // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
-
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo!
     );
@@ -199,10 +204,13 @@ export class Charge {
    * Aborts a request
    */
   async abort(/*code: AbortCode, message?: string*/) {
-    // await this.request(JsonRpcMethods.Abort, {
-    //   referenceId: this.referenceId,
-    //   abort_code: code,
-    //   abort_message: message,
+    // await this.request({
+    //   method: JsonRpcMethods.Abort,
+    //   params: {
+    //     referenceId: this.referenceId,
+    //     abort_code: code,
+    //     abort_message: message,
+    //   },
     // });
   }
 }

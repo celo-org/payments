@@ -1,10 +1,5 @@
 import { ADDRESS } from "../../config";
-import {
-  Address,
-  BusinessData,
-  PaymentAction,
-  PaymentInfo,
-} from "@celo/payments-types";
+import { PaymentAction, PaymentInfo } from "@celo/payments-types";
 
 export const KYC: PaymentInfo = {
   requiredPayerData: {
@@ -27,10 +22,10 @@ export const KYC: PaymentInfo = {
   },
   receiver: {
     accountAddress: ADDRESS,
-    businessData: <BusinessData>{
+    businessData: {
       name: "Acme Autos",
       legalName: "Acme Autos LLC",
-      address: <Address>{
+      address: {
         city: "San Frans",
         country: "US",
         line1: "1260 Market Street",
@@ -41,11 +36,11 @@ export const KYC: PaymentInfo = {
     },
   },
   action: {
-    amount: 10,
+    amount: 0.2,
     currency: PaymentAction.currency.C_USD,
     action: PaymentAction.action.CHARGE,
     timestamp: Date.now(),
   },
-  referenceId: "00000000-0000-0000-0000000001",
+  referenceId: "00000000-0000-0000-0000000000",
   description: "Mock purchase",
 };

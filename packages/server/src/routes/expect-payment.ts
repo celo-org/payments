@@ -3,6 +3,12 @@ import { ResponseToolkit } from "@hapi/hapi";
 import { get, has } from "../storage";
 import { jsonRpcSuccess, paymentNotFound } from "../helpers/json-rpc-wrapper";
 import { newKit } from "@celo/contractkit";
+import AbiDecoder from "abi-decoder";
+import ERC20 from "../abis/ERC20.json";
+
+AbiDecoder.addABI(ERC20);
+
+const kit = newKit("https://alfajores-forno.celo-testnet.org");
 
 export function expectPayment(
   jsonRpcRequestId: number,
@@ -28,14 +34,12 @@ async function findTxHashInBlockchain([referenceId, txHash]: [
   refId: string,
   txHash: string
 ]) {
-  const kit = newKit("https://alfajores-forno.celo-testnet.org");
-  const transactionReceipt = await kit.connection.getTransactionReceipt(txHash);
-  if (transactionReceipt) {
-    console.log("Found matching tx for the given hash", {
-      referenceId,
-      txHash,
-      transactionReceipt,
-    });
+  const tx = await kit.web3.eth.getTransaction(txHash);
+  if (tx) {
+    console.log("Found matching tx for the given hash");
+    console.log("Decoding transaction", tx.hash);
+    console.log("Decoded", AbiDecoder.decodeMethod(tx.input));
+
     // TODO: implement verification of received funds
   } else {
     setTimeout(findTxHashInBlockchain, 2000, [referenceId, txHash]);

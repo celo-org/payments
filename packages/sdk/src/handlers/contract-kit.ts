@@ -1,13 +1,15 @@
 import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
-import { BlockChainHandler } from './interface';
 import { PaymentInfo } from '@celo/payments-types';
+import { ChainHandler } from './interface';
+import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
+import { serializeSignature } from '@celo/base';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
  * as its mechanism to compute transaction hashes and submit transactions.
  */
-export class ContractKitTransactionHandler implements BlockChainHandler {
+export class ContractKitTransactionHandler implements ChainHandler {
   private signedTransaction?: EncodedTransaction;
 
   constructor(private kit: ContractKit) {
@@ -94,5 +96,15 @@ export class ContractKitTransactionHandler implements BlockChainHandler {
     ).waitReceipt();
 
     return transactionHash;
+  }
+
+  async signTypedPaymentRequest(typedData: EIP712TypedData) {
+    return serializeSignature(
+      await this.kit.signTypedData(this.kit.defaultAccount!, typedData)
+    );
+  }
+
+  async getChainId() {
+    return this.kit.web3.eth.getChainId();
   }
 }

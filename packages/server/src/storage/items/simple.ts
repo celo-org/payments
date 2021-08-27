@@ -1,10 +1,5 @@
 import { ADDRESS } from "../../config";
-import {
-  Address,
-  BusinessData,
-  PaymentAction,
-  PaymentInfo,
-} from "@celo/payments-types";
+import { PaymentAction, PaymentInfo } from "@celo/payments-types";
 
 export const Simple: PaymentInfo = {
   requiredPayerData: {
@@ -27,10 +22,10 @@ export const Simple: PaymentInfo = {
   },
   receiver: {
     accountAddress: ADDRESS,
-    businessData: <BusinessData>{
+    businessData: {
       name: "Acme Autos",
       legalName: "Acme Autos LLC",
-      address: <Address>{
+      address: {
         city: "San Frans",
         country: "US",
         line1: "1260 Market Street",

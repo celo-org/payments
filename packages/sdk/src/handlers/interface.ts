@@ -4,7 +4,7 @@ import { PaymentInfo } from '@celo/payments-types';
  * Abstracts away complexity related to on chain interaction. Responsible
  * for computing transaction hashes and submitting transactions to the chain
  */
-export interface BlockChainHandler {
+export interface ChainHandler {
   /**
    * Compute the transaction hash for a given charge.
    *
@@ -17,7 +17,12 @@ export interface BlockChainHandler {
    */
   submitTransaction: (tx: PaymentInfo) => Promise<string>;
   /**
+   * Compute an EIP712 signature over the payment request.
+   */
+  signTypedPaymentRequest: (data: any) => Promise<string>;
+  /**
    * Get the address of the sender submitting this transaction to the chain
    */
   getSendingAddress: () => string;
+  getChainId: () => Promise<number>;
 }
