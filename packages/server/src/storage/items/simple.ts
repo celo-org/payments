@@ -1,23 +1,23 @@
-import { GetInfoResponse } from "@celo/payments-types";
 import { ADDRESS } from "../../config";
+import { PaymentAction, PaymentInfo } from "@celo/payments-types";
 
-export const Simple: GetInfoResponse = {
+export const Simple: PaymentInfo = {
   requiredPayerData: {
-    givenName: true,
-    surname: true,
-    phoneNumber: false,
+    givenName: false,
+    surname: false,
+    phoneNumber: true,
     address: {
-      city: true,
-      country: true,
-      line1: true,
+      city: false,
+      country: false,
+      line1: false,
       line2: false,
-      postalCode: true,
+      postalCode: false,
       state: false,
     },
     nationalIdData: {
-      idValue: true,
-      country: true,
-      type: true,
+      idValue: false,
+      country: false,
+      type: false,
     },
   },
   receiver: {
@@ -25,21 +25,20 @@ export const Simple: GetInfoResponse = {
     businessData: {
       name: "Acme Autos",
       legalName: "Acme Autos LLC",
-      imageUrl: "",
       address: {
-        city: "Test",
-        country: "Test",
-        line1: "1",
-        line2: "2",
-        postalCode: "1",
-        state: "1",
+        city: "San Frans",
+        country: "US",
+        line1: "1260 Market Street",
+        line2: "Suite 450",
+        postalCode: "94103",
+        state: "CA",
       },
     },
   },
   action: {
-    amount: 1,
-    currency: "cUSD",
-    action: "charge",
+    amount: 0.1,
+    currency: PaymentAction.currency.C_USD,
+    action: PaymentAction.action.CHARGE,
     timestamp: Date.now(),
   },
   referenceId: "00000000-0000-0000-0000000000",

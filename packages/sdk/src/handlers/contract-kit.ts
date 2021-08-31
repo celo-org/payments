@@ -1,9 +1,9 @@
 import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
+import { PaymentInfo } from '@celo/payments-types';
 import { ChainHandler } from './interface';
 import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
 import { serializeSignature } from '@celo/base';
-import { GetInfoResponse } from '@celo/payments-types';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
@@ -23,7 +23,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
   }
 
   private async getSignedTransaction(
-    info: GetInfoResponse
+    info: PaymentInfo
   ): Promise<EncodedTransaction> {
     if (this.signedTransaction) {
       return this.signedTransaction;
@@ -68,7 +68,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
       to: stable.address,
       from: this.kit.defaultAccount,
       gas: 100_000,
-      gasPrice: gasPriceMinimum.times(5).toString(),
+      gasPrice: gasPriceMinimum.times(50).toString(),
       chainId: await this.kit.connection.chainId(),
       nonce: await this.kit.connection.getTransactionCount(
         this.kit.defaultAccount
@@ -82,14 +82,14 @@ export class ContractKitTransactionHandler implements ChainHandler {
     return this.signedTransaction;
   }
 
-  async computeTransactionHash(info: GetInfoResponse) {
+  async computeTransactionHash(info: PaymentInfo) {
     const {
       tx: { hash },
     } = await this.getSignedTransaction(info);
     return hash;
   }
 
-  async submitTransaction(info: GetInfoResponse) {
+  async submitTransaction(info: PaymentInfo) {
     const { raw } = await this.getSignedTransaction(info);
     const { transactionHash } = await (
       await this.kit.connection.sendSignedTransaction(raw)

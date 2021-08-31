@@ -10,11 +10,13 @@
     "payments"
   ],
   "scripts": {
-    "clean": "rm -rf node_modules packages/**/node_modules packages/**/lib packages/**/build",
+    "clean": "rm -rf node_modules packages/**/node_modules packages/**/lib packages/**/build packages/**/tsconfig.tsbuildinfo",
+    "clean:build": "rm -rf packages/**/tsconfig.tsbuildinfo",
     "build": "lerna run build",
     "postinstall": "lerna bootstrap",
     "start": "yarn lerna run start --stream",
-    "cli": "yarn build && yarn --cwd ./packages/cli cli"
+    "cli": "yarn build && yarn --cwd ./packages/cli cli",
+    "generate-web-models": "yarn --cwd ./packages/types web-models:build"
   },
   "engines": {
     "node": ">=12"

@@ -1,15 +1,18 @@
 import { ResponseToolkit } from "@hapi/hapi";
 import { get } from "../storage";
-import { GetInfoRequest } from "@celo/payments-types";
+import { GetPaymentInfoParams } from "@celo/payments-types";
+import { jsonRpcSuccess, paymentNotFound } from "../helpers/json-rpc-wrapper";
 
 export function getInfo(
-  { params: { referenceId } }: GetInfoRequest,
+  jsonRpcRequestId: number,
+  params: GetPaymentInfoParams,
   res: ResponseToolkit
 ) {
-  const item = get(referenceId);
+  const item = get(params.referenceId);
+  console.log("get info request", { params });
   if (item) {
-    return res.response(item).code(200);
+    return jsonRpcSuccess(res, jsonRpcRequestId, item);
   }
 
-  return res.response().code(404);
+  return paymentNotFound(res, jsonRpcRequestId, params.referenceId);
 }

@@ -1,27 +1,35 @@
 import { Request, ResponseToolkit } from "@hapi/hapi";
 import {
-  AbortRequest,
-  InitChargeRequest,
-  GetInfoRequest,
+  GetPaymentInfo,
+  GetPaymentInfoParams,
+  InitCharge,
+  InitChargeParams,
   JsonRpcMethods,
-  ConfirmRequest,
+  ReadyForSettlement,
+  ReadyForSettlementParams,
 } from "@celo/payments-types";
-import { abort, confirmation, getInfo, initCharge } from "./routes";
+import { getInfo, initCharge } from "./routes";
+import { methodNotFound } from "./helpers/json-rpc-wrapper";
+import { expectPayment } from "./routes/expect-payment";
 
 interface PaymentRequest extends Request {
-  payload: AbortRequest | InitChargeRequest | GetInfoRequest | ConfirmRequest;
+  payload: GetPaymentInfo | InitCharge | ReadyForSettlement;
 }
 
 export function handle({ payload }: PaymentRequest, res: ResponseToolkit) {
-  if (payload.method === JsonRpcMethods.Abort) {
-    return abort(payload, res);
-  } else if (payload.method === JsonRpcMethods.GetInfo) {
-    return getInfo(payload, res);
-  } else if (payload.method === JsonRpcMethods.Confirm) {
-    return confirmation(payload, res);
-  } else if (payload.method === JsonRpcMethods.Init) {
-    return initCharge(payload, res);
-  } else {
-    res.response(404).send();
+  const method = payload.method.toString();
+  switch (method) {
+    case JsonRpcMethods.GetInfo:
+      const getPaymentInfoParams = payload.params as GetPaymentInfoParams;
+      return getInfo(payload.id, getPaymentInfoParams, res);
+    case JsonRpcMethods.InitCharge:
+      const initChargeParams = payload.params as InitChargeParams;
+      return initCharge(payload.id, initChargeParams, res);
+    case JsonRpcMethods.ReadyForSettlement:
+      const readyForSettlementParams =
+        payload.params as ReadyForSettlementParams;
+      return expectPayment(payload.id, readyForSettlementParams, res);
+    default:
+      return methodNotFound(res, payload.id);
   }
 }

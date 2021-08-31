@@ -1,21 +1,39 @@
-import { InitChargeRequest } from "@celo/payments-types";
+import { InitChargeParams, JsonRpcError } from "@celo/payments-types";
 import { ResponseToolkit } from "@hapi/hapi";
 import { get, has, update } from "../storage";
+import { riskChecks, RiskChecksResult } from "../helpers";
+import {
+  jsonRpcError,
+  jsonRpcSuccess,
+  paymentNotFound,
+} from "../helpers/json-rpc-wrapper";
 
 export function initCharge(
-  { params }: InitChargeRequest,
+  jsonRpcRequestId: number,
+  params: InitChargeParams,
   res: ResponseToolkit
 ) {
   if (!has(params.referenceId)) {
-    return res.response().code(404);
+    return paymentNotFound(res, jsonRpcRequestId, params.referenceId);
   }
 
   console.log("initCharge", params);
 
-  update(params.referenceId, {
-    ...get(params.referenceId),
-    transactionHash: params.transactionHash,
-  });
+  if (riskChecks(params.sender) === RiskChecksResult.Ok) {
+    update(params.referenceId, {
+      ...get(params.referenceId),
+      transactionHash: params.transactionHash,
+    });
+  } else {
+    const message = "Risk checks failed!";
+    console.log(message);
+    const riskCheckFailedJsonRpcError = <JsonRpcError>{
+      code: -32602,
+      message,
+    };
 
-  return res.response().code(204);
+    return jsonRpcError(res, jsonRpcRequestId, riskCheckFailedJsonRpcError);
+  }
+
+  return jsonRpcSuccess(res, jsonRpcRequestId);
 }
