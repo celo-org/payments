@@ -17,7 +17,7 @@ export namespace JsonRpcInvalidParameterError {
      * Invalid method parameter(s)
      */
     export enum code {
-        '_-32602' = -32602,
+        value = -32602
     }
 
 

@@ -126,7 +126,14 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                oneOf:
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
+                  - "$ref": "#/components/schemas/JsonRpcRiskChecksFailedError"
+                  - "$ref": "#/components/schemas/JsonRpcMissingInformationError"
+                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
       requestBody:
         content:
           application/json:
@@ -279,6 +286,107 @@ components:
               enum:
                 - -32602
               description: Invalid method parameter(s)
+    JsonRpcUnspecifiedError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32000
+              description: |
+                Unspecified error
+      example:
+        code: -32000
+        message: Unspecified error
+        data:
+          referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+    JsonRpcReferenceIdNotFoundError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32001
+              description: |
+                The reference id provided in the request was not found
+      example:
+        code: -32001
+        message: The reference id provided in the request was not found
+        data:
+          referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+    JsonRpcRiskChecksFailedError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32002
+              description: |
+                The risk checks did not pass successfully
+      example:
+        code: -32002
+        message: The risk checks did not pass successfully
+        data:
+          reason: Sanctions list
+    JsonRpcMissingInformationError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32003
+              description: |
+                A mandatory field or element are missing from the request
+      example:
+        code: -32003
+        message: A mandatory field or element are missing from the request
+        data:
+          missingFields:
+            - "phoneNumber"
+    JsonRpcPaymentTypeMismatchError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32004
+              description: |
+                Consumer tried to invoke an action that is irrelevant for the payment type
+      example:
+        code: -32004
+        message: Consumer tried to invoke an action that is irrelevant for the payment type
+        data:
+          requestedAction: capture
+    JsonRpcInvalidCommandTypeError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32005
+              description: |
+                When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
+      example:
+        code: -32005
+        message: ReadyForSettlement sent before payment was initialized
     ReferenceId:
       type: string
       description: Unique reference ID of this payment. This value should be globally
@@ -618,17 +726,41 @@ components:
 tags:
   - name: Payments
   - name: GetPaymentInfoRequest
-    x-displayName: GetPaymentInfoParams (GetPaymentInfo Request)
+    x-displayName: GetPaymentInfo Request (GetPaymentInfoParams)
     description: <SchemaDefinition schemaRef="#/components/schemas/GetPaymentInfoParams"/>
   - name: GetPaymentInfoResponse
-    x-displayName: PaymentInfo (GetPaymentInfo Response)
+    x-displayName: GetPaymentInfo Response (PaymentInfo)
     description: <SchemaDefinition schemaRef="#/components/schemas/PaymentInfo"/>
   - name: InitChargeModel
-    x-displayName: InitChargeParams (InitCharge Request)
+    x-displayName: InitCharge Request (InitChargeParams)
     description: <SchemaDefinition schemaRef="#/components/schemas/InitChargeParams"/>
   - name: ReadyForSettlementModel
-    x-displayName: ReadyForSettlementParams (ReadyForSettlement Request)
+    x-displayName: ReadyForSettlement Request (ReadyForSettlementParams)
     description: <SchemaDefinition schemaRef="#/components/schemas/ReadyForSettlementParams"/>
+  - name: JsonRpcInvalidParameterErrorModel
+    x-displayName: Invalid Parameter (JsonRpcInvalidParameterError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcInvalidParameterError"/>
+  - name: JsonRpcMethodNotFoundErrorModel
+    x-displayName: Method Not Found (JsonRpcMethodNotFoundError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcMethodNotFoundError"/>
+  - name: JsonRpcReferenceIdNotFoundErrorModel
+    x-displayName: Reference Id Not Found (JsonRpcReferenceIdNotFoundError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcReferenceIdNotFoundError"/>
+  - name: JsonRpcRiskChecksFailedErrorModel
+    x-displayName: Risk Checks Failed (JsonRpcRiskChecksFailedError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcRiskChecksFailedError"/>
+  - name: JsonRpcMissingInformationErrorModel
+    x-displayName: Missing Information (JsonRpcMissingInformationError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcMissingInformationError"/>
+  - name: JsonRpcPaymentTypeMismatchErrorModel
+    x-displayName: Payment Type Mismatch (JsonRpcPaymentTypeMismatchError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcPaymentTypeMismatchError"/>
+  - name: JsonRpcInvalidCommandTypeErrorModel
+    x-displayName: Invalid Command Type (JsonRpcInvalidCommandTypeError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcInvalidCommandTypeError"/>
+  - name: JsonRpcUnspecifiedErrorModel
+    x-displayName: Unspecified Error (JsonRpcUnspecifiedError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcUnspecifiedError"/>
 x-tagGroups:
   - name: Payments
     tags:
@@ -640,3 +772,14 @@ x-tagGroups:
       - GetPaymentInfoResponse
       - InitChargeModel
       - ReadyForSettlementModel
+  - name: ErrorModels
+    x-displayName: Errors
+    tags:
+      - JsonRpcInvalidParameterErrorModel
+      - JsonRpcMethodNotFoundErrorModel
+      - JsonRpcReferenceIdNotFoundErrorModel
+      - JsonRpcRiskChecksFailedErrorModel
+      - JsonRpcMissingInformationErrorModel
+      - JsonRpcPaymentTypeMismatchErrorModel
+      - JsonRpcInvalidCommandTypeErrorModel
+      - JsonRpcUnspecifiedErrorModel

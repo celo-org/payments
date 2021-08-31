@@ -18,7 +18,7 @@ export namespace InitChargeRequest {
      * Method name
      */
     export enum method {
-        INIT_CHARGE = 'initCharge',
+        value = "initCharge"
     }
 
 

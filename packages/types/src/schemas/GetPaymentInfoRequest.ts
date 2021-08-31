@@ -18,7 +18,7 @@ export namespace GetPaymentInfoRequest {
      * Method name
      */
     export enum method {
-        GET_PAYMENT_INFO = 'getPaymentInfo',
+        value = "getPaymentInfo"
     }
 
 

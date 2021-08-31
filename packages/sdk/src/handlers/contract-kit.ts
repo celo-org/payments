@@ -68,7 +68,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
       to: stable.address,
       from: this.kit.defaultAccount,
       gas: 100_000,
-      gasPrice: gasPriceMinimum.times(5).toString(),
+      gasPrice: gasPriceMinimum.times(50).toString(),
       chainId: await this.kit.connection.chainId(),
       nonce: await this.kit.connection.getTransactionCount(
         this.kit.defaultAccount

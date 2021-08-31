@@ -5,13 +5,17 @@ import {
   GetPaymentInfoRequest,
   InitChargeRequest,
   JsonRpcErrorResponse,
+  JsonRpcInvalidParameterError,
+  JsonRpcMethodNotFoundError,
+  JsonRpcReferenceIdNotFoundError,
+  JsonRpcRiskChecksFailedError,
   PayerData,
   PaymentInfo,
   PaymentMessageRequest,
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
 import { randomInt } from 'crypto';
-import { ChainHandler } from './handlers/interface';
+import { ChainHandler } from './handlers';
 import { buildTypedPaymentRequest } from './signing';
 
 interface JsonRpcErrorResult extends Error {
@@ -89,8 +93,23 @@ export class Charge {
 
     if (response.status >= 400) {
       const jsonError = jsonResponse as JsonRpcErrorResponse;
+      let name = 'JsonRpcError';
+      switch (jsonError.error.code) {
+        case JsonRpcReferenceIdNotFoundError.code.value:
+          name = 'ReferenceIdNotFoundError';
+          break;
+        case JsonRpcInvalidParameterError.code.value:
+          name = 'InvalidParameterError';
+          break;
+        case JsonRpcRiskChecksFailedError.code.value:
+          name = 'RiskChecksFailedError';
+          break;
+        case JsonRpcMethodNotFoundError.code.value:
+          name = 'MethodNotFoundError';
+          break;
+      }
       return Err<JsonRpcErrorResult>({
-        name: 'JsonRpcError',
+        name,
         message: jsonError.error.message,
         ...jsonError.error,
       });
@@ -123,7 +142,7 @@ export class Charge {
    */
   async getInfo(): Promise<PaymentInfo> {
     const getPaymentInfoRequest: GetPaymentInfoRequest = {
-      method: GetPaymentInfoRequest.method.GET_PAYMENT_INFO,
+      method: GetPaymentInfoRequest.method.value,
       params: {
         referenceId: this.referenceId,
       },
@@ -165,7 +184,7 @@ export class Charge {
     transactionHash: string
   ) {
     const initChargeRequest: InitChargeRequest = {
-      method: InitChargeRequest.method.INIT_CHARGE,
+      method: InitChargeRequest.method.value,
       params: {
         sender: {
           accountAddress: await this.chainHandler.getSendingAddress(),
@@ -181,7 +200,7 @@ export class Charge {
 
   private async sendReadyForSettlementRequest() {
     const readyForSettlementRequest: ReadyForSettlementRequest = {
-      method: ReadyForSettlementRequest.method.READY_FOR_SETTLEMENT,
+      method: ReadyForSettlementRequest.method.value,
       params: {
         referenceId: this.referenceId,
       },
@@ -196,6 +215,7 @@ export class Charge {
     } catch (e) {
       // TODO: retries?
       // await this.abort(AbortCode.unable_to_submit_transaction);
+      console.error(e);
       throw new Error(AbortCode.unable_to_submit_transaction);
     }
   }

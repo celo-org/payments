@@ -17,7 +17,7 @@ export namespace JsonRpcMethodNotFoundError {
      * Method not found
      */
     export enum code {
-        '_-32601' = -32601,
+        value = -32601
     }
 
 

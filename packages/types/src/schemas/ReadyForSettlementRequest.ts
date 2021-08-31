@@ -18,7 +18,7 @@ export namespace ReadyForSettlementRequest {
      * Method name
      */
     export enum method {
-        READY_FOR_SETTLEMENT = 'readyForSettlement',
+        value = "readyForSettlement"
     }
 
 
