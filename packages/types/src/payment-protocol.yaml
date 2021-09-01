@@ -445,32 +445,22 @@ components:
         - referenceId
     RequiredAddressData:
       type: object
-      required:
-        - city
-        - country
-        - line1
-        - line2
-        - postalCode
-        - state
+      description: |
+        Defines which elements of the payer address data are required for this payment.
+        The absence of properties indicates their optionality (default to false)
       properties:
         city:
           type: boolean
-          default: true
         country:
           type: boolean
-          default: true
         line1:
           type: boolean
-          default: true
         line2:
           type: boolean
-          default: false
         postalCode:
           type: boolean
-          default: true
         state:
           type: boolean
-          default: false
     Address:
       type: object
       properties:
@@ -502,20 +492,16 @@ components:
           description: State, county, province, region
     RequiredNationalIdData:
       type: object
-      required:
-        - idValue
-        - country
-        - type
+      description: |
+        Defines which elements of the payer national ID data are required for this payment.
+        The absence of properties indicates their optionality (default to false)
       properties:
         idValue:
           type: boolean
-          default: true
         country:
           type: boolean
-          default: true
         type:
           type: boolean
-          default: false
     NationalIdData:
       type: object
       properties:
@@ -533,25 +519,16 @@ components:
           description: Indicates the type of the ID
     RequiredPayerData:
       type: object
-      required:
-        - givenName
-        - surname
-        - phoneNumber
-        - address
-        - nationalIdData
       description: |
         Defines which elements of the payer data are required for this payment.
-        The absence of properties indicates their optionality
+        The absence of properties indicates their optionality (default to false)
       properties:
         givenName:
           type: boolean
-          default: true
         surname:
           type: boolean
-          default: true
         phoneNumber:
           type: boolean
-          default: true
         address:
           "$ref": "#/components/schemas/RequiredAddressData"
         nationalIdData:

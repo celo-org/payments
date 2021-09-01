@@ -7,13 +7,13 @@ import type { RequiredNationalIdData } from './RequiredNationalIdData';
 
 /**
  * Defines which elements of the payer data are required for this payment.
- * The absence of properties indicates their optionality
+ * The absence of properties indicates their optionality (default to false)
  *
  */
 export type RequiredPayerData = {
-    givenName: boolean;
-    surname: boolean;
-    phoneNumber: boolean;
-    address: RequiredAddressData;
-    nationalIdData: RequiredNationalIdData;
+    givenName?: boolean;
+    surname?: boolean;
+    phoneNumber?: boolean;
+    address?: RequiredAddressData;
+    nationalIdData?: RequiredNationalIdData;
 }
