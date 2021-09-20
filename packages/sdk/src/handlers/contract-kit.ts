@@ -91,11 +91,13 @@ export class ContractKitTransactionHandler implements ChainHandler {
 
   async submitTransaction(info: PaymentInfo) {
     const { raw } = await this.getSignedTransaction(info);
-    const { transactionHash } = await (
+    const receipt = await (
       await this.kit.connection.sendSignedTransaction(raw)
     ).waitReceipt();
 
-    return transactionHash;
+    console.log('receipt', receipt);
+
+    return receipt.transactionHash;
   }
 
   async signTypedPaymentRequest(typedData: EIP712TypedData) {

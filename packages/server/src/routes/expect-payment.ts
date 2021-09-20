@@ -39,6 +39,8 @@ async function findTxHashInBlockchain([referenceId, txHash]: [
     console.log("Found matching tx for the given hash");
     console.log("Decoding transaction", tx.hash);
     console.log("Decoded", AbiDecoder.decodeMethod(tx.input));
+    const receipt = await kit.web3.eth.getTransactionReceipt(txHash);
+    console.log("Transaction receipt: ", receipt);
 
     // TODO: implement verification of received funds
   } else {

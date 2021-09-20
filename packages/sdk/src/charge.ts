@@ -1,7 +1,8 @@
 import { Err, ErrorResult, Ok } from '@celo/base';
 import { fetchWithRetries, parseDeepLink } from './helpers';
 import {
-  AbortCode,
+  AbortCodes,
+  AbortRequest,
   GetPaymentInfoRequest,
   InitChargeRequest,
   JsonRpcErrorResponse,
@@ -17,6 +18,7 @@ import {
 import { randomInt } from 'crypto';
 import { ChainHandler } from './handlers';
 import { buildTypedPaymentRequest } from './signing';
+import { OnchainFailureError } from './errors/onchain-failure';
 
 interface JsonRpcErrorResult extends Error {
   name: string;
@@ -214,23 +216,23 @@ export class Charge {
       await this.chainHandler.submitTransaction(this.paymentInfo!);
     } catch (e) {
       // TODO: retries?
-      // await this.abort(AbortCode.unable_to_submit_transaction);
-      console.error(e);
-      throw new Error(AbortCode.unable_to_submit_transaction);
+      throw new OnchainFailureError(AbortCodes.COULD_NOT_PUT_TRANSACTION);
     }
   }
 
   /**
    * Aborts a request
    */
-  async abort(/*code: AbortCode, message?: string*/) {
-    // await this.request({
-    //   method: JsonRpcMethods.Abort,
-    //   params: {
-    //     referenceId: this.referenceId,
-    //     abort_code: code,
-    //     abort_message: message,
-    //   },
-    // });
+  async abort(code: AbortCodes, message?: string) {
+    const abortRequest: AbortRequest = {
+      method: AbortRequest.method.value,
+      params: {
+        referenceId: this.referenceId,
+        abortCode: code,
+        abortMessage: message,
+      },
+    };
+
+    return await this.requestWithErrorHandling(abortRequest);
   }
 }

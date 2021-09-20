@@ -206,6 +206,40 @@ paths:
           application/json:
             schema:
               "$ref": "#/components/schemas/ReadyForSettlement"
+  "/rpc\ \ \ ":
+    post:
+      operationId: abort
+      deprecated: false
+      summary: Abort Payment
+      description: Allows the wallet to abort a payment
+      tags:
+        - Payments
+      parameters: [ ]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AbortResponse"
+        '404':
+          description: The method does not exist / is not available
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+        '400':
+          description: One or more parameters are invalid (including reference ID not found)
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Abort"
+
 x-headers: [ ]
 components:
   schemas:
@@ -696,6 +730,47 @@ components:
         params:
           "$ref": "#/components/schemas/ReadyForSettlementParams"
     ReadyForSettlementResponse:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcProtocol"
+    Abort:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcRequired"
+        - "$ref": "#/components/schemas/AbortRequest"
+    AbortCodes:
+      type: string
+      enum:
+        - general
+        - customer_declined
+        - insufficient_funds
+        - could_not_put_transaction
+        - business_not_verified
+    AbortParams:
+      title: Parameters
+      type: object
+      required:
+        - referenceId
+      properties:
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+        abortCode:
+          "$ref": "#/components/schemas/AbortCodes"
+        abortMessage:
+          type: string
+          description: a descriptive message regarding the root cause for the abortion
+    AbortRequest:
+      type: object
+      required:
+        - method
+        - params
+      properties:
+        method:
+          type: string
+          description: Method name
+          enum:
+            - abort
+        params:
+          "$ref": "#/components/schemas/AbortParams"
+    AbortResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcProtocol"
 

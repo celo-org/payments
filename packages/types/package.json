@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "tsc -b .",
-    "web-models:build": "ts-node ./scripts/genereate-web-models.ts"
+    "web-models:build": "ts-node ./scripts/generate-web-models.ts"
   },
   "dependencies": {
     "@celo/contractkit": "1.2.0"

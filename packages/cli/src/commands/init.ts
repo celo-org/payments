@@ -2,9 +2,10 @@ import { newKit } from "@celo/contractkit";
 import cli from "cli-ux";
 import { Command, flags } from "@oclif/command";
 import { Charge, ContractKitTransactionHandler } from "@celo/payments-sdk";
-import { PaymentInfo } from "@celo/payments-types";
+import { AbortCodes, PaymentInfo } from "@celo/payments-types";
 import { getAccount } from "../helpers";
 import { CeloAccountPrivateKeyFilePath } from "../helpers/create-account";
+import { OnchainFailureError } from "@celo/payments-sdk/build/main/errors/onchain-failure";
 
 export default class Init extends Command {
   static description = "Create a charge and interactively submit it";
@@ -64,7 +65,7 @@ export default class Init extends Command {
         : "https://forno.celo.org"
     );
     kit.addAccount(privateKey);
-    const [defaultAccount] = await kit.getWallet().getAccounts();
+    const [defaultAccount] = kit.getWallet().getAccounts();
     kit.defaultAccount = defaultAccount;
 
     const txHandler = new ContractKitTransactionHandler(kit);
@@ -96,7 +97,18 @@ export default class Init extends Command {
     const info: PaymentInfo = await charge.getInfo();
     cli.info(JSON.stringify(info, null, 2));
 
+    const accountsContract = await kit.contracts.getAccounts();
+    const receiverUrl = await accountsContract.getMetadataURL(
+      info.receiver.accountAddress
+    );
+    cli.info("Receiver URL as registered in the blockchain:", receiverUrl);
+
     const confirmedByTheUser = await cli.confirm("Continue with payment?");
+
+    if (!confirmedByTheUser) {
+      await charge.abort(AbortCodes.CUSTOMER_DECLINED);
+      return;
+    }
 
     const defaultPayerData = { phoneNumber: "12345678" };
     await cli.info("The default payer data is:");
@@ -110,12 +122,34 @@ export default class Init extends Command {
       // TODO: validate customPayerData is in a valid payer data structure
     }
 
-    if (confirmedByTheUser) {
+    // No need for further user approval to continue the flow
+    try {
       await charge.submit(
         customPayerData ? JSON.parse(customPayerData) : defaultPayerData
       );
-    } else {
-      await charge.abort(/*AbortCode.user_declined_payment*/);
+    } catch (e) {
+      if (e instanceof OnchainFailureError) {
+        const sendAbort = await cli.confirm(
+          "Submitting onchain transaction failed. Send abort to merchant?"
+        );
+        if (sendAbort) {
+          const codeStr = await cli.prompt(
+            "Abort code to send [default: could_not_put_transaction]: ",
+            { default: "could_not_put_transaction" }
+          );
+          let code = AbortCodes.COULD_NOT_PUT_TRANSACTION;
+          switch (codeStr) {
+            case "insufficient_funds":
+              code = AbortCodes.INSUFFICIENT_FUNDS;
+              break;
+            case "could_not_put_transaction":
+            default:
+              code = AbortCodes.COULD_NOT_PUT_TRANSACTION;
+          }
+          await charge.abort(code);
+        }
+      }
+      console.error(e);
     }
   }
 }

@@ -1,12 +1,18 @@
 import { ResponseToolkit } from "@hapi/hapi";
-import { get } from "../storage";
+import { has } from "../storage";
+import { AbortParams } from "@celo/payments-types";
+import { jsonRpcSuccess, paymentNotFound } from "../helpers/json-rpc-wrapper";
 
-export function abort({ params }: any, res: ResponseToolkit) {
-  const item = get(params.referenceId);
-  if (!item) {
-    return res.response().code(404);
+export function abort(
+  jsonRpcRequestId: number,
+  params: AbortParams,
+  res: ResponseToolkit
+) {
+  if (!has(params.referenceId)) {
+    return paymentNotFound(res, jsonRpcRequestId, params.referenceId);
   }
 
   console.log("abort", params);
-  return res.response().code(204);
+
+  return jsonRpcSuccess(res, jsonRpcRequestId);
 }

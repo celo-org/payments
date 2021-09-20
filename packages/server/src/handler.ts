@@ -1,5 +1,6 @@
 import { Request, ResponseToolkit } from "@hapi/hapi";
 import {
+  AbortParams,
   GetPaymentInfo,
   GetPaymentInfoParams,
   InitCharge,
@@ -8,9 +9,8 @@ import {
   ReadyForSettlement,
   ReadyForSettlementParams,
 } from "@celo/payments-types";
-import { getInfo, initCharge } from "./routes";
+import { expectPayment, getInfo, initCharge, abort } from "./routes";
 import { methodNotFound } from "./helpers/json-rpc-wrapper";
-import { expectPayment } from "./routes/expect-payment";
 
 interface PaymentRequest extends Request {
   payload: GetPaymentInfo | InitCharge | ReadyForSettlement;
@@ -29,6 +29,9 @@ export function handle({ payload }: PaymentRequest, res: ResponseToolkit) {
       const readyForSettlementParams =
         payload.params as ReadyForSettlementParams;
       return expectPayment(payload.id, readyForSettlementParams, res);
+    case JsonRpcMethods.Abort:
+      const abortParams = payload.params as AbortParams;
+      return abort(payload.id, abortParams, res);
     default:
       return methodNotFound(res, payload.id);
   }
