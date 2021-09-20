@@ -1,31 +1,46 @@
 import { Err, ErrorResult, Ok } from '@celo/base';
+import { fetchWithRetries, parseDeepLink } from './helpers';
 import {
-  AbortCode,
-  GetInfoResponse,
-  JsonRpcMethods,
-  KYC,
+  AbortCodes,
+  AbortRequest,
+  GetPaymentInfoRequest,
+  InitChargeRequest,
+  JsonRpcErrorResponse,
+  JsonRpcInvalidParameterError,
+  JsonRpcMethodNotFoundError,
+  JsonRpcReferenceIdNotFoundError,
+  JsonRpcRiskChecksFailedError,
+  PayerData,
+  PaymentInfo,
   PaymentMessageRequest,
+  ReadyForSettlementRequest,
 } from '@celo/payments-types';
-import { ChainHandler } from './handlers/interface';
-import { fetchWithRetries, parseUri } from './helpers';
+import { randomInt } from 'crypto';
+import { ChainHandler } from './handlers';
 import { buildTypedPaymentRequest } from './signing';
+import { OnchainFailureError } from './errors/onchain-failure';
+
+interface JsonRpcErrorResult extends Error {
+  name: string;
+  message: string;
+}
 
 /**
  * Charge object for use in the Celo Payments Protocol
  */
 export class Charge {
-  private paymentInfo?: GetInfoResponse;
+  private paymentInfo?: PaymentInfo;
 
   /**
    * Instantiates a new charge object for use in the Celo Payments Protocol
    *
-   * @param baseUrl url of the payment service provider implementing the protocol
+   * @param apiBase url of the payment service provider implementing the protocol
    * @param referenceId reference ID of the charge
    * @param chainHandler handler to abstract away chain interaction semantics
    */
   constructor(
-    private baseUrl: string,
-    private referenceId: string,
+    public apiBase: string,
+    public referenceId: string,
     private chainHandler: ChainHandler
   ) {}
 
@@ -33,27 +48,26 @@ export class Charge {
    * Instantiates a new charge object for use in the Celo Payments Protocol
    * from a URI, often encoded as part of a QR code.
    *
-   * @param uri encoded URI with `baseUrl` and `referenceId`
+   * @param deepLink encoded URI with `apiBase` and `referenceId`
    * @param chainHandler handler to abstract away chain interaction semantics
    * @returns an instance of the Payments class
    */
-  static fromUri(uri: string, chainHandler: ChainHandler) {
-    const { baseUrl, referenceId } = parseUri(uri);
-    return new Charge(baseUrl, referenceId, chainHandler);
+  static fromDeepLink(deepLink: string, chainHandler: ChainHandler) {
+    const { apiBase, referenceId } = parseDeepLink(deepLink);
+    return new Charge(apiBase, referenceId, chainHandler);
   }
 
   /**
-   * Creates authenticated requests to the `baseUrl`
+   * Creates authenticated requests to the `apiBase`
    *
-   * @param route the endpoint to hit
-   * @param method the HTTP method to use for the request
-   * @param body optional body of the HTTP request
+   * @param message the HTTP body with the JSON-RPC params of the request
    */
   private async request(message: PaymentMessageRequest) {
-    const response = await fetchWithRetries(`${this.baseUrl}/rpc`, {
+    const requestId = randomInt(281474976710655);
+    const request = {
       method: 'POST',
       body: JSON.stringify({
-        id: 0,
+        id: requestId,
         jsonrpc: '2.0',
         ...message,
       }),
@@ -67,10 +81,40 @@ export class Charge {
           )
         ),
       },
-    });
+    };
+    const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
+
+    const jsonResponse = await response.json();
+    if (jsonResponse.id !== requestId) {
+      return Err(
+        new Error(
+          `JsonRpc response id (${jsonResponse.id}) different from request (${requestId})`
+        )
+      );
+    }
 
     if (response.status >= 400) {
-      return Err(new Error(await response.text()));
+      const jsonError = jsonResponse as JsonRpcErrorResponse;
+      let name = 'JsonRpcError';
+      switch (jsonError.error.code) {
+        case JsonRpcReferenceIdNotFoundError.code.value:
+          name = 'ReferenceIdNotFoundError';
+          break;
+        case JsonRpcInvalidParameterError.code.value:
+          name = 'InvalidParameterError';
+          break;
+        case JsonRpcRiskChecksFailedError.code.value:
+          name = 'RiskChecksFailedError';
+          break;
+        case JsonRpcMethodNotFoundError.code.value:
+          name = 'MethodNotFoundError';
+          break;
+      }
+      return Err<JsonRpcErrorResult>({
+        name,
+        message: jsonError.error.message,
+        ...jsonError.error,
+      });
     }
 
     if (response.status === 204) {
@@ -78,10 +122,19 @@ export class Charge {
     }
 
     try {
-      return Ok(await response.json());
+      return Ok(jsonResponse.result);
     } catch (e) {
       return Err(e);
     }
+  }
+
+  private async requestWithErrorHandling(params: PaymentMessageRequest) {
+    const response = await this.request(params);
+    if (!response.ok) {
+      const error = (response as ErrorResult<JsonRpcErrorResult>).error;
+      throw new Error(error.message);
+    }
+    return response;
   }
 
   /**
@@ -89,19 +142,18 @@ export class Charge {
    *
    * @returns
    */
-  async getInfo() {
-    const response = await this.request({
-      method: JsonRpcMethods.GetInfo,
+  async getInfo(): Promise<PaymentInfo> {
+    const getPaymentInfoRequest: GetPaymentInfoRequest = {
+      method: GetPaymentInfoRequest.method.value,
       params: {
         referenceId: this.referenceId,
       },
-    });
-    if (!response.ok) {
-      throw new Error((response as ErrorResult<any>).error);
-    }
+    };
+
+    const response = await this.requestWithErrorHandling(getPaymentInfoRequest);
 
     // TODO: schema validation
-    this.paymentInfo = response.result as GetInfoResponse;
+    this.paymentInfo = response.result as PaymentInfo;
     return this.paymentInfo;
   }
 
@@ -111,55 +163,76 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  async submit(payerData: KYC) {
+  async submit(payerData: PayerData) {
+    // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo!
     );
 
-    const response = await this.request({
-      method: JsonRpcMethods.Init,
+    const response = await this.sendInitChargeRequest(
+      payerData,
+      transactionHash
+    );
+
+    await this.sendReadyForSettlementRequest();
+
+    await this.submitTransactionOnChain();
+
+    return response;
+  }
+
+  private async sendInitChargeRequest(
+    payerData: PayerData,
+    transactionHash: string
+  ) {
+    const initChargeRequest: InitChargeRequest = {
+      method: InitChargeRequest.method.value,
       params: {
-        transactionHash,
-        referenceId: this.referenceId,
         sender: {
           accountAddress: await this.chainHandler.getSendingAddress(),
           payerData,
         },
+        referenceId: this.referenceId,
+        transactionHash,
       },
-    });
-    // TODO: schema validation
-    if (!response.ok) {
-      throw new Error('Invalid init charge response');
-    }
+    };
 
+    return await this.requestWithErrorHandling(initChargeRequest);
+  }
+
+  private async sendReadyForSettlementRequest() {
+    const readyForSettlementRequest: ReadyForSettlementRequest = {
+      method: ReadyForSettlementRequest.method.value,
+      params: {
+        referenceId: this.referenceId,
+      },
+    };
+
+    return await this.requestWithErrorHandling(readyForSettlementRequest);
+  }
+
+  private async submitTransactionOnChain() {
     try {
       await this.chainHandler.submitTransaction(this.paymentInfo!);
     } catch (e) {
       // TODO: retries?
-      await this.abort(AbortCode.unable_to_submit_transaction);
-      throw new Error(AbortCode.unable_to_submit_transaction);
+      throw new OnchainFailureError(AbortCodes.COULD_NOT_PUT_TRANSACTION);
     }
-
-    await this.request({
-      method: JsonRpcMethods.Confirm,
-      params: {
-        referenceId: this.referenceId,
-      },
-    });
-    return response;
   }
 
   /**
    * Aborts a request
    */
-  async abort(code: AbortCode, message?: string) {
-    await this.request({
-      method: JsonRpcMethods.Abort,
+  async abort(code: AbortCodes, message?: string) {
+    const abortRequest: AbortRequest = {
+      method: AbortRequest.method.value,
       params: {
         referenceId: this.referenceId,
-        abort_code: code,
-        abort_message: message,
+        abortCode: code,
+        abortMessage: message,
       },
-    });
+    };
+
+    return await this.requestWithErrorHandling(abortRequest);
   }
 }

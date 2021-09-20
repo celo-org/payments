@@ -1,4 +1,4 @@
-import { GetInfoResponse } from '@celo/payments-types';
+import { PaymentInfo } from '@celo/payments-types';
 
 /**
  * Abstracts away complexity related to on chain interaction. Responsible
@@ -11,11 +11,11 @@ export interface ChainHandler {
    * This will be used to notify PSPs ahead of time for a transaction
    * hash they can listen for.
    */
-  computeTransactionHash: (tx: GetInfoResponse) => Promise<string>;
+  computeTransactionHash: (tx: PaymentInfo) => Promise<string>;
   /**
    * Submit the transaction and return the hash for a given charge.
    */
-  submitTransaction: (tx: GetInfoResponse) => Promise<string>;
+  submitTransaction: (tx: PaymentInfo) => Promise<string>;
   /**
    * Compute an EIP712 signature over the payment request.
    */

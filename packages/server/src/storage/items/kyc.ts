@@ -1,11 +1,11 @@
-import { GetInfoResponse } from "@celo/payments-types";
 import { ADDRESS } from "../../config";
+import { PaymentAction, PaymentInfo } from "@celo/payments-types";
 
-export const KYC: GetInfoResponse = {
+export const KYC: PaymentInfo = {
   requiredPayerData: {
     givenName: true,
     surname: true,
-    phoneNumber: false,
+    phoneNumber: true,
     address: {
       city: true,
       country: true,
@@ -25,23 +25,22 @@ export const KYC: GetInfoResponse = {
     businessData: {
       name: "Acme Autos",
       legalName: "Acme Autos LLC",
-      imageUrl: "",
       address: {
-        city: "Test",
-        country: "Test",
-        line1: "1",
-        line2: "2",
-        postalCode: "1",
-        state: "1",
+        city: "San Frans",
+        country: "US",
+        line1: "1260 Market Street",
+        line2: "Suite 450",
+        postalCode: "94103",
+        state: "CA",
       },
     },
   },
   action: {
-    amount: 10,
-    currency: "cUSD",
-    action: "charge",
+    amount: 0.2,
+    currency: PaymentAction.currency.C_USD,
+    action: PaymentAction.action.CHARGE,
     timestamp: Date.now(),
   },
-  referenceId: "00000000-0000-0000-0000000001",
-  description: "Mock purchase with lots of required KYC data",
+  referenceId: "00000000-0000-0000-0000000000",
+  description: "Mock purchase",
 };

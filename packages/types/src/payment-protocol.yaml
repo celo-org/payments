@@ -1,0 +1,837 @@
+x-send-defaults: true
+openapi: 3.0.0
+info:
+  title: First Payment Protocol
+  version: 1.0.0
+  description: |-
+    An OpenAPI spec to describe First/Celo JSON-RPC payment protocol.
+
+    This protocol adheres to JSON RPC 2.0 with the following specific instructions:
+    - Parameters are sent by-name, i.e. params MUST be an Object, with member names that match the Server expected parameter names. The absence of expected names will result in an error being generated. The names must match exactly, including case, to the method's expected parameters
+    - Request id cannot be Null (this protocol does not make use of JSON RPC notifications)
+    - Request id cannot be fractional
+    - No usage of batches (i.e. each request is sent individually)
+
+    <div style='background-color: #dfeaf5; border-left: 6px solid #2196F3; margin-top: 16px; margin-bottom: 16px; padding: 16px;'>
+    Please note that due to lack of ability to describe different json-rpc methods under the exact same path (REST limitation), we use the hidden spaces as path suffix.
+    When reading the documentation, it should not be visible, but for code generation one should carfuly inspect the generated code for these spaces.
+
+    The endpoint itself should be called without that suffix (e.g. `/rpc` instead of <code>/rpc&nbsp;&nbsp;</code>)
+    </div>
+
+    ## Authentication
+    All requests are signed by the <a href='https://docs.celo.org/command-line-interface/commands/account#celocli-account-register-data-encryption-key'>data encryption key (DEK)</a> of the sending wallet, and included as an HTTP `X-Signature` header.<br/>
+    We use <a href='https://eips.ethereum.org/EIPS/eip-712'>EIP712</a> as a signing schema, but simplify it by considering every item of the JSON payload as part of the message to be signed by the sender.<br/>
+    Thus, there is no need to define a `domain separator`, rather simply use the structure definitions from this document for the various data types<br/>
+    The sender should order the data values of the JSON payload alphabetically using DFS tree scanning, concatinate it to a byte array and sign.<br/>
+    A psuedo code will look like:
+    ```
+    1. bytearray = ''
+    2. Flattern the JSON tree to a list of lexicographical order keys (and its values)
+    3. For every "key":
+      3.1 t = "key" data type (according to the spec)
+      3.2 bytearray += values["key"] (data types should be encoded according to EIP-712 under the "Definition of encodeData" section)
+    4. Sign(bytearray)
+    ```
+
+    For example for the following JSON payload
+    ```json
+    {
+      "id": 42910,
+      "jsonrpc": "2.0",
+      "result": {
+        "requiredPayerData": {
+          "phoneNumber": true,
+          "address": {
+            "city": true,
+            "country": true,
+            "line1": false,
+          }
+        },
+        "receiver": {
+          "accountAddress": "0x9A648e76bCa0Bc3A0Ac44C37Db6Af133B57b8896",
+          "businessData": {
+            "name": "Acme",
+            "legalName": "Acme Technologies Inc.",
+            "address": {
+              "city": "San Francisco",
+            }
+          }
+        },
+        "referenceId": "8502eb05-558d-4480-8511-c1011710b340",
+        "description": "payment request description"
+      }
+    }
+    ```
+    First, we flattern the structure (DFS) into a series of key/values -
+    ```
+    "id": 42910
+    "jsonrpc": "2.0"
+    "result.description": "payment request description"
+    "result.receiver.accountAddress": "0x9A648e76bCa0Bc3A0Ac44C37Db6Af133B57b8896"
+    "result.receiver.businessData.address.city": "San Francisco"
+    "result.receiver.businessData.legalName": "Acme Technologies Inc."
+    "result.receiver.businessData.name": "Acme"
+    "result.referenceId": "8502eb05-558d-4480-8511-c1011710b340"
+    "result.requiredPayerData.address.city": true
+    "result.requiredPayerData.address.country": true
+    "result.requiredPayerData.address.line1": false
+    "result.requiredPayerData.phoneNumber": true
+    ```
+    Now, we need to encode every value according to its data type:
+    ```
+    "id": abi.encode(42910)
+    "jsonrpc": keccak256(bytes("2.0"))
+    "result.description": keccak256(bytes("payment request description"))
+    ...
+    ```
+    and concatinate it to a single byte array: `0x000000000000000000000000000000000000000000000000000000000000a79e000000000000000000000000000000000000000000000000000000000000018000000000000000000000000000000000000000000000000000000000000001c00000000000000000000000009a648e76bca0bc3a0ac44c37db6af133b57b889600000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000240000000000000000000000000000000000000000000000000000000000000028000000000000000000000000000000000000000000000000000000000000002c000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000003322e300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001b7061796d656e742072657175657374206465736372697074696f6e0000000000000000000000000000000000000000000000000000000000000000000000000d53616e204672616e636973636f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001641636d6520546563686e6f6c6f6769657320496e632e00000000000000000000000000000000000000000000000000000000000000000000000000000000000441636d6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002438353032656230352d353538642d343438302d383531312d63313031313731306233343000000000000000000000000000000000000000000000000000000000` <br/>
+    Now, we use our DEK to sign that byte array.<br/>
+    The signature is sent over HTTP `X-Signature` header.
+
+    For all invalid signature errors we recommend PSPs return a 400 error code.<br/>
+  x-logo:
+    url: ./logo.png
+    altText: First/Celo logo
+
+servers:
+  - url: http://127.0.0.1:3000
+paths:
+  "/rpc":
+    post:
+      operationId: getPaymentInfo
+      deprecated: false
+      summary: Get Payment Info
+      description: Allows the wallet to obtain payment information from First, given
+        a reference id. In most cases, this would be the first method invoked by the
+        wallet
+      tags:
+        - Payments
+      parameters: [ ]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/GetPaymentInfoResponse"
+        '404':
+          description: The method does not exist / is not available
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+        '400':
+          description: One or more parameters are invalid (including reference ID not found)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
+                  - "$ref": "#/components/schemas/JsonRpcRiskChecksFailedError"
+                  - "$ref": "#/components/schemas/JsonRpcMissingInformationError"
+                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/GetPaymentInfo"
+  "/rpc\ ":
+    post:
+      operationId: initCharge
+      deprecated: false
+      summary: Init Charge
+      description: This functionality allows the wallet to initiate the payment process
+        with First, based on the payment details provided.
+      tags:
+        - Payments
+      parameters: [ ]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/InitChargeResponse"
+        '404':
+          description: The method does not exist / is not available
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+        '400':
+          description: One or more parameters are invalid (including reference ID not found)
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/InitCharge"
+  "/rpc\ \ ":
+    post:
+      operationId: readyForSettlement
+      deprecated: false
+      summary: Ready For Settlement
+      description: Allows the wallet to indicate the payment was put on- chain and is ready for settlement. The wallet is expected to submit a transaction on-chain
+      tags:
+        - Payments
+      parameters: [ ]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ReadyForSettlementResponse"
+        '404':
+          description: The method does not exist / is not available
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+        '400':
+          description: One or more parameters are invalid (including reference ID not found)
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ReadyForSettlement"
+  "/rpc\ \ \ ":
+    post:
+      operationId: abort
+      deprecated: false
+      summary: Abort Payment
+      description: Allows the wallet to abort a payment
+      tags:
+        - Payments
+      parameters: [ ]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AbortResponse"
+        '404':
+          description: The method does not exist / is not available
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+        '400':
+          description: One or more parameters are invalid (including reference ID not found)
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Abort"
+
+x-headers: [ ]
+components:
+  schemas:
+    JsonRpcProtocol:
+      type: object
+      required:
+        - id
+        - jsonrpc
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Request ID
+        jsonrpc:
+          type: string
+          default: '2.0'
+          description: JSON-RPC Version (2.0)
+    JsonRpcRequired:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - type: object
+          required:
+            - method
+          properties:
+            method:
+              type: string
+              description: Method name
+    JsonRpcErrorResponse:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - type: object
+          required:
+            - error
+          properties:
+            error:
+              "$ref": "#/components/schemas/JsonRpcError"
+    Any:
+      description: something
+    JsonRpcError:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: integer
+          minimum: -32700
+          maximum: -32000
+          format: int32
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+    JsonRpcMethodNotFoundError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32601
+              description: Method not found
+    JsonRpcInvalidParameterError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32602
+              description: Invalid method parameter(s)
+    JsonRpcUnspecifiedError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32000
+              description: |
+                Unspecified error
+      example:
+        code: -32000
+        message: Unspecified error
+        data:
+          referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+    JsonRpcReferenceIdNotFoundError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32001
+              description: |
+                The reference id provided in the request was not found
+      example:
+        code: -32001
+        message: The reference id provided in the request was not found
+        data:
+          referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+    JsonRpcRiskChecksFailedError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32002
+              description: |
+                The risk checks did not pass successfully
+      example:
+        code: -32002
+        message: The risk checks did not pass successfully
+        data:
+          reason: Sanctions list
+    JsonRpcMissingInformationError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32003
+              description: |
+                A mandatory field or element are missing from the request
+      example:
+        code: -32003
+        message: A mandatory field or element are missing from the request
+        data:
+          missingFields:
+            - "phoneNumber"
+    JsonRpcPaymentTypeMismatchError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32004
+              description: |
+                Consumer tried to invoke an action that is irrelevant for the payment type
+      example:
+        code: -32004
+        message: Consumer tried to invoke an action that is irrelevant for the payment type
+        data:
+          requestedAction: capture
+    JsonRpcInvalidCommandTypeError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32005
+              description: |
+                When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
+      example:
+        code: -32005
+        message: ReadyForSettlement sent before payment was initialized
+    ReferenceId:
+      type: string
+      description: Unique reference ID of this payment. This value should be globally
+        unique
+      format: uuid
+    GetPaymentInfo:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcRequired"
+        - "$ref": "#/components/schemas/GetPaymentInfoRequest"
+    GetPaymentInfoParams:
+      title: Parameters
+      type: object
+      required:
+        - referenceId
+      properties:
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+    GetPaymentInfoRequest:
+      type: object
+      required:
+        - method
+        - params
+      properties:
+        method:
+          type: string
+          description: Method name
+          enum:
+            - getPaymentInfo
+        params:
+          "$ref": "#/components/schemas/GetPaymentInfoParams"
+    GetPaymentInfoResponse:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - type: object
+          properties:
+            result:
+              "$ref": "#/components/schemas/PaymentInfo"
+    PaymentInfo:
+      type: object
+      properties:
+        requiredPayerData:
+          "$ref": "#/components/schemas/RequiredPayerData"
+        receiver:
+          "$ref": "#/components/schemas/ReceiverData"
+        action:
+          "$ref": "#/components/schemas/PaymentAction"
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+        description:
+          type: string
+          description: Description of the payment. To be displayed to the customer
+          example: payment request description
+      required:
+        - action
+        - receiver
+        - referenceId
+    RequiredAddressData:
+      type: object
+      description: |
+        Defines which elements of the payer address data are required for this payment.
+        The absence of properties indicates their optionality (default to false)
+      properties:
+        city:
+          type: boolean
+        country:
+          type: boolean
+        line1:
+          type: boolean
+        line2:
+          type: boolean
+        postalCode:
+          type: boolean
+        state:
+          type: boolean
+    Address:
+      type: object
+      properties:
+        city:
+          type: string
+          example: San Francisco
+          description: The city, district, suburb, town, or village
+        country:
+          type: string
+          example: US
+          minLength: 2
+          maxLength: 2
+          description: Two-letter (ISO country code)[https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2]
+        line1:
+          type: string
+          example: 1260 Market Street
+          description: Address line 1
+        line2:
+          type: string
+          example: Suite 450
+          description: Address line 2 - apartment, unit, etc.
+        postalCode:
+          type: string
+          example: '94103'
+          description: ZIP or postal code
+        state:
+          type: string
+          example: CA
+          description: State, county, province, region
+    RequiredNationalIdData:
+      type: object
+      description: |
+        Defines which elements of the payer national ID data are required for this payment.
+        The absence of properties indicates their optionality (default to false)
+      properties:
+        idValue:
+          type: boolean
+        country:
+          type: boolean
+        type:
+          type: boolean
+    NationalIdData:
+      type: object
+      properties:
+        idValue:
+          type: string
+          description: Indicates the national ID value - for example, a social security
+            number
+        country:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Two-letter (ISO country code)[https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2]
+        type:
+          type: string
+          description: Indicates the type of the ID
+    RequiredPayerData:
+      type: object
+      description: |
+        Defines which elements of the payer data are required for this payment.
+        The absence of properties indicates their optionality (default to false)
+      properties:
+        givenName:
+          type: boolean
+        surname:
+          type: boolean
+        phoneNumber:
+          type: boolean
+        address:
+          "$ref": "#/components/schemas/RequiredAddressData"
+        nationalIdData:
+          "$ref": "#/components/schemas/RequiredNationalIdData"
+    PayerData:
+      type: object
+      properties:
+        givenName:
+          type: string
+          description: Given name of the payer
+        surname:
+          type: string
+          description: Surname of the payer
+        phoneNumber:
+          type: string
+          description: Phone number of the payer
+        address:
+          "$ref": "#/components/schemas/Address"
+        nationalIdData:
+          "$ref": "#/components/schemas/NationalIdData"
+    BusinessData:
+      type: object
+      required:
+        - name
+        - legalName
+        - address
+      description: Includes the details of the merchant to be displayed to the payer
+      properties:
+        name:
+          type: string
+          example: Acme
+          description: Merchant's display name. Should be recognizable by the payer
+        legalName:
+          type: string
+          example: Acme Technologies Inc.
+          description: The legal entity name
+        imageUrl:
+          type: string
+          format: url
+          description: URL with the business logo
+          example: https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Acme_Markets_lolo.svg/1200px-Acme_Markets_lolo.svg.png
+        address:
+          "$ref": "#/components/schemas/Address"
+    ReceiverData:
+      type: object
+      required:
+        - accountAddress
+        - businessData
+      description: The details of the payment receiver (e.g. merchant)
+      properties:
+        accountAddress:
+          type: string
+          format: hex
+          description: The blockchain address of the receiver account
+          example: '0x9A648e76bCa0Bc3A0Ac44C37Db6Af133B57b8896'
+        businessData:
+          "$ref": "#/components/schemas/BusinessData"
+    PaymentAction:
+      type: object
+      required:
+        - amount
+        - currency
+        - action
+        - timestamp
+      description: Information regarding the type of payment and payment amount
+      properties:
+        amount:
+          type: integer
+          minimum: 0
+          format: uint64
+          example: 452
+          description: Amount of the transfer. Base units are the same as for on-chain
+            transactions for this currency.
+        currency:
+          type: string
+          enum:
+            - cUSD
+          default: cUSD
+          description: One of the supported on-chain currency types, e.g. cUSD. At
+            the moment, cUSD is the only allowed value.
+        action:
+          type: string
+          enum:
+            - charge
+          default: charge
+          description: This value indicates the requested action to perform. At the
+            moment, charge is the only allowed value.
+        timestamp:
+          type: integer
+          minimum: 0
+          format: uint32
+          description: Unix timestamp indicating the time that the payment was created
+    InitCharge:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcRequired"
+        - "$ref": "#/components/schemas/InitChargeRequest"
+    InitChargeParams:
+      title: Parameters
+      type: object
+      required:
+        - sender
+        - referenceId
+        - transactionHash
+      properties:
+        sender:
+          "$ref": "#/components/schemas/PaymentSender"
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+        transactionHash:
+          type: string
+          format: hex
+          description: Transaction hash (pre-calculated), in Hex format
+    InitChargeRequest:
+      type: object
+      required:
+        - method
+        - params
+      properties:
+        method:
+          type: string
+          description: Method name
+          enum:
+            - initCharge
+        params:
+          "$ref": "#/components/schemas/InitChargeParams"
+    PaymentSender:
+      type: object
+      description: Minimal payer information required
+      required:
+        - accountAddress
+        - payerData
+      properties:
+        accountAddress:
+          type: string
+          format: hex
+          description: Address of the customer/wallet
+        payerData:
+          "$ref": "#/components/schemas/PayerData"
+    InitChargeResponse:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcProtocol"
+    ReadyForSettlement:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcRequired"
+        - "$ref": "#/components/schemas/ReadyForSettlementRequest"
+    ReadyForSettlementParams:
+      title: Parameters
+      type: object
+      required:
+        - referenceId
+      properties:
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+    ReadyForSettlementRequest:
+      type: object
+      required:
+        - method
+        - params
+      properties:
+        method:
+          type: string
+          description: Method name
+          enum:
+            - readyForSettlement
+        params:
+          "$ref": "#/components/schemas/ReadyForSettlementParams"
+    ReadyForSettlementResponse:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcProtocol"
+    Abort:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcRequired"
+        - "$ref": "#/components/schemas/AbortRequest"
+    AbortCodes:
+      type: string
+      enum:
+        - general
+        - customer_declined
+        - insufficient_funds
+        - could_not_put_transaction
+        - business_not_verified
+    AbortParams:
+      title: Parameters
+      type: object
+      required:
+        - referenceId
+      properties:
+        referenceId:
+          "$ref": "#/components/schemas/ReferenceId"
+        abortCode:
+          "$ref": "#/components/schemas/AbortCodes"
+        abortMessage:
+          type: string
+          description: a descriptive message regarding the root cause for the abortion
+    AbortRequest:
+      type: object
+      required:
+        - method
+        - params
+      properties:
+        method:
+          type: string
+          description: Method name
+          enum:
+            - abort
+        params:
+          "$ref": "#/components/schemas/AbortParams"
+    AbortResponse:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcProtocol"
+
+
+tags:
+  - name: Payments
+  - name: GetPaymentInfoRequest
+    x-displayName: GetPaymentInfo Request (GetPaymentInfoParams)
+    description: <SchemaDefinition schemaRef="#/components/schemas/GetPaymentInfoParams"/>
+  - name: GetPaymentInfoResponse
+    x-displayName: GetPaymentInfo Response (PaymentInfo)
+    description: <SchemaDefinition schemaRef="#/components/schemas/PaymentInfo"/>
+  - name: InitChargeModel
+    x-displayName: InitCharge Request (InitChargeParams)
+    description: <SchemaDefinition schemaRef="#/components/schemas/InitChargeParams"/>
+  - name: ReadyForSettlementModel
+    x-displayName: ReadyForSettlement Request (ReadyForSettlementParams)
+    description: <SchemaDefinition schemaRef="#/components/schemas/ReadyForSettlementParams"/>
+  - name: JsonRpcInvalidParameterErrorModel
+    x-displayName: Invalid Parameter (JsonRpcInvalidParameterError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcInvalidParameterError"/>
+  - name: JsonRpcMethodNotFoundErrorModel
+    x-displayName: Method Not Found (JsonRpcMethodNotFoundError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcMethodNotFoundError"/>
+  - name: JsonRpcReferenceIdNotFoundErrorModel
+    x-displayName: Reference Id Not Found (JsonRpcReferenceIdNotFoundError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcReferenceIdNotFoundError"/>
+  - name: JsonRpcRiskChecksFailedErrorModel
+    x-displayName: Risk Checks Failed (JsonRpcRiskChecksFailedError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcRiskChecksFailedError"/>
+  - name: JsonRpcMissingInformationErrorModel
+    x-displayName: Missing Information (JsonRpcMissingInformationError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcMissingInformationError"/>
+  - name: JsonRpcPaymentTypeMismatchErrorModel
+    x-displayName: Payment Type Mismatch (JsonRpcPaymentTypeMismatchError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcPaymentTypeMismatchError"/>
+  - name: JsonRpcInvalidCommandTypeErrorModel
+    x-displayName: Invalid Command Type (JsonRpcInvalidCommandTypeError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcInvalidCommandTypeError"/>
+  - name: JsonRpcUnspecifiedErrorModel
+    x-displayName: Unspecified Error (JsonRpcUnspecifiedError)
+    description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcUnspecifiedError"/>
+x-tagGroups:
+  - name: Payments
+    tags:
+      - Payments
+  - name: RequestModels
+    x-displayName: Models
+    tags:
+      - GetPaymentInfoRequest
+      - GetPaymentInfoResponse
+      - InitChargeModel
+      - ReadyForSettlementModel
+  - name: ErrorModels
+    x-displayName: Errors
+    tags:
+      - JsonRpcInvalidParameterErrorModel
+      - JsonRpcMethodNotFoundErrorModel
+      - JsonRpcReferenceIdNotFoundErrorModel
+      - JsonRpcRiskChecksFailedErrorModel
+      - JsonRpcMissingInformationErrorModel
+      - JsonRpcPaymentTypeMismatchErrorModel
+      - JsonRpcInvalidCommandTypeErrorModel
+      - JsonRpcUnspecifiedErrorModel
