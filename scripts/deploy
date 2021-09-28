@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const child_process = require("child_process");
 
-const VERSIONS = ["patch", "minor", "major"];
+const VERSIONS = ["major", "minor", "patch"];
 
 const versionCommand = process.argv[process.argv.length - 1];
 
@@ -25,7 +25,7 @@ const packages = folders.map((folder) => {
 });
 
 function incrementVersion(currentVersion, command) {
-  const index = command === "patch" ? 2 : command === "minor" ? 1 : 0;
+  const index = VERSIONS.indexOf(command);
   return currentVersion
     .split(".")
     .map((v, i) => (i === index ? parseInt(v) + 1 : v))
@@ -36,10 +36,15 @@ packages.forEach(({ name, version }) => {
   console.log(name, version, "=>", incrementVersion(version, versionCommand));
 });
 
-const { version: newVersion } = packages[0];
+const { version: oldVersion } = packages[0];
+const newVersion = incrementVersion(oldVersion, versionCommand);
 
 child_process.execSync(
-  `sed -i '' 's/"version": ".*"/"version": "${newVersion}"/g' ./packages/*/package.json`
+  `sed -i '' 's/"version": ".*"/"version": "${newVersion}"/g' ${path.join(
+    packagesFolder,
+    "*",
+    "package.json"
+  )}`
 );
 child_process.execSync(
   `sed -i '' 's/"@celo\/payments-.*"/"@celo\/payments-${newVersion}"/g' ${packagesFolder}`
