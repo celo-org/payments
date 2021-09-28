@@ -96,29 +96,13 @@ export class ContractKitTransactionHandler implements ChainHandler {
       await this.kit.connection.sendSignedTransaction(raw)
     ).waitReceipt();
 
-    console.log('receipt', receipt);
-
     return receipt.transactionHash;
   }
 
   async signTypedPaymentRequest(typedData: EIP712TypedData) {
     const [, dek] = this.kit.getWallet().getAccounts();
 
-    const sig = serializeSignature(
-      await this.kit.signTypedData(dek, typedData)
-    );
-
-    console.log('Signing', JSON.stringify(typedData));
-    console.log('Signing with', dek);
-    console.log('sig', sig);
-    console.log('recovered', recoverEIP712TypedDataSigner(typedData, sig));
-    console.log(
-      'Valid',
-      dek.toLowerCase() ===
-        recoverEIP712TypedDataSigner(typedData, sig).toLowerCase()
-    );
-
-    return sig;
+    return serializeSignature(await this.kit.signTypedData(dek, typedData));
   }
 
   async getChainId() {

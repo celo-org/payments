@@ -17,8 +17,6 @@ export function expectPayment(
     return paymentNotFound(res, jsonRpcRequestId, params.referenceId);
   }
 
-  console.log("expectPayment", params);
-
   const payment = get(params.referenceId);
   setImmediate(findTxHashInBlockchain, [
     payment.referenceId,
