@@ -10,14 +10,25 @@ import {
   ReadyForSettlementParams,
 } from "@celo/payments-types";
 import { expectPayment, getInfo, initCharge, abort } from "./routes";
-import { methodNotFound } from "./helpers/json-rpc-wrapper";
+import { methodNotFound, unauthorized } from "./helpers/json-rpc-wrapper";
+
+import { verifySignature } from "./auth";
 
 interface PaymentRequest extends Request {
+  headers: { [header: string]: string };
   payload: GetPaymentInfo | InitCharge | ReadyForSettlement;
 }
 
-export function handle({ payload }: PaymentRequest, res: ResponseToolkit) {
+export function handle(
+  { payload, headers }: PaymentRequest,
+  res: ResponseToolkit
+) {
   const method = payload.method.toString();
+
+  if (!verifySignature(headers.authorization, headers.address, payload)) {
+    return unauthorized(res, payload.id);
+  }
+
   switch (method) {
     case JsonRpcMethods.GetInfo:
       const getPaymentInfoParams = payload.params as GetPaymentInfoParams;

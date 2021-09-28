@@ -77,3 +77,14 @@ export function paymentNotFound(
   };
   return jsonRpcError(apiResponse, jsonRpcRequestId, paymentNotFoundError);
 }
+
+export function unauthorized(
+  apiResponse: ResponseToolkit,
+  jsonRpcRequestId: number
+) {
+  const paymentNotFoundError = <JsonRpcError>{
+    code: -32602,
+    message: "Invalid signature",
+  };
+  return jsonRpcError(apiResponse, jsonRpcRequestId, paymentNotFoundError);
+}

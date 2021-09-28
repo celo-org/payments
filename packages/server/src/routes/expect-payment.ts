@@ -2,13 +2,11 @@ import { ReadyForSettlementParams } from "@celo/payments-types";
 import { ResponseToolkit } from "@hapi/hapi";
 import { get, has } from "../storage";
 import { jsonRpcSuccess, paymentNotFound } from "../helpers/json-rpc-wrapper";
-import { newKit } from "@celo/contractkit";
 import AbiDecoder from "abi-decoder";
 import ERC20 from "../abis/ERC20.json";
+import { kit } from "../services";
 
 AbiDecoder.addABI(ERC20);
-
-const kit = newKit("https://alfajores-forno.celo-testnet.org");
 
 export function expectPayment(
   jsonRpcRequestId: number,

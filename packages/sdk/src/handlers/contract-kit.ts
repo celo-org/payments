@@ -4,6 +4,7 @@ import { PaymentInfo } from '@celo/payments-types';
 import { ChainHandler } from './interface';
 import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
 import { serializeSignature } from '@celo/base';
+import { recoverEIP712TypedDataSigner } from '@celo/utils/lib/signatureUtils';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
@@ -59,7 +60,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
     //   hardfork: '0x',
     // };
 
-    const { txo } = await stable.transfer(
+    const { txo } = stable.transfer(
       info.receiver.accountAddress,
       this.kit.web3.utils.toWei(info.action.amount.toString())
     );
@@ -101,13 +102,23 @@ export class ContractKitTransactionHandler implements ChainHandler {
   }
 
   async signTypedPaymentRequest(typedData: EIP712TypedData) {
-    if (!this.kit.defaultAccount) {
-      throw new Error('Missing default account');
-    }
+    const [, dek] = this.kit.getWallet().getAccounts();
 
-    return serializeSignature(
-      await this.kit.signTypedData(this.kit.defaultAccount, typedData)
+    const sig = serializeSignature(
+      await this.kit.signTypedData(dek, typedData)
     );
+
+    console.log('Signing', JSON.stringify(typedData));
+    console.log('Signing with', dek);
+    console.log('sig', sig);
+    console.log('recovered', recoverEIP712TypedDataSigner(typedData, sig));
+    console.log(
+      'Valid',
+      dek.toLowerCase() ===
+        recoverEIP712TypedDataSigner(typedData, sig).toLowerCase()
+    );
+
+    return sig;
   }
 
   async getChainId() {

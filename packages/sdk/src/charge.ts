@@ -18,7 +18,7 @@ import { randomInt } from 'crypto';
 import { OnchainFailureError } from './errors/onchain-failure';
 import { ChainHandler } from './handlers';
 import { fetchWithRetries, parseDeepLink } from './helpers';
-import { buildTypedPaymentRequest } from './signing';
+import { buildTypedPaymentRequest } from '@celo/payments-utils';
 
 interface JsonRpcErrorResult extends Error {
   name: string;
@@ -80,6 +80,7 @@ export class Charge {
             await this.chainHandler.getChainId()
           )
         ),
+        Address: this.chainHandler.getSendingAddress(),
       },
     };
     const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
