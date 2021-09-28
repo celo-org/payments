@@ -23,8 +23,8 @@
     ]
   },
   "dependencies": {
-    "@celo/payments-sdk": "*",
-    "@celo/payments-types": "*",
+    "@celo/payments-sdk": "0.0.0",
+    "@celo/payments-types": "0.0.0",
     "@oclif/command": "^1.8.0",
     "@oclif/plugin-help": "^3.2.2",
     "cli-ux": "^5.6.3"
