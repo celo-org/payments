@@ -13,6 +13,7 @@ if (!VERSIONS.includes(versionCommand)) {
   process.exit(1);
 }
 
+const rootFolder = path.join(__dirname, "..");
 const packagesFolder = path.join(__dirname, "..", "packages");
 const folders = fs.readdirSync(packagesFolder);
 
@@ -45,12 +46,6 @@ folders.forEach((folder) => {
       .readFileSync(path.join(packagesFolder, folder, "package.json"))
       .toString()
   );
-  console.log(
-    packageJson.name,
-    packageJson.version,
-    "=>",
-    incrementVersion(packageJson.version, versionCommand)
-  );
 
   const newDependencies = Object.keys(packageJson.dependencies).reduce(
     (accum, packageName) => {
@@ -64,7 +59,8 @@ folders.forEach((folder) => {
     {}
   );
 
-  console.log(
+  fs.writeFileSync(
+    path.join(packagesFolder, folder, "package.json"),
     JSON.stringify(
       {
         ...packageJson,
@@ -75,17 +71,13 @@ folders.forEach((folder) => {
       2
     )
   );
-  // fs.writeFileSync(
-  //   path.join(packagesFolder, folder, "package.json"),
-  //   JSON.stringify(
-  //     {
-  //       name,
-  //       version: newVersion,
-  //       dependencies: newDependencies,
-  //       ...rest,
-  //     },
-  //     null,
-  //     2
-  //   )
-  // );
+});
+
+child_process.execSync("yarn", { cwd: rootFolder });
+child_process.execSync("yarn build", { cwd: rootFolder });
+
+folders.forEach((folder) => {
+  child_process.execSync("npm publish --public", {
+    cwd: path.join(packagesFolder, folder),
+  });
 });
