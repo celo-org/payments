@@ -1,0 +1,46 @@
+#!/usr/local/bin/node
+
+const fs = require("fs");
+const path = require("path");
+const child_process = require("child_process");
+
+const VERSIONS = ["patch", "minor", "major"];
+
+const versionCommand = process.argv[process.argv.length - 1];
+
+if (!VERSIONS.includes(versionCommand)) {
+  console.log("invalid command, please use one of", VERSIONS.join(", "));
+  process.exit(1);
+}
+
+const packagesFolder = path.join(__dirname, "..", "packages");
+const folders = fs.readdirSync(packagesFolder);
+
+const packages = folders.map((folder) => {
+  return JSON.parse(
+    fs
+      .readFileSync(path.join(packagesFolder, folder, "package.json"))
+      .toString()
+  );
+});
+
+function incrementVersion(currentVersion, command) {
+  const index = command === "patch" ? 2 : command === "minor" ? 1 : 0;
+  return currentVersion
+    .split(".")
+    .map((v, i) => (i === index ? parseInt(v) + 1 : v))
+    .join(".");
+}
+
+packages.forEach(({ name, version }) => {
+  console.log(name, version, "=>", incrementVersion(version, versionCommand));
+});
+
+const { version: newVersion } = packages[0];
+
+child_process.execSync(
+  `sed -i '' 's/"version": ".*"/"version": "${newVersion}"/g' ./packages/*/package.json`
+);
+child_process.execSync(
+  `sed -i '' 's/"@celo\/payments-.*"/"@celo\/payments-${newVersion}"/g' ${packagesFolder}`
+);
