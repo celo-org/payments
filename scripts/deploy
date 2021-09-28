@@ -39,13 +39,53 @@ packages.forEach(({ name, version }) => {
 const { version: oldVersion } = packages[0];
 const newVersion = incrementVersion(oldVersion, versionCommand);
 
-child_process.execSync(
-  `sed -i '' 's/"version": ".*"/"version": "${newVersion}"/g' ${path.join(
-    packagesFolder,
-    "*",
-    "package.json"
-  )}`
-);
-child_process.execSync(
-  `sed -i '' 's/"@celo\/payments-.*"/"@celo\/payments-${newVersion}"/g' ${packagesFolder}`
-);
+folders.forEach((folder) => {
+  const packageJson = JSON.parse(
+    fs
+      .readFileSync(path.join(packagesFolder, folder, "package.json"))
+      .toString()
+  );
+  console.log(
+    packageJson.name,
+    packageJson.version,
+    "=>",
+    incrementVersion(packageJson.version, versionCommand)
+  );
+
+  const newDependencies = Object.keys(packageJson.dependencies).reduce(
+    (accum, packageName) => {
+      return {
+        ...accum,
+        [packageName]: packageName.startsWith("@celo/payments-")
+          ? newVersion
+          : packageJson.dependencies[packageName],
+      };
+    },
+    {}
+  );
+
+  console.log(
+    JSON.stringify(
+      {
+        ...packageJson,
+        version: newVersion,
+        dependencies: newDependencies,
+      },
+      null,
+      2
+    )
+  );
+  // fs.writeFileSync(
+  //   path.join(packagesFolder, folder, "package.json"),
+  //   JSON.stringify(
+  //     {
+  //       name,
+  //       version: newVersion,
+  //       dependencies: newDependencies,
+  //       ...rest,
+  //     },
+  //     null,
+  //     2
+  //   )
+  // );
+});
