@@ -6,7 +6,38 @@ const child_process = require("child_process");
 
 const VERSIONS = ["major", "minor", "patch"];
 
+/**
+ * What does this script do? Conform to our
+ * system and deploy all packages at once.
+ *
+ * Given a structure as follows
+ *
+ * - A 0.0.1-dev
+ *   - B 0.0.1-dev
+ *   - C 0.0.1-dev
+ * - B 0.0.1-dev
+ *   - B 0.0.1-dev
+ * - C 0.0.1-dev
+ *
+ * A patch deploy (./scripts/deploy patch) would
+ * - For each package
+ * - Update the dependencies to 0.0.1
+ * - Update the package version to 0.0.1
+ * - Publish 0.0.1
+ * - Update the dependencies to 0.0.2-dev
+ * - Update the version to 0.0.2-dev
+ *
+ * A minor deploy (./scripts/deploy minor) would
+ * - For each package
+ * - Update the dependencies to 0.1.0
+ * - Update the package version to 0.1.0
+ * - Publish 0.1.0
+ * - Update the dependencies to 0.1.0-dev
+ * - Update the version to 0.1.0-dev
+ */
+
 const versionCommand = process.argv[process.argv.length - 1];
+const dryRun = process.argv.includes("--dry-run");
 
 if (!VERSIONS.includes(versionCommand)) {
   console.log("invalid command, please use one of", VERSIONS.join(", "));
@@ -25,60 +56,88 @@ const packages = folders.map((folder) => {
   );
 });
 
-function incrementVersion(currentVersion, command) {
+function incrementVersion(version, command) {
   const index = VERSIONS.indexOf(command);
-  return currentVersion
+  return version
     .split(".")
-    .map((v, i) => (i === index ? parseInt(v) + 1 : v))
+    .map((v, i) => (i === index ? parseInt(v) + 1 : i > index ? 0 : v))
     .join(".");
 }
 
-packages.forEach(({ name, version }) => {
-  console.log(name, version, "=>", incrementVersion(version, versionCommand));
-});
+function removeDevSuffix(version) {
+  return version.endsWith("-dev") ? version.slice(0, 5) : version;
+}
 
-const { version: oldVersion } = packages[0];
-const newVersion = incrementVersion(oldVersion, versionCommand);
+function addDevSuffix(version) {
+  return version.endsWith("-dev") ? version : `${version}-dev`;
+}
 
-folders.forEach((folder) => {
-  const packageJson = JSON.parse(
+function readPackageJson(folder) {
+  return JSON.parse(
     fs
       .readFileSync(path.join(packagesFolder, folder, "package.json"))
       .toString()
   );
+}
 
-  const newDependencies = Object.keys(packageJson.dependencies).reduce(
+function writePackageJson(folder, properties) {
+  const packageJson = readPackageJson(folder);
+  fs.writeFileSync(
+    path.join(packagesFolder, folder, "package.json"),
+    JSON.stringify(
+      {
+        ...packageJson,
+        ...properties,
+      },
+      null,
+      2
+    )
+  );
+}
+
+function updateDependencies(folder, version) {
+  const packageJson = readPackageJson(folder);
+
+  const dependencies = Object.keys(packageJson.dependencies).reduce(
     (accum, packageName) => {
       return {
         ...accum,
         [packageName]: packageName.startsWith("@celo/payments-")
-          ? newVersion
+          ? version
           : packageJson.dependencies[packageName],
       };
     },
     {}
   );
 
-  fs.writeFileSync(
-    path.join(packagesFolder, folder, "package.json"),
-    JSON.stringify(
-      {
-        ...packageJson,
-        version: newVersion,
-        dependencies: newDependencies,
-      },
-      null,
-      2
-    )
-  );
+  writePackageJson(folder, { dependencies });
+}
+
+const newVersion =
+  versionCommand === "patch"
+    ? removeDevSuffix(packages[0].version)
+    : incrementVersion(removeDevSuffix(packages[0].version), versionCommand);
+
+console.log("@celo/payments", oldVersion, "=>", newVersion);
+
+folders.forEach((folder) => {
+  writePackageJson(folder, { version: newVersion });
+  updateDependencies(folder, newVersion);
 });
 
 child_process.execSync("yarn", { cwd: rootFolder });
 child_process.execSync("yarn build", { cwd: rootFolder });
 
-folders.forEach((folder) => {
-  child_process.execSync("npm publish --access public", {
-    cwd: path.join(packagesFolder, folder),
-    stdio: "inherit",
+if (!dryRun) {
+  folders.forEach((folder) => {
+    child_process.execSync("npm publish --access public", {
+      cwd: path.join(packagesFolder, folder),
+      stdio: "inherit",
+    });
   });
+}
+
+folders.forEach((folder) => {
+  writePackageJson(folder, { version: addDevSuffix(newVersion) });
+  updateDependencies(folder, addDevSuffix(newVersion));
 });
