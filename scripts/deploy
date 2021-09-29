@@ -12,6 +12,8 @@ const VERSIONS = ["major", "minor", "patch"];
  *
  * Given a structure as follows
  *
+ *  A, B, C are deployed as 0.0.1
+ *
  * - A 0.0.1-dev
  *   - B 0.0.1-dev
  *   - C 0.0.1-dev
@@ -21,9 +23,9 @@ const VERSIONS = ["major", "minor", "patch"];
  *
  * A patch deploy (./scripts/deploy patch) would
  * - For each package
- * - Update the dependencies to 0.0.1
- * - Update the package version to 0.0.1
- * - Publish 0.0.1
+ * - Update the dependencies to 0.0.2
+ * - Update the package version to 0.0.2
+ * - Publish 0.0.2
  * - Update the dependencies to 0.0.2-dev
  * - Update the version to 0.0.2-dev
  *
@@ -36,7 +38,7 @@ const VERSIONS = ["major", "minor", "patch"];
  * - Update the version to 0.1.0-dev
  */
 
-const versionCommand = process.argv[process.argv.length - 1];
+const versionCommand = process.argv[2];
 const dryRun = process.argv.includes("--dry-run");
 
 if (!VERSIONS.includes(versionCommand)) {
@@ -113,12 +115,12 @@ function updateDependencies(folder, version) {
   writePackageJson(folder, { dependencies });
 }
 
-const newVersion =
-  versionCommand === "patch"
-    ? removeDevSuffix(packages[0].version)
-    : incrementVersion(removeDevSuffix(packages[0].version), versionCommand);
+const newVersion = incrementVersion(
+  removeDevSuffix(packages[0].version),
+  versionCommand
+);
 
-console.log("@celo/payments", oldVersion, "=>", newVersion);
+console.log("@celo/payments", packages[0].version, "=>", newVersion);
 
 folders.forEach((folder) => {
   writePackageJson(folder, { version: newVersion });
