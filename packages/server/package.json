@@ -1,12 +1,12 @@
 {
   "name": "@celo/payments-server",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "scripts": {
     "start": "ts-node-dev ./bin/index.ts",
     "build": "tsc -b ."
   },
   "dependencies": {
-    "@celo/payments-types": "0.0.0",
+    "@celo/payments-types": "0.0.2",
     "@hapi/hapi": "^20.1.5",
     "abi-decoder": "^2.4.0"
   },

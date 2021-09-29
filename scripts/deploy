@@ -77,7 +77,8 @@ child_process.execSync("yarn", { cwd: rootFolder });
 child_process.execSync("yarn build", { cwd: rootFolder });
 
 folders.forEach((folder) => {
-  child_process.execSync("npm publish --public", {
+  child_process.execSync("npm publish --access public", {
     cwd: path.join(packagesFolder, folder),
+    stdio: "inherit",
   });
 });
