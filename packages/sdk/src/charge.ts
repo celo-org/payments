@@ -1,5 +1,4 @@
 import { Err, ErrorResult, Ok } from '@celo/base';
-import { fetchWithRetries, parseDeepLink } from './helpers';
 import {
   AbortCodes,
   AbortRequest,
@@ -16,9 +15,10 @@ import {
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
 import { randomInt } from 'crypto';
-import { ChainHandler } from './handlers';
-import { buildTypedPaymentRequest } from './signing';
 import { OnchainFailureError } from './errors/onchain-failure';
+import { ChainHandler } from './handlers';
+import { fetchWithRetries, parseDeepLink } from './helpers';
+import { buildTypedPaymentRequest } from './signing';
 
 interface JsonRpcErrorResult extends Error {
   name: string;
