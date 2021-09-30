@@ -164,9 +164,13 @@ export class Charge {
    * @returns
    */
   async submit(payerData: PayerData) {
+    if (!this.paymentInfo) {
+      return Err(new Error('getInfo() has not been called'));
+    }
+
     // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
     const transactionHash = await this.chainHandler.computeTransactionHash(
-      this.paymentInfo!
+      this.paymentInfo
     );
 
     const response = await this.sendInitChargeRequest(
@@ -212,8 +216,12 @@ export class Charge {
   }
 
   private async submitTransactionOnChain() {
+    if (!this.paymentInfo) {
+      throw new Error('getInfo() has not been called');
+    }
+
     try {
-      await this.chainHandler.submitTransaction(this.paymentInfo!);
+      await this.chainHandler.submitTransaction(this.paymentInfo);
     } catch (e) {
       // TODO: retries?
       throw new OnchainFailureError(AbortCodes.COULD_NOT_PUT_TRANSACTION);
