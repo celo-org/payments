@@ -39,7 +39,7 @@ const VERSIONS = ["major", "minor", "patch"];
  */
 
 const versionCommand = process.argv[2];
-const dryRun = process.argv.includes("--dry-run");
+const dryRun = !process.argv.includes("--publish");
 
 if (!VERSIONS.includes(versionCommand)) {
   console.log("invalid command, please use one of", VERSIONS.join(", "));
@@ -115,12 +115,13 @@ function updateDependencies(folder, version) {
   writePackageJson(folder, { dependencies });
 }
 
+const oldVersion = packages[0].version;
 const newVersion = incrementVersion(
-  removeDevSuffix(packages[0].version),
+  removeDevSuffix(oldVersion),
   versionCommand
 );
 
-console.log("@celo/payments", packages[0].version, "=>", newVersion);
+console.log("@celo/payments", oldVersion, "=>", newVersion);
 
 folders.forEach((folder) => {
   writePackageJson(folder, { version: newVersion });
@@ -143,3 +144,13 @@ folders.forEach((folder) => {
   writePackageJson(folder, { version: addDevSuffix(newVersion) });
   updateDependencies(folder, addDevSuffix(newVersion));
 });
+
+if (dryRun) {
+  // roll back everything
+  folders.forEach((folder) => {
+    writePackageJson(folder, { version: oldVersion });
+    updateDependencies(folder, oldVersion);
+  });
+  console.log("Publish dry run exited successfully!");
+  console.log("Use --publish to actually deploy");
+}
