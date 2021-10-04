@@ -19,7 +19,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
   }
 
   getSendingAddress() {
-    return this.kit.defaultAccount!;
+    return this.kit.defaultAccount;
   }
 
   private async getSignedTransaction(
@@ -101,8 +101,12 @@ export class ContractKitTransactionHandler implements ChainHandler {
   }
 
   async signTypedPaymentRequest(typedData: EIP712TypedData) {
+    if (!this.kit.defaultAccount) {
+      throw new Error('Missing default account');
+    }
+
     return serializeSignature(
-      await this.kit.signTypedData(this.kit.defaultAccount!, typedData)
+      await this.kit.signTypedData(this.kit.defaultAccount, typedData)
     );
   }
 

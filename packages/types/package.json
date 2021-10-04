@@ -1,6 +1,6 @@
 {
   "name": "@celo/payments-types",
-  "version": "0.0.0",
+  "version": "0.0.4-dev",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -11,7 +11,7 @@
     "web-models:build": "ts-node ./scripts/generate-web-models.ts"
   },
   "dependencies": {
-    "@celo/contractkit": "1.2.0"
+    "@celo/contractkit": "1.2.5"
   },
   "devDependencies": {
     "openapi-typescript-codegen": "^0.9.3",

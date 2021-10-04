@@ -19,6 +19,8 @@ export interface ChainHandler {
   /**
    * Compute an EIP712 signature over the payment request.
    */
+  // "any" type fixed in the authorization PR
+  // eslint-disable-next-line
   signTypedPaymentRequest: (data: any) => Promise<string>;
   /**
    * Get the address of the sender submitting this transaction to the chain
