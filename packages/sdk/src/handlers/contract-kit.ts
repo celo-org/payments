@@ -1,10 +1,10 @@
+import { serializeSignature } from '@celo/base';
 import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
 import { PaymentInfo } from '@celo/payments-types';
-import { ChainHandler } from './interface';
 import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
-import { serializeSignature } from '@celo/base';
-import { recoverEIP712TypedDataSigner } from '@celo/utils/lib/signatureUtils';
+
+import { ChainHandler } from './interface';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
@@ -13,7 +13,7 @@ import { recoverEIP712TypedDataSigner } from '@celo/utils/lib/signatureUtils';
 export class ContractKitTransactionHandler implements ChainHandler {
   private signedTransaction?: EncodedTransaction;
 
-  constructor(private kit: ContractKit) {
+  constructor(private readonly kit: ContractKit) {
     if (!kit.defaultAccount) {
       throw new Error('Missing defaultAccount');
     }

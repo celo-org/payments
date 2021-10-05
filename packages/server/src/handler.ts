@@ -1,4 +1,3 @@
-import { Request, ResponseToolkit } from "@hapi/hapi";
 import {
   AbortParams,
   GetPaymentInfo,
@@ -9,10 +8,11 @@ import {
   ReadyForSettlement,
   ReadyForSettlementParams,
 } from "@celo/payments-types";
-import { expectPayment, getInfo, initCharge, abort } from "./routes";
-import { methodNotFound, unauthorized } from "./helpers/json-rpc-wrapper";
+import { Request, ResponseToolkit } from "@hapi/hapi";
 
 import { verifySignature } from "./auth";
+import { methodNotFound, unauthorized } from "./helpers/json-rpc-wrapper";
+import { abort, expectPayment, getInfo, initCharge } from "./routes";
 
 interface PaymentRequest extends Request {
   headers: { [header: string]: string };

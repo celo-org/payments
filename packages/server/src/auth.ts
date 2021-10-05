@@ -2,6 +2,7 @@ import { PaymentMessageRequest } from "@celo/payments-types";
 import { buildTypedPaymentRequest } from "@celo/payments-utils";
 import { AddressUtils } from "@celo/utils";
 import { verifyEIP712TypedDataSigner } from "@celo/utils/lib/signatureUtils";
+
 import { kit } from "./services";
 
 export async function verifySignature(
@@ -14,8 +15,7 @@ export async function verifySignature(
     const dek = await accounts.getDataEncryptionKey(account);
 
     const typedData = buildTypedPaymentRequest(
-      // @ts-ignore
-      { method: body.method, params: body.params },
+      { method: body.method, params: body.params } as PaymentMessageRequest,
       await kit.web3.eth.getChainId()
     );
 
