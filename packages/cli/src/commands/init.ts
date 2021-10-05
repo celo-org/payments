@@ -26,7 +26,11 @@ export default class Init extends Command {
     }),
     privateKey: flags.string({
       char: "p",
-      description: "Private key of the purchasee",
+      description: "Private key of the purchaser",
+    }),
+    dek: flags.string({
+      char: "d",
+      description: "Private DEK of the purchaser",
     }),
     testnet: flags.boolean({
       default: true,
@@ -41,7 +45,7 @@ export default class Init extends Command {
 
   async run() {
     let {
-      flags: { privateKey, testnet, referenceId, apiBase, deepLink },
+      flags: { privateKey, testnet, referenceId, apiBase, deepLink, dek },
     } = this.parse(Init);
     let charge: Charge;
 
@@ -65,6 +69,7 @@ export default class Init extends Command {
         : "https://forno.celo.org"
     );
     kit.addAccount(privateKey);
+    kit.addAccount(dek);
     const [defaultAccount] = kit.getWallet().getAccounts();
     kit.defaultAccount = defaultAccount;
 

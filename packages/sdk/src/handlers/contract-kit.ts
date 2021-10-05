@@ -1,9 +1,10 @@
+import { serializeSignature } from '@celo/base';
 import { EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
 import { PaymentInfo } from '@celo/payments-types';
-import { ChainHandler } from './interface';
 import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
-import { serializeSignature } from '@celo/base';
+
+import { ChainHandler } from './interface';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
@@ -12,7 +13,7 @@ import { serializeSignature } from '@celo/base';
 export class ContractKitTransactionHandler implements ChainHandler {
   private signedTransaction?: EncodedTransaction;
 
-  constructor(private kit: ContractKit) {
+  constructor(private readonly kit: ContractKit) {
     if (!kit.defaultAccount) {
       throw new Error('Missing defaultAccount');
     }
@@ -59,7 +60,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
     //   hardfork: '0x',
     // };
 
-    const { txo } = await stable.transfer(
+    const { txo } = stable.transfer(
       info.receiver.accountAddress,
       this.kit.web3.utils.toWei(info.action.amount.toString())
     );
@@ -95,19 +96,13 @@ export class ContractKitTransactionHandler implements ChainHandler {
       await this.kit.connection.sendSignedTransaction(raw)
     ).waitReceipt();
 
-    console.log('receipt', receipt);
-
     return receipt.transactionHash;
   }
 
   async signTypedPaymentRequest(typedData: EIP712TypedData) {
-    if (!this.kit.defaultAccount) {
-      throw new Error('Missing default account');
-    }
+    const [, dek] = this.kit.getWallet().getAccounts();
 
-    return serializeSignature(
-      await this.kit.signTypedData(this.kit.defaultAccount, typedData)
-    );
+    return serializeSignature(await this.kit.signTypedData(dek, typedData));
   }
 
   async getChainId() {
