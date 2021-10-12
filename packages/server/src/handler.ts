@@ -11,7 +11,10 @@ import {
 import { Request, ResponseToolkit } from "@hapi/hapi";
 
 import { verifySignature } from "./auth";
-import { methodNotFound, unauthorized } from "./helpers/json-rpc-wrapper";
+import {
+  methodNotFound,
+  unauthenticatedRequest,
+} from "./helpers/json-rpc-wrapper";
 import { abort, expectPayment, getInfo, initCharge } from "./routes";
 
 interface PaymentRequest extends Request {
@@ -19,14 +22,20 @@ interface PaymentRequest extends Request {
   payload: GetPaymentInfo | InitCharge | ReadyForSettlement;
 }
 
-export function handle(
+export async function handle(
   { payload, headers }: PaymentRequest,
   res: ResponseToolkit
 ) {
   const method = payload.method.toString();
+  console.log("request headers", headers);
+  const validSignature = await verifySignature(
+    headers["x-signature"],
+    headers["x-address"],
+    payload
+  );
 
-  if (!verifySignature(headers.authorization, headers.address, payload)) {
-    return unauthorized(res, payload.id);
+  if (!validSignature) {
+    return unauthenticatedRequest(res, payload.id);
   }
 
   switch (method) {

@@ -19,6 +19,7 @@ import { OnchainFailureError } from './errors/onchain-failure';
 import { ChainHandler } from './handlers';
 import { fetchWithRetries, parseDeepLink } from './helpers';
 import { buildTypedPaymentRequest } from '@celo/payments-utils';
+import { EIP712Schemas } from '@celo/payments-types';
 
 interface JsonRpcErrorResult extends Error {
   name: string;
@@ -61,8 +62,12 @@ export class Charge {
    * Creates authenticated requests to the `apiBase`
    *
    * @param message the HTTP body with the JSON-RPC params of the request
+   * @param schema
    */
-  private async request(message: PaymentMessageRequest) {
+  private async request(
+    message: PaymentMessageRequest,
+    schema: { name: string; type: string }[]
+  ) {
     const requestId = randomInt(281474976710655);
     const request = {
       method: 'POST',
@@ -74,13 +79,14 @@ export class Charge {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        Authorization: await this.chainHandler.signTypedPaymentRequest(
+        'X-Signature': await this.chainHandler.signTypedPaymentRequest(
           buildTypedPaymentRequest(
             message,
+            schema,
             await this.chainHandler.getChainId()
           )
         ),
-        Address: this.chainHandler.getSendingAddress(),
+        'X-Address': this.chainHandler.getSendingAddress(),
       },
     };
     const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
@@ -129,8 +135,11 @@ export class Charge {
     }
   }
 
-  private async requestWithErrorHandling(params: PaymentMessageRequest) {
-    const response = await this.request(params);
+  private async requestWithErrorHandling(
+    params: PaymentMessageRequest,
+    schema: { name: string; type: string }[]
+  ) {
+    const response = await this.request(params, schema);
     if (!response.ok) {
       const error = (response as ErrorResult<JsonRpcErrorResult>).error;
       throw new Error(error.message);
@@ -151,7 +160,10 @@ export class Charge {
       },
     };
 
-    const response = await this.requestWithErrorHandling(getPaymentInfoRequest);
+    const response = await this.requestWithErrorHandling(
+      getPaymentInfoRequest,
+      EIP712Schemas.GetPaymentInfoRequest
+    );
 
     // TODO: schema validation
     this.paymentInfo = response.result as PaymentInfo;
@@ -202,7 +214,10 @@ export class Charge {
       },
     };
 
-    return await this.requestWithErrorHandling(initChargeRequest);
+    return await this.requestWithErrorHandling(
+      initChargeRequest,
+      EIP712Schemas.InitChargeRequest
+    );
   }
 
   private async sendReadyForSettlementRequest() {
@@ -213,7 +228,10 @@ export class Charge {
       },
     };
 
-    return await this.requestWithErrorHandling(readyForSettlementRequest);
+    return await this.requestWithErrorHandling(
+      readyForSettlementRequest,
+      EIP712Schemas.ReadyForSettlementRequest
+    );
   }
 
   private async submitTransactionOnChain() {
@@ -242,6 +260,9 @@ export class Charge {
       },
     };
 
-    return await this.requestWithErrorHandling(abortRequest);
+    return await this.requestWithErrorHandling(
+      abortRequest,
+      EIP712Schemas.AbortRequest
+    );
   }
 }

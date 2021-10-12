@@ -12,15 +12,21 @@ import { ChainHandler } from './interface';
  */
 export class ContractKitTransactionHandler implements ChainHandler {
   private signedTransaction?: EncodedTransaction;
+  private readonly blockchainAddress;
+  private readonly dekAddress;
 
   constructor(private readonly kit: ContractKit) {
-    if (!kit.defaultAccount) {
-      throw new Error('Missing defaultAccount');
+    [this.blockchainAddress, this.dekAddress] = this.kit
+      .getWallet()
+      .getAccounts();
+
+    if (!this.blockchainAddress || !this.dekAddress) {
+      throw new Error('Missing defaultAccount or dekAccount');
     }
   }
 
   getSendingAddress() {
-    return this.kit.defaultAccount;
+    return this.blockchainAddress;
   }
 
   private async getSignedTransaction(
@@ -67,12 +73,12 @@ export class ContractKitTransactionHandler implements ChainHandler {
 
     this.signedTransaction = await wallet.signTransaction({
       to: stable.address,
-      from: this.kit.defaultAccount,
+      from: this.blockchainAddress,
       gas: 100_000,
       gasPrice: gasPriceMinimum.times(50).toString(),
       chainId: await this.kit.connection.chainId(),
       nonce: await this.kit.connection.getTransactionCount(
-        this.kit.defaultAccount
+        this.blockchainAddress
       ),
       data: txo.encodeABI(),
       feeCurrency: stable.address,
@@ -100,9 +106,9 @@ export class ContractKitTransactionHandler implements ChainHandler {
   }
 
   async signTypedPaymentRequest(typedData: EIP712TypedData) {
-    const [, dek] = this.kit.getWallet().getAccounts();
-
-    return serializeSignature(await this.kit.signTypedData(dek, typedData));
+    return serializeSignature(
+      await this.kit.signTypedData(this.dekAddress, typedData)
+    );
   }
 
   async getChainId() {

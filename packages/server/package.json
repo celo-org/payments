@@ -10,7 +10,8 @@
     "@celo/payments-utils": "0.0.0",
     "@celo/utils": "1.2.5",
     "@hapi/hapi": "^20.1.5",
-    "abi-decoder": "^2.4.0"
+    "abi-decoder": "^2.4.0",
+    "ajv": "^8.6.3"
   },
   "devDependencies": {
     "ts-node-dev": "^1.1.8"

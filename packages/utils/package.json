@@ -7,9 +7,33 @@
     "lib"
   ],
   "scripts": {
-    "build": "tsc -b ."
+    "build": "tsc -b .",
+    "test:unit": "nyc --silent ava"
   },
   "dependencies": {
     "@celo/payments-types": "0.0.4-dev"
+  },
+  "devDependencies": {
+    "ava": "^3.15.0",
+    "nyc": "^15.1.0"
+  },
+  "ava": {
+    "failFast": true,
+    "timeout": "60s",
+    "typescript": {
+      "rewritePaths": {
+        "src/": "lib/"
+      }
+    },
+    "files": [
+      "!lib/module/**"
+    ]
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "exclude": [
+      "**/*.spec.js"
+    ]
   }
+
 }

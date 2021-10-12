@@ -1,5 +1,11 @@
 import { ResponseToolkit } from "@hapi/hapi";
-import { JsonRpcError, JsonRpcProtocol } from "@celo/payments-types";
+import {
+  JsonRpcError,
+  JsonRpcInvalidSignatureError,
+  JsonRpcMethodNotFoundError,
+  JsonRpcProtocol,
+  JsonRpcReferenceIdNotFoundError,
+} from "@celo/payments-types";
 
 export type JSON = Record<string, any>;
 export type JsonRpcResponse = JsonRpcProtocol & {
@@ -41,10 +47,11 @@ export function jsonRpcError(
 ) {
   let httpCode = 500;
   switch (jsonRpcError.code) {
-    case -32601:
+    case JsonRpcReferenceIdNotFoundError.code.value:
       httpCode = 404;
       break;
-    case -32602:
+    case JsonRpcInvalidSignatureError.code.value:
+    case JsonRpcMethodNotFoundError.code.value:
       httpCode = 400;
       break;
   }
@@ -56,8 +63,8 @@ export function methodNotFound(
   apiResponse: ResponseToolkit,
   jsonRpcRequestId: number
 ) {
-  const methodNotFoundError = <JsonRpcError>{
-    code: -32601,
+  const methodNotFoundError = <JsonRpcMethodNotFoundError>{
+    code: JsonRpcMethodNotFoundError.code.value,
     message: "JSON-RPC method not found",
   };
   return jsonRpcError(apiResponse, jsonRpcRequestId, methodNotFoundError);
@@ -68,8 +75,8 @@ export function paymentNotFound(
   jsonRpcRequestId: number,
   referenceId?: string
 ) {
-  const paymentNotFoundError = <JsonRpcError>{
-    code: -32602,
+  const paymentNotFoundError = <JsonRpcReferenceIdNotFoundError>{
+    code: JsonRpcReferenceIdNotFoundError.code.value,
     message: "Reference id not found",
     data: {
       referenceId,
@@ -78,13 +85,13 @@ export function paymentNotFound(
   return jsonRpcError(apiResponse, jsonRpcRequestId, paymentNotFoundError);
 }
 
-export function unauthorized(
+export function unauthenticatedRequest(
   apiResponse: ResponseToolkit,
   jsonRpcRequestId: number
 ) {
-  const paymentNotFoundError = <JsonRpcError>{
-    code: -32602,
+  const invalidSignatureError = <JsonRpcInvalidSignatureError>{
+    code: JsonRpcInvalidSignatureError.code.value,
     message: "Invalid signature",
   };
-  return jsonRpcError(apiResponse, jsonRpcRequestId, paymentNotFoundError);
+  return jsonRpcError(apiResponse, jsonRpcRequestId, invalidSignatureError);
 }

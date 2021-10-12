@@ -127,11 +127,9 @@ paths:
             application/json:
               schema:
                 oneOf:
+                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
                   - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
                   - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
-                  - "$ref": "#/components/schemas/JsonRpcRiskChecksFailedError"
-                  - "$ref": "#/components/schemas/JsonRpcMissingInformationError"
-                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
                   - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
                   - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
       requestBody:
@@ -167,7 +165,15 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                oneOf:
+                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
+                  - "$ref": "#/components/schemas/JsonRpcRiskChecksFailedError"
+                  - "$ref": "#/components/schemas/JsonRpcMissingInformationError"
+                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
       requestBody:
         content:
           application/json:
@@ -200,7 +206,13 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                oneOf:
+                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
+                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
       requestBody:
         content:
           application/json:
@@ -233,7 +245,13 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                oneOf:
+                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
+                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
       requestBody:
         content:
           application/json:
@@ -421,6 +439,21 @@ components:
       example:
         code: -32005
         message: ReadyForSettlement sent before payment was initialized
+    JsonRpcInvalidSignatureError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32006
+              description: |
+                Signature header missing or could not be verified
+      example:
+        code: -32006
+        message: Signature header missing or could not be verified
     ReferenceId:
       type: string
       description: Unique reference ID of this payment. This value should be globally

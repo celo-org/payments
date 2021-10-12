@@ -1,1 +1,1 @@
-export { getAccount } from "./create-account";
+export { getAccountKeys } from "./create-account";
