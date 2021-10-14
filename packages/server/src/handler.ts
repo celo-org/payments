@@ -1,18 +1,18 @@
 import {
   AbortParams,
+  AbortRequest,
+  EIP712Schemas,
   GetPaymentInfo,
   GetPaymentInfoParams,
+  GetPaymentInfoRequest,
   InitCharge,
   InitChargeParams,
+  InitChargeRequest,
   JsonRpcMethods,
+  OffchainHeaders,
   ReadyForSettlement,
   ReadyForSettlementParams,
-  OffchainHeaders,
-  EIP712Schemas,
-  GetPaymentInfoRequest,
-  InitChargeRequest,
   ReadyForSettlementRequest,
-  AbortRequest,
 } from "@celo/payments-types";
 import { Request, ResponseToolkit } from "@hapi/hapi";
 
@@ -26,7 +26,6 @@ import {
 } from "./helpers/json-rpc-wrapper";
 import { abort, expectPayment, getInfo, initCharge } from "./routes";
 import { getKit } from "./services";
-import util from "util";
 
 interface PaymentRequest extends Request {
   headers: { [header: string]: string };
