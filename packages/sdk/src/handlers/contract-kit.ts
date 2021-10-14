@@ -114,4 +114,9 @@ export class ContractKitTransactionHandler implements ChainHandler {
   async getChainId() {
     return this.kit.web3.eth.getChainId();
   }
+
+  async getDataEncryptionKey(account: string): Promise<string> {
+    const accounts = await this.kit.contracts.getAccounts();
+    return accounts.getDataEncryptionKey(account);
+  }
 }

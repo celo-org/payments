@@ -19,8 +19,9 @@ export interface EIP712TypedData {
 
 export const EIP712Schemas: EIP712Types = {
   Abort: [
-    { name: "id", type: "number" },
+    { name: "id", type: "int256" },
     { name: "jsonrpc", type: "string" },
+    { name: "method", type: "string" },
     { name: "params", type: "AbortParams" },
   ],
   AbortParams: [
@@ -33,7 +34,7 @@ export const EIP712Schemas: EIP712Types = {
     { name: "params", type: "AbortParams" },
   ],
   AbortResponse: [
-    { name: "id", type: "number" },
+    { name: "id", type: "int256" },
     { name: "jsonrpc", type: "string" },
   ],
   Address: [
@@ -52,8 +53,9 @@ export const EIP712Schemas: EIP712Types = {
     { name: "address", type: "Address" },
   ],
   GetPaymentInfo: [
-    { name: "id", type: "number" },
+    { name: "id", type: "int256" },
     { name: "jsonrpc", type: "string" },
+    { name: "method", type: "string" },
     { name: "params", type: "GetPaymentInfoParams" },
   ],
   GetPaymentInfoParams: [{ name: "referenceId", type: "string" }],
@@ -62,13 +64,14 @@ export const EIP712Schemas: EIP712Types = {
     { name: "params", type: "GetPaymentInfoParams" },
   ],
   GetPaymentInfoResponse: [
-    { name: "id", type: "number" },
+    { name: "id", type: "int256" },
     { name: "jsonrpc", type: "string" },
     { name: "result", type: "PaymentInfo" },
   ],
   InitCharge: [
-    { name: "id", type: "number" },
+    { name: "id", type: "int256" },
     { name: "jsonrpc", type: "string" },
+    { name: "method", type: "string" },
     { name: "params", type: "InitChargeParams" },
   ],
   InitChargeParams: [
@@ -81,8 +84,62 @@ export const EIP712Schemas: EIP712Types = {
     { name: "params", type: "InitChargeParams" },
   ],
   InitChargeResponse: [
-    { name: "id", type: "number" },
+    { name: "id", type: "int256" },
     { name: "jsonrpc", type: "string" },
+  ],
+  JsonRpcError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcErrorResponse: [
+    { name: "id", type: "int256" },
+    { name: "jsonrpc", type: "string" },
+    { name: "error", type: "JsonRpcError" },
+  ],
+  JsonRpcInvalidCommandTypeError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcInvalidParameterError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcInvalidSignatureError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcMethodNotFoundError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcMissingInformationError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcPaymentTypeMismatchError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcProtocol: [
+    { name: "id", type: "int256" },
+    { name: "jsonrpc", type: "string" },
+  ],
+  JsonRpcReferenceIdNotFoundError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcRequired: [
+    { name: "id", type: "int256" },
+    { name: "jsonrpc", type: "string" },
+    { name: "method", type: "string" },
+  ],
+  JsonRpcRiskChecksFailedError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
+  ],
+  JsonRpcUnspecifiedError: [
+    { name: "code", type: "int256" },
+    { name: "message", type: "string" },
   ],
   NationalIdData: [
     { name: "idValue", type: "string" },
@@ -97,10 +154,10 @@ export const EIP712Schemas: EIP712Types = {
     { name: "nationalIdData", type: "NationalIdData" },
   ],
   PaymentAction: [
-    { name: "amount", type: "number" },
+    { name: "amount", type: "uint256" },
     { name: "currency", type: "string" },
     { name: "action", type: "string" },
-    { name: "timestamp", type: "number" },
+    { name: "timestamp", type: "int256" },
   ],
   PaymentInfo: [
     { name: "requiredPayerData", type: "RequiredPayerData" },
@@ -114,8 +171,9 @@ export const EIP712Schemas: EIP712Types = {
     { name: "payerData", type: "PayerData" },
   ],
   ReadyForSettlement: [
-    { name: "id", type: "number" },
+    { name: "id", type: "int256" },
     { name: "jsonrpc", type: "string" },
+    { name: "method", type: "string" },
     { name: "params", type: "ReadyForSettlementParams" },
   ],
   ReadyForSettlementParams: [{ name: "referenceId", type: "string" }],
@@ -124,7 +182,7 @@ export const EIP712Schemas: EIP712Types = {
     { name: "params", type: "ReadyForSettlementParams" },
   ],
   ReadyForSettlementResponse: [
-    { name: "id", type: "number" },
+    { name: "id", type: "int256" },
     { name: "jsonrpc", type: "string" },
   ],
   ReceiverData: [
@@ -132,22 +190,22 @@ export const EIP712Schemas: EIP712Types = {
     { name: "businessData", type: "BusinessData" },
   ],
   RequiredAddressData: [
-    { name: "city", type: "boolean" },
-    { name: "country", type: "boolean" },
-    { name: "line1", type: "boolean" },
-    { name: "line2", type: "boolean" },
-    { name: "postalCode", type: "boolean" },
-    { name: "state", type: "boolean" },
+    { name: "city", type: "bool" },
+    { name: "country", type: "bool" },
+    { name: "line1", type: "bool" },
+    { name: "line2", type: "bool" },
+    { name: "postalCode", type: "bool" },
+    { name: "state", type: "bool" },
   ],
   RequiredNationalIdData: [
-    { name: "idValue", type: "boolean" },
-    { name: "country", type: "boolean" },
-    { name: "type", type: "boolean" },
+    { name: "idValue", type: "bool" },
+    { name: "country", type: "bool" },
+    { name: "type", type: "bool" },
   ],
   RequiredPayerData: [
-    { name: "givenName", type: "boolean" },
-    { name: "surname", type: "boolean" },
-    { name: "phoneNumber", type: "boolean" },
+    { name: "givenName", type: "bool" },
+    { name: "surname", type: "bool" },
+    { name: "phoneNumber", type: "bool" },
     { name: "address", type: "RequiredAddressData" },
     { name: "nationalIdData", type: "RequiredNationalIdData" },
   ],

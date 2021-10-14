@@ -8,6 +8,7 @@ import {
   createKitFromPrivateKey,
 } from "../helpers/create-account";
 import { OnchainFailureError } from "@celo/payments-sdk/build/main/errors/onchain-failure";
+import { privateToPublic } from "ethereumjs-util";
 
 export default class Init extends Command {
   static description = "Create a charge and interactively submit it";
@@ -55,6 +56,8 @@ export default class Init extends Command {
       privateKey =
         privateKey ?? (await this.getPrivateKey("privateKey", testnet));
       dek = dek ?? (await this.getPrivateKey("dataEncryptionKey", testnet));
+      const dekPublicKey = privateToPublic(Buffer.from(dek.slice(2), "hex"));
+      cli.info(`DEK public key: ${dekPublicKey.toString("hex")}`);
 
       const kit = createKitFromPrivateKey(testnet, privateKey, dek);
 
@@ -86,12 +89,6 @@ export default class Init extends Command {
 
       const info: PaymentInfo = await charge.getInfo();
       cli.info(JSON.stringify(info, null, 2));
-
-      const accountsContract = await kit.contracts.getAccounts();
-      const receiverUrl = await accountsContract.getMetadataURL(
-        info.receiver.accountAddress
-      );
-      cli.info("Receiver URL as registered in the blockchain:", receiverUrl);
 
       const confirmedByTheUser = await cli.confirm("Continue with payment?");
 
@@ -139,7 +136,6 @@ export default class Init extends Command {
             await charge.abort(code);
           }
         }
-        console.error(e);
       }
     } catch (e: unknown) {
       console.error(e);

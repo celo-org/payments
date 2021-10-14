@@ -1,5 +1,6 @@
 import * as Hapi from "@hapi/hapi";
 import { handle } from "./handler";
+import { getKit } from "./services";
 
 export default async () => {
   const server = Hapi.server({
@@ -25,6 +26,8 @@ export default async () => {
     path: "/rpc",
     handler: handle,
   });
+
+  await getKit();
 
   await server.start();
   console.log("Server running on %s", server.info.uri);

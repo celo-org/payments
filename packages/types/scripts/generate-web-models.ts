@@ -5,8 +5,11 @@ import {
   SourceFile,
   Symbol,
   Type,
+  TypeAliasDeclaration,
+  TypeLiteralNode,
 } from "ts-morph";
 import * as fs from "fs";
+import { readFileSync } from "fs";
 import { generate } from "openapi-typescript-codegen";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -18,7 +21,6 @@ import {
 } from "fs-extra";
 import { basename, join } from "path";
 import * as jsYaml from "js-yaml";
-import { readFileSync } from "fs";
 
 const tsConfig = JSON.parse(
   fs
@@ -43,6 +45,43 @@ function findSingleMemberEnum(
     }
   }
   return undefined;
+}
+
+function changeSingleMember(
+  sourceFile: SourceFile,
+  name: string,
+  fromType: string,
+  toType: string
+) {
+  const typeAliases = sourceFile.getExportedDeclarations();
+  if (!typeAliases || typeAliases.size === 0) return false;
+  let changed = false;
+  typeAliases.forEach((values) => {
+    values.forEach((declartion) => {
+      if (!(declartion instanceof TypeAliasDeclaration)) return;
+      const typeNode = declartion.getTypeNode();
+      if (!(typeNode instanceof TypeLiteralNode)) return;
+      typeNode.getMembers().forEach((member: PropertySignature) => {
+        const structure = member.getStructure();
+        if (structure.name === name && structure.type === fromType) {
+          console.log(
+            `Changing ${name} declaration @ ${sourceFile.getBaseName()} from ${fromType} to ${toType}`
+          );
+          member.setType(toType);
+          sourceFile.saveSync();
+          changed = true;
+        }
+      });
+    });
+  });
+  if (changed) {
+    sourceFile.addImportDeclaration({
+      defaultImport: "BigNumber",
+      moduleSpecifier: "bignumber.js",
+    });
+    sourceFile.saveSync();
+  }
+  return changed;
 }
 
 function changeEnumMemberName(anEnum: EnumDeclaration, name: string) {
@@ -126,17 +165,33 @@ function manipulateSingleFileEnum(
   }
 }
 
+function manipulateSingleFileAmountBigNumber(
+  modelFilePath: string,
+  modelFilename: string
+) {
+  const [project, sourceFile] = initTsProject(modelFilePath, modelFilename);
+
+  const changed = changeSingleMember(
+    sourceFile,
+    "amount",
+    "(number | string)",
+    "BigNumber"
+  );
+
+  if (changed) {
+    saveManipulatedFile(project, sourceFile, modelFilename, modelFilePath);
+  }
+}
+
 function extractTypeNameAndProperties(
   sourceFile: SourceFile
 ): [string, Symbol[]] {
   const typeAlias = sourceFile.getTypeAliases()[0];
   if (typeAlias) {
     const typeName = typeAlias.getName();
-    if (!typeName.startsWith("JsonRpc")) {
-      const type = typeAlias.getType();
-      if (!type.isString()) {
-        return [typeName, type.getProperties()];
-      }
+    const type = typeAlias.getType();
+    if (!type.isString()) {
+      return [typeName, type.getProperties()];
     }
   }
   return [undefined, undefined];
@@ -145,7 +200,16 @@ function extractTypeNameAndProperties(
 function guessValueTypeName(property: Symbol): [Type, string] {
   const valueDeclaration = property.getValueDeclaration();
   if (!valueDeclaration) {
-    return [undefined, undefined];
+    const declarations = property.getDeclarations();
+    if (!declarations || declarations.length === 0) {
+      return [undefined, undefined];
+    }
+    for (const dec of declarations as PropertySignature[]) {
+      const tryType = dec.getTypeNode().getText();
+      if (["string", "number"].includes(tryType)) {
+        return [dec.getTypeNode().getType(), tryType];
+      }
+    }
   }
   const signature = valueDeclaration
     .getSymbol()
@@ -172,18 +236,42 @@ function inferDirectTypeAlias(
   underlyingType: Type,
   currentGuess: string
 ): string {
-  const baseType = underlyingType
-    .getSymbol()
-    .getDeclaredType()
-    .getBaseTypeOfLiteralType();
+  const symbol = underlyingType.getSymbol();
+  if (!symbol) {
+    if (currentGuess.includes("any")) {
+      return undefined;
+    } else {
+      const message = `No underlying symbol for ${underlyingType.getText()}`;
+      console.error(message, { currentGuess, underlyingType });
+      throw new Error(message);
+    }
+  }
+
+  const baseType = symbol.getDeclaredType().getBaseTypeOfLiteralType();
   if (baseType.isNumberLiteral()) {
     return "number";
   }
   if (baseType.isStringLiteral()) {
     return "string";
   }
+  if (baseType.isBooleanLiteral() || baseType.isBoolean()) {
+    return "boolean";
+  }
 
   return currentGuess;
+}
+
+function renameTypeNameToEip712(typeName: string) {
+  switch (typeName) {
+    case "boolean":
+      return "bool";
+    case "number":
+      return "int256";
+    case "BigNumber":
+      return "uint256";
+    default:
+      return typeName;
+  }
 }
 
 function formatEip712SchemasFile(allTypes) {
@@ -213,16 +301,23 @@ function generateEip712Schemas(modelFilePath: string, modelFiles: string[]) {
 
         if (underlyingType.isEnum()) {
           valueTypeName = inferEnumUnderlyingType(underlyingType);
-        } else if (!underlyingType.getText().startsWith("import")) {
+        } else if (
+          !underlyingType.getText().startsWith("import") &&
+          underlyingType.getText() !== "any"
+        ) {
           valueTypeName = underlyingType.getText();
         }
         if (valueTypeName.includes(".")) {
           valueTypeName = inferDirectTypeAlias(underlyingType, valueTypeName);
         }
-        allTypes[typeName].push({
-          name: property.getName(),
-          type: valueTypeName,
-        });
+        valueTypeName = renameTypeNameToEip712(valueTypeName);
+
+        if (valueTypeName) {
+          allTypes[typeName].push({
+            name: property.getName(),
+            type: valueTypeName,
+          });
+        }
       }
     }
   }
@@ -266,6 +361,12 @@ function manipulateEnums(modelFiles, schemasDestinationPath: string) {
   }
 }
 
+function manipulateAmountBigNumber(modelFiles, schemasDestinationPath: string) {
+  for (const modelFile of modelFiles) {
+    manipulateSingleFileAmountBigNumber(schemasDestinationPath, modelFile);
+  }
+}
+
 function extractComponentJsonSchema(
   openApiPath: string,
   schemasDestinationPath: string
@@ -304,6 +405,9 @@ async function generateWebSchemas() {
 
   console.log("Manipulating enums with a single value...");
   manipulateEnums(modelFiles, schemasDestinationPath);
+
+  console.log("Manipulating amounts to be BigNumber...");
+  manipulateAmountBigNumber(modelFiles, schemasDestinationPath);
 
   console.log("Generating EIP712 schemas...");
   generateEip712Schemas(schemasDestinationPath, modelFiles);

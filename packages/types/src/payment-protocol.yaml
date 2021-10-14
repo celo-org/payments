@@ -663,12 +663,17 @@ components:
       description: Information regarding the type of payment and payment amount
       properties:
         amount:
-          type: integer
-          minimum: 0
-          format: uint64
-          example: 452
-          description: Amount of the transfer. Base units are the same as for on-chain
-            transactions for this currency.
+          oneOf:
+            - type: integer
+              minimum: 0
+              format: uint64
+              example: 452
+              description: Amount of the transfer. Base units are the same as for on-chain
+                transactions for this currency.
+            - type: string
+              example: '100000000000000000'
+              description: A string representation of the Amount of the transfer. Base units are the same as for on-chain
+                transactions for this currency. Strings should be used only for BigNumbers
         currency:
           type: string
           enum:

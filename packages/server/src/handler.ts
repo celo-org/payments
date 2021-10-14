@@ -7,52 +7,95 @@ import {
   JsonRpcMethods,
   ReadyForSettlement,
   ReadyForSettlementParams,
+  OffchainHeaders,
+  EIP712Schemas,
+  GetPaymentInfoRequest,
+  InitChargeRequest,
+  ReadyForSettlementRequest,
+  AbortRequest,
 } from "@celo/payments-types";
 import { Request, ResponseToolkit } from "@hapi/hapi";
 
-import { verifySignature } from "./auth";
+import {
+  ContractKitTransactionHandler,
+  verifySignature,
+} from "@celo/payments-sdk";
 import {
   methodNotFound,
   unauthenticatedRequest,
 } from "./helpers/json-rpc-wrapper";
 import { abort, expectPayment, getInfo, initCharge } from "./routes";
+import { getKit } from "./services";
+import util from "util";
 
 interface PaymentRequest extends Request {
   headers: { [header: string]: string };
   payload: GetPaymentInfo | InitCharge | ReadyForSettlement;
 }
 
+let chainHandler = undefined;
+
 export async function handle(
   { payload, headers }: PaymentRequest,
   res: ResponseToolkit
 ) {
+  if (!chainHandler) {
+    chainHandler = new ContractKitTransactionHandler(await getKit());
+  }
   const method = payload.method.toString();
-  console.log("request headers", headers);
-  const validSignature = await verifySignature(
-    headers["x-signature"],
-    headers["x-address"],
-    payload
-  );
+  let schema, schemaName;
 
+  switch (method) {
+    case GetPaymentInfoRequest.method.value:
+      schema = EIP712Schemas.GetPaymentInfo;
+      schemaName = "GetPaymentInfo";
+      break;
+    case InitChargeRequest.method.value:
+      schema = EIP712Schemas.InitCharge;
+      schemaName = "InitCharge";
+      break;
+    case ReadyForSettlementRequest.method.value:
+      schema = EIP712Schemas.ReadyForSettlement;
+      schemaName = "ReadyForSettlement";
+      break;
+    case AbortRequest.method.value:
+      schema = EIP712Schemas.Abort;
+      schemaName = "Abort";
+      break;
+  }
+
+  const validSignature = await verifySignature(
+    chainHandler,
+    headers[OffchainHeaders.SIGNATURE.toLowerCase()],
+    headers[OffchainHeaders.ADDRESS.toLowerCase()],
+    payload,
+    schema,
+    schemaName
+  );
   if (!validSignature) {
-    return unauthenticatedRequest(res, payload.id);
+    return unauthenticatedRequest(res, payload.id, chainHandler);
   }
 
   switch (method) {
     case JsonRpcMethods.GetInfo:
       const getPaymentInfoParams = payload.params as GetPaymentInfoParams;
-      return getInfo(payload.id, getPaymentInfoParams, res);
+      return getInfo(payload.id, getPaymentInfoParams, chainHandler, res);
     case JsonRpcMethods.InitCharge:
       const initChargeParams = payload.params as InitChargeParams;
-      return initCharge(payload.id, initChargeParams, res);
+      return initCharge(payload.id, initChargeParams, chainHandler, res);
     case JsonRpcMethods.ReadyForSettlement:
       const readyForSettlementParams =
         payload.params as ReadyForSettlementParams;
-      return expectPayment(payload.id, readyForSettlementParams, res);
+      return expectPayment(
+        payload.id,
+        readyForSettlementParams,
+        chainHandler,
+        res
+      );
     case JsonRpcMethods.Abort:
       const abortParams = payload.params as AbortParams;
-      return abort(payload.id, abortParams, res);
+      return abort(payload.id, abortParams, chainHandler, res);
     default:
-      return methodNotFound(res, payload.id);
+      return methodNotFound(res, payload.id, chainHandler);
   }
 }

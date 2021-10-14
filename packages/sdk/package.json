@@ -44,6 +44,8 @@
     "@celo/contractkit": "1.2.5",
     "@celo/payments-types": "0.0.4-dev",
     "@types/isomorphic-fetch": "^0.0.35",
+    "ajv": "^8.6.3",
+    "bignumber.js": "^9.0.1",
     "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {

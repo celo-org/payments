@@ -4,10 +4,7 @@ import {
   EIP712Schemas,
   EIP712TypedData,
   EIP712Types,
-  PaymentMessageRequest,
 } from "@celo/payments-types";
-
-// import * as util from "util";
 
 function scanTypedSchema(
   message: EIP712ObjectValue,
@@ -16,6 +13,10 @@ function scanTypedSchema(
   schemaBagName: string
 ) {
   Object.entries(message).forEach(([propName, value]) => {
+    // not allowed in JSON anyway...
+    if (value === undefined) {
+      return;
+    }
     const parameter = schema.find(({ name }) => name === propName);
     if (!parameter) {
       throw new Error(
@@ -28,13 +29,15 @@ function scanTypedSchema(
     }
     schemasBag[schemaBagName].push(parameter);
 
-    if (["string", "number"].includes(parameter.type)) {
+    if (["string", "uint256", "int256", "bool"].includes(parameter.type)) {
       return;
     }
 
     const type = EIP712Schemas[parameter.type];
     if (!type) {
-      throw new Error(`Unknown EIP712 type of parameter ${parameter}`);
+      throw new Error(
+        `Unknown EIP712 type of parameter ${JSON.stringify(parameter)}`
+      );
     }
 
     scanTypedSchema(value, type, schemasBag, parameter.type);
@@ -42,7 +45,7 @@ function scanTypedSchema(
 }
 
 export function buildTypedPaymentRequest(
-  message: PaymentMessageRequest,
+  message: any,
   schema: EIP712Parameter[],
   chainId: number
 ): EIP712TypedData {
@@ -66,8 +69,6 @@ export function buildTypedPaymentRequest(
     },
     message,
   };
-
-  // console.log(util.inspect(typedData, false, null, true /* enable colors */));
 
   return typedData;
 }

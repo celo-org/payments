@@ -26,5 +26,8 @@ export interface ChainHandler {
    * Get the address of the sender submitting this transaction to the chain
    */
   getSendingAddress: () => string;
+
   getChainId: () => Promise<number>;
+
+  getDataEncryptionKey: (account: string) => Promise<string>;
 }

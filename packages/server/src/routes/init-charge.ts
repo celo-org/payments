@@ -1,4 +1,8 @@
-import { InitChargeParams, JsonRpcError } from "@celo/payments-types";
+import {
+  EIP712Schemas,
+  InitChargeParams,
+  JsonRpcError,
+} from "@celo/payments-types";
 import { ResponseToolkit } from "@hapi/hapi";
 import { get, has, update } from "../storage";
 import { riskChecks, RiskChecksResult } from "../helpers";
@@ -7,14 +11,21 @@ import {
   jsonRpcSuccess,
   paymentNotFound,
 } from "../helpers/json-rpc-wrapper";
+import { ChainHandler } from "@celo/payments-sdk";
 
 export function initCharge(
   jsonRpcRequestId: number,
   params: InitChargeParams,
+  chainHandler: ChainHandler,
   res: ResponseToolkit
 ) {
   if (!has(params.referenceId)) {
-    return paymentNotFound(res, jsonRpcRequestId, params.referenceId);
+    return paymentNotFound(
+      res,
+      jsonRpcRequestId,
+      chainHandler,
+      params.referenceId
+    );
   }
 
   console.log("initCharge", params);
@@ -32,8 +43,18 @@ export function initCharge(
       message,
     };
 
-    return jsonRpcError(res, jsonRpcRequestId, riskCheckFailedJsonRpcError);
+    return jsonRpcError(
+      res,
+      jsonRpcRequestId,
+      chainHandler,
+      riskCheckFailedJsonRpcError
+    );
   }
 
-  return jsonRpcSuccess(res, jsonRpcRequestId);
+  return jsonRpcSuccess(
+    res,
+    jsonRpcRequestId,
+    chainHandler,
+    EIP712Schemas.InitChargeResponse
+  );
 }
