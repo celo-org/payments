@@ -6,6 +6,7 @@ export interface EIP712Parameter {
 export interface EIP712TypeDefinition {
   name: string;
   schema: EIP712Parameter[];
+  bigNumbers: string[];
 }
 export interface EIP712TypeDefinitions {
   [key: string]: EIP712TypeDefinition;

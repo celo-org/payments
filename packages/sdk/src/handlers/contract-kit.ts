@@ -68,7 +68,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
 
     const { txo } = stable.transfer(
       info.receiver.accountAddress,
-      this.kit.web3.utils.toWei(info.action.amount.toString())
+      info.action.amount.toString()
     );
 
     this.signedTransaction = await wallet.signTransaction({

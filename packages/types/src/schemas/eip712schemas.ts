@@ -6,6 +6,7 @@ export interface EIP712Parameter {
 export interface EIP712TypeDefinition {
   name: string;
   schema: EIP712Parameter[];
+  bigNumbers: string[];
 }
 export interface EIP712TypeDefinitions {
   [key: string]: EIP712TypeDefinition;
@@ -33,6 +34,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "method", type: "string" },
       { name: "params", type: "AbortParams" },
     ],
+    bigNumbers: [],
   },
   AbortParams: {
     name: "AbortParams",
@@ -41,6 +43,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "abortCode", type: "string" },
       { name: "abortMessage", type: "string" },
     ],
+    bigNumbers: [],
   },
   AbortRequest: {
     name: "AbortRequest",
@@ -48,6 +51,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "method", type: "string" },
       { name: "params", type: "AbortParams" },
     ],
+    bigNumbers: [],
   },
   AbortResponse: {
     name: "AbortResponse",
@@ -55,6 +59,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "id", type: "int256" },
       { name: "jsonrpc", type: "string" },
     ],
+    bigNumbers: [],
   },
   Address: {
     name: "Address",
@@ -66,8 +71,9 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "postalCode", type: "string" },
       { name: "state", type: "string" },
     ],
+    bigNumbers: [],
   },
-  Any: { name: "Any", schema: [] },
+  Any: { name: "Any", schema: [], bigNumbers: [] },
   BusinessData: {
     name: "BusinessData",
     schema: [
@@ -76,6 +82,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "imageUrl", type: "string" },
       { name: "address", type: "Address" },
     ],
+    bigNumbers: [],
   },
   GetPaymentInfo: {
     name: "GetPaymentInfo",
@@ -85,10 +92,12 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "method", type: "string" },
       { name: "params", type: "GetPaymentInfoParams" },
     ],
+    bigNumbers: [],
   },
   GetPaymentInfoParams: {
     name: "GetPaymentInfoParams",
     schema: [{ name: "referenceId", type: "string" }],
+    bigNumbers: [],
   },
   GetPaymentInfoRequest: {
     name: "GetPaymentInfoRequest",
@@ -96,6 +105,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "method", type: "string" },
       { name: "params", type: "GetPaymentInfoParams" },
     ],
+    bigNumbers: [],
   },
   GetPaymentInfoResponse: {
     name: "GetPaymentInfoResponse",
@@ -104,6 +114,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "jsonrpc", type: "string" },
       { name: "result", type: "PaymentInfo" },
     ],
+    bigNumbers: [],
   },
   InitCharge: {
     name: "InitCharge",
@@ -113,6 +124,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "method", type: "string" },
       { name: "params", type: "InitChargeParams" },
     ],
+    bigNumbers: [],
   },
   InitChargeParams: {
     name: "InitChargeParams",
@@ -121,6 +133,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "referenceId", type: "string" },
       { name: "transactionHash", type: "string" },
     ],
+    bigNumbers: [],
   },
   InitChargeRequest: {
     name: "InitChargeRequest",
@@ -128,6 +141,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "method", type: "string" },
       { name: "params", type: "InitChargeParams" },
     ],
+    bigNumbers: [],
   },
   InitChargeResponse: {
     name: "InitChargeResponse",
@@ -135,6 +149,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "id", type: "int256" },
       { name: "jsonrpc", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcError: {
     name: "JsonRpcError",
@@ -142,6 +157,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcErrorResponse: {
     name: "JsonRpcErrorResponse",
@@ -150,6 +166,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "jsonrpc", type: "string" },
       { name: "error", type: "JsonRpcError" },
     ],
+    bigNumbers: [],
   },
   JsonRpcInvalidCommandTypeError: {
     name: "JsonRpcInvalidCommandTypeError",
@@ -157,6 +174,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcInvalidParameterError: {
     name: "JsonRpcInvalidParameterError",
@@ -164,6 +182,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcInvalidSignatureError: {
     name: "JsonRpcInvalidSignatureError",
@@ -171,6 +190,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcMethodNotFoundError: {
     name: "JsonRpcMethodNotFoundError",
@@ -178,6 +198,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcMissingInformationError: {
     name: "JsonRpcMissingInformationError",
@@ -185,6 +206,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcPaymentTypeMismatchError: {
     name: "JsonRpcPaymentTypeMismatchError",
@@ -192,6 +214,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcProtocol: {
     name: "JsonRpcProtocol",
@@ -199,6 +222,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "id", type: "int256" },
       { name: "jsonrpc", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcReferenceIdNotFoundError: {
     name: "JsonRpcReferenceIdNotFoundError",
@@ -206,6 +230,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcRequired: {
     name: "JsonRpcRequired",
@@ -214,6 +239,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "jsonrpc", type: "string" },
       { name: "method", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcRiskChecksFailedError: {
     name: "JsonRpcRiskChecksFailedError",
@@ -221,6 +247,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   JsonRpcUnspecifiedError: {
     name: "JsonRpcUnspecifiedError",
@@ -228,6 +255,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
     ],
+    bigNumbers: [],
   },
   NationalIdData: {
     name: "NationalIdData",
@@ -236,6 +264,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "country", type: "string" },
       { name: "type", type: "string" },
     ],
+    bigNumbers: [],
   },
   PayerData: {
     name: "PayerData",
@@ -246,6 +275,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "address", type: "Address" },
       { name: "nationalIdData", type: "NationalIdData" },
     ],
+    bigNumbers: [],
   },
   PaymentAction: {
     name: "PaymentAction",
@@ -255,6 +285,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "action", type: "string" },
       { name: "timestamp", type: "int256" },
     ],
+    bigNumbers: ["amount"],
   },
   PaymentInfo: {
     name: "PaymentInfo",
@@ -265,6 +296,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "referenceId", type: "string" },
       { name: "description", type: "string" },
     ],
+    bigNumbers: [],
   },
   PaymentSender: {
     name: "PaymentSender",
@@ -272,6 +304,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "accountAddress", type: "string" },
       { name: "payerData", type: "PayerData" },
     ],
+    bigNumbers: [],
   },
   ReadyForSettlement: {
     name: "ReadyForSettlement",
@@ -281,10 +314,12 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "method", type: "string" },
       { name: "params", type: "ReadyForSettlementParams" },
     ],
+    bigNumbers: [],
   },
   ReadyForSettlementParams: {
     name: "ReadyForSettlementParams",
     schema: [{ name: "referenceId", type: "string" }],
+    bigNumbers: [],
   },
   ReadyForSettlementRequest: {
     name: "ReadyForSettlementRequest",
@@ -292,6 +327,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "method", type: "string" },
       { name: "params", type: "ReadyForSettlementParams" },
     ],
+    bigNumbers: [],
   },
   ReadyForSettlementResponse: {
     name: "ReadyForSettlementResponse",
@@ -299,6 +335,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "id", type: "int256" },
       { name: "jsonrpc", type: "string" },
     ],
+    bigNumbers: [],
   },
   ReceiverData: {
     name: "ReceiverData",
@@ -306,6 +343,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "accountAddress", type: "string" },
       { name: "businessData", type: "BusinessData" },
     ],
+    bigNumbers: [],
   },
   RequiredAddressData: {
     name: "RequiredAddressData",
@@ -317,6 +355,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "postalCode", type: "bool" },
       { name: "state", type: "bool" },
     ],
+    bigNumbers: [],
   },
   RequiredNationalIdData: {
     name: "RequiredNationalIdData",
@@ -325,6 +364,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "country", type: "bool" },
       { name: "type", type: "bool" },
     ],
+    bigNumbers: [],
   },
   RequiredPayerData: {
     name: "RequiredPayerData",
@@ -335,5 +375,6 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
       { name: "address", type: "RequiredAddressData" },
       { name: "nationalIdData", type: "RequiredNationalIdData" },
     ],
+    bigNumbers: [],
   },
 };

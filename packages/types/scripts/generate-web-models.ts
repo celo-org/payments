@@ -299,6 +299,7 @@ function generateEip712Schemas(modelFilePath: string, modelFiles: string[]) {
       allTypes[typeName] = {
         name: typeName,
         schema: [],
+        bigNumbers: [],
       };
       for (let property of typeProperties) {
         let [underlyingType, valueTypeName] = guessValueTypeName(property);
@@ -315,13 +316,18 @@ function generateEip712Schemas(modelFilePath: string, modelFiles: string[]) {
         if (valueTypeName.includes(".")) {
           valueTypeName = inferDirectTypeAlias(underlyingType, valueTypeName);
         }
+        const isBigNumberField = valueTypeName === "BigNumber";
         valueTypeName = renameTypeNameToEip712(valueTypeName);
 
         if (valueTypeName) {
+          const fieldName = property.getName();
           allTypes[typeName].schema.push({
-            name: property.getName(),
+            name: fieldName,
             type: valueTypeName,
           });
+          if (isBigNumberField) {
+            allTypes[typeName].bigNumbers.push(fieldName);
+          }
         }
       }
     }

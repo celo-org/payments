@@ -22,6 +22,7 @@ import { OnchainFailureError } from './errors/onchain-failure';
 import { ChainHandler } from './handlers';
 import { fetchWithRetries, parseDeepLink, verifySignature } from './helpers';
 import { buildTypedPaymentRequest } from '@celo/payments-utils';
+import BigNumber from 'bignumber.js';
 
 interface JsonRpcErrorResult extends Error {
   name: string;
@@ -173,9 +174,26 @@ export class Charge {
     }
 
     try {
-      return Ok(jsonResponse.result);
+      let result = jsonResponse.result;
+      const baseType = responseTypeDefinition.schema.find(
+        (p) => p.name === 'result'
+      ).type;
+      this.parseWithBigNumbers(result, baseType);
+      return Ok(result);
     } catch (e) {
       return Err(e);
+    }
+  }
+
+  private parseWithBigNumbers(result: any, type: string) {
+    let child = EIP712Schemas[type];
+    for (let field of child.schema) {
+      if (child.bigNumbers.includes(field.name)) {
+        result[field.name] = new BigNumber(result[field.name]);
+      }
+      if (Object.keys(EIP712Schemas).includes(field.type)) {
+        this.parseWithBigNumbers(result[field.name], field.type);
+      }
     }
   }
 
