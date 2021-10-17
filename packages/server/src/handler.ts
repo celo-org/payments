@@ -1,4 +1,5 @@
 import {
+  Abort,
   AbortParams,
   AbortRequest,
   EIP712Schemas,
@@ -27,12 +28,19 @@ import {
 import { abort, expectPayment, getInfo, initCharge } from "./routes";
 import { getKit } from "./services";
 
+interface Headers {
+  [header: string]: string;
+}
+
+type PaymentPayload = GetPaymentInfo | InitCharge | ReadyForSettlement | Abort;
+
 interface PaymentRequest extends Request {
-  headers: { [header: string]: string };
-  payload: GetPaymentInfo | InitCharge | ReadyForSettlement;
+  headers: Headers;
+  payload: PaymentPayload;
 }
 
 let chainHandler = undefined;
+export let useAuthentication: boolean = true;
 
 export async function handle(
   { payload, headers }: PaymentRequest,
@@ -42,37 +50,15 @@ export async function handle(
     chainHandler = new ContractKitTransactionHandler(await getKit());
   }
   const method = payload.method.toString();
-  let schema, schemaName;
 
-  switch (method) {
-    case GetPaymentInfoRequest.method.value:
-      schema = EIP712Schemas.GetPaymentInfo;
-      schemaName = "GetPaymentInfo";
-      break;
-    case InitChargeRequest.method.value:
-      schema = EIP712Schemas.InitCharge;
-      schemaName = "InitCharge";
-      break;
-    case ReadyForSettlementRequest.method.value:
-      schema = EIP712Schemas.ReadyForSettlement;
-      schemaName = "ReadyForSettlement";
-      break;
-    case AbortRequest.method.value:
-      schema = EIP712Schemas.Abort;
-      schemaName = "Abort";
-      break;
-  }
-
-  const validSignature = await verifySignature(
-    chainHandler,
-    headers[OffchainHeaders.SIGNATURE.toLowerCase()],
-    headers[OffchainHeaders.ADDRESS.toLowerCase()],
+  const [authenticated, response] = await handleAuthentication(
+    method,
+    headers,
     payload,
-    schema,
-    schemaName
+    res
   );
-  if (!validSignature) {
-    return unauthenticatedRequest(res, payload.id, chainHandler);
+  if (!authenticated) {
+    return response;
   }
 
   switch (method) {
@@ -97,4 +83,45 @@ export async function handle(
     default:
       return methodNotFound(res, payload.id, chainHandler);
   }
+}
+
+async function handleAuthentication(
+  method: string,
+  headers: Headers,
+  payload: PaymentPayload,
+  res: ResponseToolkit
+): Promise<[boolean, any]> {
+  if (useAuthentication) {
+    let typeDefinition;
+
+    switch (method) {
+      case GetPaymentInfoRequest.method.value:
+        typeDefinition = EIP712Schemas.GetPaymentInfo;
+        break;
+      case InitChargeRequest.method.value:
+        typeDefinition = EIP712Schemas.InitCharge;
+        break;
+      case ReadyForSettlementRequest.method.value:
+        typeDefinition = EIP712Schemas.ReadyForSettlement;
+        break;
+      case AbortRequest.method.value:
+        typeDefinition = EIP712Schemas.Abort;
+        break;
+    }
+
+    const validSignature = await verifySignature(
+      chainHandler,
+      headers[OffchainHeaders.SIGNATURE.toLowerCase()],
+      headers[OffchainHeaders.ADDRESS.toLowerCase()],
+      payload,
+      typeDefinition
+    );
+    if (!validSignature) {
+      return [
+        false,
+        await unauthenticatedRequest(res, payload.id, chainHandler),
+      ];
+    }
+  }
+  return [true, undefined];
 }

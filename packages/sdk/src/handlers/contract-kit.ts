@@ -20,8 +20,8 @@ export class ContractKitTransactionHandler implements ChainHandler {
       .getWallet()
       .getAccounts();
 
-    if (!this.blockchainAddress || !this.dekAddress) {
-      throw new Error('Missing defaultAccount or dekAccount');
+    if (!this.blockchainAddress) {
+      throw new Error('Missing defaultAccount');
     }
   }
 
@@ -106,9 +106,12 @@ export class ContractKitTransactionHandler implements ChainHandler {
   }
 
   async signTypedPaymentRequest(typedData: EIP712TypedData) {
-    return serializeSignature(
-      await this.kit.signTypedData(this.dekAddress, typedData)
-    );
+    if (this.dekAddress) {
+      return serializeSignature(
+        await this.kit.signTypedData(this.dekAddress, typedData)
+      );
+    }
+    return undefined;
   }
 
   async getChainId() {

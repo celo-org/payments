@@ -62,7 +62,7 @@ test("Use buildTypedPaymentRequest With full flat command", (t) => {
 
   const typedData = buildTypedPaymentRequest(
     message,
-    EIP712Schemas.GetPaymentInfoRequest,
+    EIP712Schemas.GetPaymentInfoRequest.schema,
     2
   );
 
@@ -106,7 +106,7 @@ test("Use buildTypedPaymentRequest With partial flat command", (t) => {
 
   const typedData = buildTypedPaymentRequest(
     message,
-    EIP712Schemas.AbortRequest,
+    EIP712Schemas.AbortRequest.schema,
     2
   );
 
@@ -161,7 +161,7 @@ test("Use buildTypedPaymentRequest With partial nested command", (t) => {
 
   const typedData = buildTypedPaymentRequest(
     message,
-    EIP712Schemas.InitChargeRequest,
+    EIP712Schemas.InitChargeRequest.schema,
     2
   );
 

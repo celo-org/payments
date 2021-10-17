@@ -1,7 +1,7 @@
 import { ResponseToolkit } from "@hapi/hapi";
 import {
-  EIP712Parameter,
   EIP712Schemas,
+  EIP712TypeDefinition,
   JsonRpcError,
   JsonRpcInvalidSignatureError,
   JsonRpcMethodNotFoundError,
@@ -37,13 +37,13 @@ export function wrapWithJsonRpc(
 
 async function offchainSign(
   message: JSON,
-  schema: EIP712Parameter[],
+  eip712TypeDefinition: EIP712TypeDefinition,
   chainHandler: ChainHandler,
   apiResponse: ResponseToolkit
 ) {
   const typedData = buildTypedPaymentRequest(
     message,
-    schema,
+    eip712TypeDefinition.schema,
     await chainHandler.getChainId()
   );
 
@@ -58,7 +58,7 @@ export async function jsonRpcSuccess(
   apiResponse: ResponseToolkit,
   jsonRpcRequestId: number,
   chainHandler: ChainHandler,
-  schema: EIP712Parameter[],
+  schema: EIP712TypeDefinition,
   result?: JSON
 ) {
   const wrappedResult = wrapWithJsonRpc(jsonRpcRequestId, result);

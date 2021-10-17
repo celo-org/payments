@@ -21,7 +21,7 @@ export interface ChainHandler {
    */
   // "any" type fixed in the authorization PR
   // eslint-disable-next-line
-  signTypedPaymentRequest: (data: any) => Promise<string>;
+  signTypedPaymentRequest: (data: any) => Promise<string | undefined>;
   /**
    * Get the address of the sender submitting this transaction to the chain
    */

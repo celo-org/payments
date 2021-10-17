@@ -44,20 +44,41 @@ export default class Init extends Command {
       char: "d",
       description: "A deep link presented by the merchant",
     }),
+    dontUseAuthentication: flags.boolean({
+      char: "a",
+      default: false,
+      description:
+        "Do not authenticate and verify every off-chain command and response",
+    }),
   };
 
   async run() {
     let {
-      flags: { privateKey, testnet, referenceId, apiBase, deepLink, dek },
+      flags: {
+        privateKey,
+        testnet,
+        referenceId,
+        apiBase,
+        deepLink,
+        dek,
+        dontUseAuthentication,
+      },
     } = this.parse(Init);
     let charge: Charge;
+    const useAuthentication = !dontUseAuthentication;
 
     try {
       privateKey =
-        privateKey ?? (await this.getPrivateKey("privateKey", testnet));
-      dek = dek ?? (await this.getPrivateKey("dataEncryptionKey", testnet));
-      const dekPublicKey = privateToPublic(Buffer.from(dek.slice(2), "hex"));
-      cli.info(`DEK public key: ${dekPublicKey.toString("hex")}`);
+        privateKey ?? (await Init.getPrivateKey("privateKey", testnet));
+      if (useAuthentication) {
+        dek = dek ?? (await Init.getPrivateKey("dataEncryptionKey", testnet));
+        const dekPublicKey = privateToPublic(Buffer.from(dek.slice(2), "hex"));
+        cli.info(`DEK public key: ${dekPublicKey.toString("hex")}`);
+      } else {
+        cli.warn(
+          "Not using DEK for authentication. No command or response will be signed or verified."
+        );
+      }
 
       const kit = createKitFromPrivateKey(testnet, privateKey, dek);
 
@@ -79,7 +100,7 @@ export default class Init extends Command {
           apiBase = await cli.prompt("Enter a PSP base URL");
         }
 
-        charge = new Charge(apiBase, referenceId, txHandler);
+        charge = new Charge(apiBase, referenceId, txHandler, useAuthentication);
       }
 
       cli.info("");
@@ -124,7 +145,7 @@ export default class Init extends Command {
               "Abort code to send [default: could_not_put_transaction]: ",
               { default: "could_not_put_transaction" }
             );
-            let code = AbortCodes.COULD_NOT_PUT_TRANSACTION;
+            let code;
             switch (codeStr) {
               case "insufficient_funds":
                 code = AbortCodes.INSUFFICIENT_FUNDS;
@@ -142,7 +163,7 @@ export default class Init extends Command {
     }
   }
 
-  private async getPrivateKey(
+  private static async getPrivateKey(
     keyName: string,
     testnet: boolean
   ): Promise<string> {

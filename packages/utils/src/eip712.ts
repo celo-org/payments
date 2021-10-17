@@ -33,7 +33,7 @@ function scanTypedSchema(
       return;
     }
 
-    const type = EIP712Schemas[parameter.type];
+    const type = EIP712Schemas[parameter.type].schema;
     if (!type) {
       throw new Error(
         `Unknown EIP712 type of parameter ${JSON.stringify(parameter)}`

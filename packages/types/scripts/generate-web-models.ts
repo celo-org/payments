@@ -282,7 +282,9 @@ function formatEip712SchemasFile(allTypes) {
   return prettier.format(
     `${eip712TypedInterfaces}
 
-    export const EIP712Schemas: EIP712Types = ${JSON.stringify(allTypes)};
+    export const EIP712Schemas: EIP712TypeDefinitions = ${JSON.stringify(
+      allTypes
+    )};
     `,
     { parser: "babel" }
   );
@@ -294,7 +296,10 @@ function generateEip712Schemas(modelFilePath: string, modelFiles: string[]) {
   for (const sourceFile of sources) {
     const [typeName, typeProperties] = extractTypeNameAndProperties(sourceFile);
     if (typeName) {
-      allTypes[typeName] = [];
+      allTypes[typeName] = {
+        name: typeName,
+        schema: [],
+      };
       for (let property of typeProperties) {
         let [underlyingType, valueTypeName] = guessValueTypeName(property);
         if (!underlyingType) continue;
@@ -313,7 +318,7 @@ function generateEip712Schemas(modelFilePath: string, modelFiles: string[]) {
         valueTypeName = renameTypeNameToEip712(valueTypeName);
 
         if (valueTypeName) {
-          allTypes[typeName].push({
+          allTypes[typeName].schema.push({
             name: property.getName(),
             type: valueTypeName,
           });

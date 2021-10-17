@@ -1,5 +1,5 @@
 import {
-  EIP712Parameter,
+  EIP712TypeDefinition,
   OffchainJsonSchema,
   PaymentMessageRequest,
   PaymentMessageResponse,
@@ -18,21 +18,22 @@ export async function verifySignature(
   signature: string,
   account: string,
   body: PaymentMessageRequest | PaymentMessageResponse,
-  schema: EIP712Parameter[],
-  schemaName: string
+  typeDefinition: EIP712TypeDefinition
 ): Promise<[boolean, ErrorObject[]]> {
   try {
     const dek = await chainHandler.getDataEncryptionKey(account);
 
     const typedData = buildTypedPaymentRequest(
       body,
-      schema,
+      typeDefinition.schema,
       await chainHandler.getChainId()
     );
 
     if (
       !ajv.validate(
-        { $ref: `OffchainJsonSchema#/components/schemas/${schemaName}` },
+        {
+          $ref: `OffchainJsonSchema#/components/schemas/${typeDefinition.name}`,
+        },
         body
       )
     ) {

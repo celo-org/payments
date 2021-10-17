@@ -3,6 +3,13 @@ export interface EIP712Parameter {
   name: string;
   type: string;
 }
+export interface EIP712TypeDefinition {
+  name: string;
+  schema: EIP712Parameter[];
+}
+export interface EIP712TypeDefinitions {
+  [key: string]: EIP712TypeDefinition;
+}
 export interface EIP712Types {
   [key: string]: EIP712Parameter[];
 }

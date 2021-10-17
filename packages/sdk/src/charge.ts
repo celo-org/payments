@@ -2,8 +2,8 @@ import { Err, ErrorResult, Ok } from '@celo/base';
 import {
   AbortCodes,
   AbortRequest,
-  EIP712Parameter,
   EIP712Schemas,
+  EIP712TypeDefinition,
   GetPaymentInfoRequest,
   InitChargeRequest,
   JsonRpcErrorResponse,
@@ -40,11 +40,13 @@ export class Charge {
    * @param apiBase url of the payment service provider implementing the protocol
    * @param referenceId reference ID of the charge
    * @param chainHandler handler to abstract away chain interaction semantics
+   * @param useAuthentication
    */
   constructor(
     public apiBase: string,
     public referenceId: string,
-    private chainHandler: ChainHandler
+    private chainHandler: ChainHandler,
+    private useAuthentication: boolean
   ) {}
 
   /**
@@ -53,26 +55,29 @@ export class Charge {
    *
    * @param deepLink encoded URI with `apiBase` and `referenceId`
    * @param chainHandler handler to abstract away chain interaction semantics
+   * @param useAuthentication should all off-chain commands be signed and verified
    * @returns an instance of the Payments class
    */
-  static fromDeepLink(deepLink: string, chainHandler: ChainHandler) {
+  static fromDeepLink(
+    deepLink: string,
+    chainHandler: ChainHandler,
+    useAuthentication: boolean = true
+  ) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
-    return new Charge(apiBase, referenceId, chainHandler);
+    return new Charge(apiBase, referenceId, chainHandler, useAuthentication);
   }
 
   /**
    * Creates authenticated requests to the `apiBase`
    *
    * @param message the HTTP body with the JSON-RPC params of the request
-   * @param requestSchema
-   * @param responseSchema
-   * @param responseSchemaName
+   * @param requestTypeDefinition
+   * @param responseTypeDefinition
    */
   private async request(
     message: PaymentMessageRequest,
-    requestSchema: EIP712Parameter[],
-    responseSchema: EIP712Parameter[],
-    responseSchemaName: string
+    requestTypeDefinition: EIP712TypeDefinition,
+    responseTypeDefinition: EIP712TypeDefinition
   ) {
     const requestId = randomInt(281474976710655);
     Object.assign(message, {
@@ -81,47 +86,54 @@ export class Charge {
     });
     const typedData = buildTypedPaymentRequest(
       message,
-      requestSchema,
+      requestTypeDefinition.schema,
       await this.chainHandler.getChainId()
     );
 
-    const signature = await this.chainHandler.signTypedPaymentRequest(
-      typedData
-    );
+    const headers = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      [OffchainHeaders.ADDRESS]: this.chainHandler.getSendingAddress(),
+    };
+
+    if (this.useAuthentication) {
+      const signature = await this.chainHandler.signTypedPaymentRequest(
+        typedData
+      );
+      Object.assign(headers, {
+        [OffchainHeaders.SIGNATURE]: signature,
+      });
+    }
+
     const request = {
       method: 'POST',
       body: JSON.stringify(message),
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        [OffchainHeaders.SIGNATURE]: signature,
-        [OffchainHeaders.ADDRESS]: this.chainHandler.getSendingAddress(),
-      },
+      headers,
     };
     const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
 
     const jsonResponse = await response.json();
 
-    const responseSignature = response.headers.get(OffchainHeaders.SIGNATURE);
-    const responseAddress = response.headers.get(OffchainHeaders.ADDRESS);
-    if (Object.keys(jsonResponse).includes('error')) {
-      responseSchema = EIP712Schemas.JsonRpcErrorResponse;
-      responseSchemaName = 'JsonRpcErrorResponse';
-    }
-    const signatureVerified = await verifySignature(
-      this.chainHandler,
-      responseSignature,
-      responseAddress,
-      jsonResponse,
-      responseSchema,
-      responseSchemaName
-    );
-    if (!signatureVerified) {
-      return Err(
-        new Error(
-          `Response signature cant be verified (signature: ${responseSignature}, address: ${responseAddress})`
-        )
+    if (this.useAuthentication) {
+      const responseSignature = response.headers.get(OffchainHeaders.SIGNATURE);
+      const responseAddress = response.headers.get(OffchainHeaders.ADDRESS);
+      if (Object.keys(jsonResponse).includes('error')) {
+        responseTypeDefinition = EIP712Schemas.JsonRpcErrorResponse;
+      }
+      const signatureVerified = await verifySignature(
+        this.chainHandler,
+        responseSignature,
+        responseAddress,
+        jsonResponse,
+        responseTypeDefinition
       );
+      if (!signatureVerified) {
+        return Err(
+          new Error(
+            `Response signature cant be verified (signature: ${responseSignature}, address: ${responseAddress})`
+          )
+        );
+      }
     }
 
     if (jsonResponse.id !== requestId) {
@@ -169,15 +181,13 @@ export class Charge {
 
   private async requestWithErrorHandling(
     params: PaymentMessageRequest,
-    schema: EIP712Parameter[],
-    responseSchema: EIP712Parameter[],
-    responseSchemaName: string
+    requestTypeDefinition: EIP712TypeDefinition,
+    responseTypeDefinition: EIP712TypeDefinition
   ) {
     const response = await this.request(
       params,
-      schema,
-      responseSchema,
-      responseSchemaName
+      requestTypeDefinition,
+      responseTypeDefinition
     );
     if (!response.ok) {
       const error = (response as ErrorResult<JsonRpcErrorResult>).error;
@@ -202,8 +212,7 @@ export class Charge {
     const response = await this.requestWithErrorHandling(
       getPaymentInfoRequest,
       EIP712Schemas.GetPaymentInfo,
-      EIP712Schemas.GetPaymentInfoResponse,
-      'GetPaymentInfoResponse'
+      EIP712Schemas.GetPaymentInfoResponse
     );
 
     // TODO: schema validation
@@ -258,8 +267,7 @@ export class Charge {
     return await this.requestWithErrorHandling(
       initChargeRequest,
       EIP712Schemas.InitCharge,
-      EIP712Schemas.InitChargeResponse,
-      'InitChargeResponse'
+      EIP712Schemas.InitChargeResponse
     );
   }
 
@@ -274,8 +282,7 @@ export class Charge {
     return await this.requestWithErrorHandling(
       readyForSettlementRequest,
       EIP712Schemas.ReadyForSettlement,
-      EIP712Schemas.ReadyForSettlementResponse,
-      'ReadyForSettlementResponse'
+      EIP712Schemas.ReadyForSettlementResponse
     );
   }
 
@@ -308,8 +315,7 @@ export class Charge {
     return await this.requestWithErrorHandling(
       abortRequest,
       EIP712Schemas.Abort,
-      EIP712Schemas.AbortResponse,
-      'AbortResponse'
+      EIP712Schemas.AbortResponse
     );
   }
 }
