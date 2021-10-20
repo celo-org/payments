@@ -20,74 +20,20 @@ info:
     </div>
 
     ## Authentication
-    All requests are signed by the <a href='https://docs.celo.org/command-line-interface/commands/account#celocli-account-register-data-encryption-key'>data encryption key (DEK)</a> of the sending wallet, and included as an HTTP `X-Signature` header.<br/>
-    We use <a href='https://eips.ethereum.org/EIPS/eip-712'>EIP712</a> as a signing schema, but simplify it by considering every item of the JSON payload as part of the message to be signed by the sender.<br/>
-    Thus, there is no need to define a `domain separator`, rather simply use the structure definitions from this document for the various data types<br/>
-    The sender should order the data values of the JSON payload alphabetically using DFS tree scanning, concatinate it to a byte array and sign.<br/>
-    A psuedo code will look like:
-    ```
-    1. bytearray = ''
-    2. Flattern the JSON tree to a list of lexicographical order keys (and its values)
-    3. For every "key":
-      3.1 t = "key" data type (according to the spec)
-      3.2 bytearray += values["key"] (data types should be encoded according to EIP-712 under the "Definition of encodeData" section)
-    4. Sign(bytearray)
-    ```
+    All requests are signed by the <a href='https://docs.celo.org/command-line-interface/commands/account#celocli-account-register-data-encryption-key'>data encryption key (DEK)</a> of the sending wallet.<br/>
+    We use <a href='https://eips.ethereum.org/EIPS/eip-712'>EIP712</a> as a signing schema, but limited only to the data models described in this document.<br/>
+    For the `domain separator` we use the structure definitions from this document for the various data types with the following modifications:<br/>
+    * `int32` and `uint32` are indicated as `int256`
+    * `uint64` is indicated as `uint256`
+    * `addresses` are treated as `strings`
 
-    For example for the following JSON payload
-    ```json
-    {
-      "id": 42910,
-      "jsonrpc": "2.0",
-      "result": {
-        "requiredPayerData": {
-          "phoneNumber": true,
-          "address": {
-            "city": true,
-            "country": true,
-            "line1": false,
-          }
-        },
-        "receiver": {
-          "accountAddress": "0x9A648e76bCa0Bc3A0Ac44C37Db6Af133B57b8896",
-          "businessData": {
-            "name": "Acme",
-            "legalName": "Acme Technologies Inc.",
-            "address": {
-              "city": "San Francisco",
-            }
-          }
-        },
-        "referenceId": "8502eb05-558d-4480-8511-c1011710b340",
-        "description": "payment request description"
-      }
-    }
-    ```
-    First, we flattern the structure (DFS) into a series of key/values -
-    ```
-    "id": 42910
-    "jsonrpc": "2.0"
-    "result.description": "payment request description"
-    "result.receiver.accountAddress": "0x9A648e76bCa0Bc3A0Ac44C37Db6Af133B57b8896"
-    "result.receiver.businessData.address.city": "San Francisco"
-    "result.receiver.businessData.legalName": "Acme Technologies Inc."
-    "result.receiver.businessData.name": "Acme"
-    "result.referenceId": "8502eb05-558d-4480-8511-c1011710b340"
-    "result.requiredPayerData.address.city": true
-    "result.requiredPayerData.address.country": true
-    "result.requiredPayerData.address.line1": false
-    "result.requiredPayerData.phoneNumber": true
-    ```
-    Now, we need to encode every value according to its data type:
-    ```
-    "id": abi.encode(42910)
-    "jsonrpc": keccak256(bytes("2.0"))
-    "result.description": keccak256(bytes("payment request description"))
-    ...
-    ```
-    and concatinate it to a single byte array: `0x000000000000000000000000000000000000000000000000000000000000a79e000000000000000000000000000000000000000000000000000000000000018000000000000000000000000000000000000000000000000000000000000001c00000000000000000000000009a648e76bca0bc3a0ac44c37db6af133b57b889600000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000240000000000000000000000000000000000000000000000000000000000000028000000000000000000000000000000000000000000000000000000000000002c000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000003322e300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001b7061796d656e742072657175657374206465736372697074696f6e0000000000000000000000000000000000000000000000000000000000000000000000000d53616e204672616e636973636f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001641636d6520546563686e6f6c6f6769657320496e632e00000000000000000000000000000000000000000000000000000000000000000000000000000000000441636d6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002438353032656230352d353538642d343438302d383531312d63313031313731306233343000000000000000000000000000000000000000000000000000000000` <br/>
-    Now, we use our DEK to sign that byte array.<br/>
-    The signature is sent over HTTP `X-Signature` header.
+    Every offchain message must include an HTTP `X-Signature` and `X-Address` headers:<br/>
+    * `X-Signature` contains the EIP712 signature
+    * `X-Address` contains the sending wallet address
+
+    When receiving an offchain message, one should query the blockchain for the sender address (`X-Address`) and fetch its most update DEK<br/>
+    Now it should calculate the EIP712 typed data structure and verify the given signature (`X-Signature`) using the retreived DEK<br/>
+    <b>The offchain response must be signed in the same way</b><br/>
 
     For all invalid signature errors we recommend PSPs return a 400 error code.<br/>
   x-logo:
@@ -827,6 +773,9 @@ tags:
   - name: ReadyForSettlementModel
     x-displayName: ReadyForSettlement Request (ReadyForSettlementParams)
     description: <SchemaDefinition schemaRef="#/components/schemas/ReadyForSettlementParams"/>
+  - name: AbortModel
+    x-displayName: Abort Request (AbortParams)
+    description: <SchemaDefinition schemaRef="#/components/schemas/AbortParams"/>
   - name: JsonRpcInvalidParameterErrorModel
     x-displayName: Invalid Parameter (JsonRpcInvalidParameterError)
     description: <SchemaDefinition schemaRef="#/components/schemas/JsonRpcInvalidParameterError"/>
@@ -862,6 +811,7 @@ x-tagGroups:
       - GetPaymentInfoResponse
       - InitChargeModel
       - ReadyForSettlementModel
+      - AbortModel
   - name: ErrorModels
     x-displayName: Errors
     tags:
