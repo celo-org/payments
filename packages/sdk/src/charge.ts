@@ -175,10 +175,13 @@ export class Charge {
 
     try {
       let result = jsonResponse.result;
-      const baseType = responseTypeDefinition.schema.find(
+      const resultParamater = responseTypeDefinition.schema.find(
         (p) => p.name === 'result'
-      ).type;
-      this.parseWithBigNumbers(result, baseType);
+      );
+      if (resultParamater && resultParamater.type) {
+        const baseType = resultParamater.type;
+        this.parseWithBigNumbers(result, baseType);
+      }
       return Ok(result);
     } catch (e) {
       return Err(e);
@@ -239,42 +242,23 @@ export class Charge {
   }
 
   /**
-   * Performs the InitCharge and ReadyForSettlement requests of the Celo Payments Protocol.
+   * Performs the InitCharge request of the Celo Payments Protocol to initiate the payment flow
+   * If you want a complete sequence - use `submit` function of this class
    *
    * @param payerData
    * @returns
    */
-  async submit(payerData: PayerData) {
-    if (!this.paymentInfo) {
-      return Err(new Error('getInfo() has not been called'));
-    }
-
+  async initCharge(payerData: PayerData): Promise<void> {
     // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo
     );
 
-    const response = await this.sendInitChargeRequest(
-      payerData,
-      transactionHash
-    );
-
-    await this.sendReadyForSettlementRequest();
-
-    await this.submitTransactionOnChain();
-
-    return response;
-  }
-
-  private async sendInitChargeRequest(
-    payerData: PayerData,
-    transactionHash: string
-  ) {
     const initChargeRequest: InitChargeRequest = {
       method: InitChargeRequest.method.value,
       params: {
         sender: {
-          accountAddress: await this.chainHandler.getSendingAddress(),
+          accountAddress: this.chainHandler.getSendingAddress(),
           payerData,
         },
         referenceId: this.referenceId,
@@ -282,14 +266,21 @@ export class Charge {
       },
     };
 
-    return await this.requestWithErrorHandling(
+    await this.requestWithErrorHandling(
       initChargeRequest,
       EIP712Schemas.InitCharge,
       EIP712Schemas.InitChargeResponse
     );
   }
 
-  private async sendReadyForSettlementRequest() {
+  /**
+   * Performs the ReadyForSettlement request of the Celo Payments Protocol
+   * If you want a complete sequence - use `submit` function of this class
+   *
+   * @returns
+   */
+
+  async readyForSettlement() {
     const readyForSettlementRequest: ReadyForSettlementRequest = {
       method: ReadyForSettlementRequest.method.value,
       params: {
@@ -304,7 +295,13 @@ export class Charge {
     );
   }
 
-  private async submitTransactionOnChain() {
+  /**
+   * Submit the on-chain transaction
+   * If you want a complete sequence - use `submit` function of this class
+   *
+   * @returns
+   */
+  async submitTransactionOnChain() {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
@@ -315,6 +312,24 @@ export class Charge {
       // TODO: retries?
       throw new OnchainFailureError(AbortCodes.COULD_NOT_PUT_TRANSACTION);
     }
+  }
+
+  /**
+   * Performs the InitCharge and ReadyForSettlement requests of the Celo Payments Protocol.
+   *
+   * @param payerData
+   * @returns
+   */
+  async submit(payerData: PayerData): Promise<void> {
+    if (!this.paymentInfo) {
+      throw new Error('getInfo() has not been called');
+    }
+
+    await this.initCharge(payerData);
+
+    await this.readyForSettlement();
+
+    await this.submitTransactionOnChain();
   }
 
   /**
