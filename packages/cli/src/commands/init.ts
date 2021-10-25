@@ -63,6 +63,10 @@ export default class Init extends Command {
       }
     }
 
+    if (!dek || dek === privateKey) {
+      dek = await cli.prompt("Enter a DEK" , { type: "hide" })
+    }
+
     const kit = newKit(
       testnet
         ? "https://alfajores-forno.celo-testnet.org"
