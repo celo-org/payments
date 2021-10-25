@@ -50,6 +50,7 @@ celocli account:register-data-encryption-key --from $accountAddress -k privateKe
 ```
 
 TODO: explain why the private key generated above in `account:new` can't be used as a DEK and a different private key needs to be used.
+
 TODO: add an easy way to generate a DEK or to bypass it completely
 
 ## How to run each package
@@ -65,4 +66,8 @@ You can run `yarn start` to run the server with hot-reloading enabled. It will r
 ### The payments CLI
 
 Run the payment CLI in interactive mode `yarn cli init -p <PRIVATE_KEY> -d <DEK> -u http://localhost:3000 -r SIMPLE` from the root of the repository. You can also see the full list of available flags via `yarn cli init --help` and all available commands via `yarn cli help`.
-You may also omit all the flags to run the command interactively. (TODO: add an option to add the dek interactively)
+You may also omit all the flags to run the command interactively.
+
+TODO: add an option to add the dek interactively
+
+The reference servers implements two types of payments: KYC and SIMPLE, you try both via the `-r` flag. If you decide to implement a new purchase example, you can find them in the folder `packages/server/src/storage/items`.
