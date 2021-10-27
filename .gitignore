@@ -12,3 +12,5 @@ package-lock.json
 **/lib
 
 **/.env
+
+.history

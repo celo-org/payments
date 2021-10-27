@@ -118,13 +118,16 @@ export class Charge {
     if (this.useAuthentication) {
       const responseSignature = response.headers.get(OffchainHeaders.SIGNATURE);
       const responseAddress = response.headers.get(OffchainHeaders.ADDRESS);
+      const authenticationHeaders = {
+        [OffchainHeaders.SIGNATURE]: responseSignature,
+        [OffchainHeaders.ADDRESS]: responseAddress,
+      };
       if (Object.keys(jsonResponse).includes('error')) {
         responseTypeDefinition = EIP712Schemas.JsonRpcErrorResponse;
       }
       const signatureVerified = await verifySignature(
         this.chainHandler,
-        responseSignature,
-        responseAddress,
+        authenticationHeaders,
         jsonResponse,
         responseTypeDefinition
       );

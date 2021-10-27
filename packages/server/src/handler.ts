@@ -1,26 +1,20 @@
 import {
+  AuthenticationHeaders,
+  ContractKitTransactionHandler,
+  verifyRequestSignature,
+} from "@celo/payments-sdk";
+import {
   Abort,
   AbortParams,
-  AbortRequest,
-  EIP712Schemas,
   GetPaymentInfo,
   GetPaymentInfoParams,
-  GetPaymentInfoRequest,
   InitCharge,
   InitChargeParams,
-  InitChargeRequest,
   JsonRpcMethods,
-  OffchainHeaders,
   ReadyForSettlement,
   ReadyForSettlementParams,
-  ReadyForSettlementRequest,
 } from "@celo/payments-types";
 import { Request, ResponseToolkit } from "@hapi/hapi";
-
-import {
-  ContractKitTransactionHandler,
-  verifySignature,
-} from "@celo/payments-sdk";
 import {
   methodNotFound,
   unauthenticatedRequest,
@@ -49,10 +43,8 @@ export async function handle(
   if (!chainHandler) {
     chainHandler = new ContractKitTransactionHandler(await getKit());
   }
-  const method = payload.method.toString();
 
   const [authenticated, response] = await handleAuthentication(
-    method,
     headers,
     payload,
     res
@@ -61,6 +53,7 @@ export async function handle(
     return response;
   }
 
+  const method = payload.method.toString();
   switch (method) {
     case JsonRpcMethods.GetInfo:
       const getPaymentInfoParams = payload.params as GetPaymentInfoParams;
@@ -86,35 +79,15 @@ export async function handle(
 }
 
 async function handleAuthentication(
-  method: string,
   headers: Headers,
   payload: PaymentPayload,
   res: ResponseToolkit
 ): Promise<[boolean, any]> {
   if (useAuthentication) {
-    let typeDefinition;
-
-    switch (method) {
-      case GetPaymentInfoRequest.method.value:
-        typeDefinition = EIP712Schemas.GetPaymentInfo;
-        break;
-      case InitChargeRequest.method.value:
-        typeDefinition = EIP712Schemas.InitCharge;
-        break;
-      case ReadyForSettlementRequest.method.value:
-        typeDefinition = EIP712Schemas.ReadyForSettlement;
-        break;
-      case AbortRequest.method.value:
-        typeDefinition = EIP712Schemas.Abort;
-        break;
-    }
-
-    const validSignature = await verifySignature(
+    const validSignature = await verifyRequestSignature(
       chainHandler,
-      headers[OffchainHeaders.SIGNATURE.toLowerCase()],
-      headers[OffchainHeaders.ADDRESS.toLowerCase()],
-      payload,
-      typeDefinition
+      headers as unknown as AuthenticationHeaders,
+      payload
     );
     if (!validSignature) {
       return [
