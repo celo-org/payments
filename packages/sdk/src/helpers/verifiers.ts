@@ -14,7 +14,7 @@ import { buildTypedPaymentRequest } from '@celo/payments-utils';
 import { AddressUtils } from '@celo/utils';
 import { verifyEIP712TypedDataSigner } from '@celo/utils/lib/signatureUtils';
 import Ajv, { ErrorObject } from 'ajv';
-import { ChainHandler } from '../handlers';
+import { ChainHandlerForAuthentication } from '../handlers';
 
 const ajv = new Ajv({ strictSchema: false, validateFormats: false });
 ajv.addSchema(OffchainJsonSchema, 'OffchainJsonSchema');
@@ -25,7 +25,7 @@ export interface AuthenticationHeaders {
 }
 
 export async function verifySignature(
-  chainHandler: ChainHandler,
+  chainHandler: ChainHandlerForAuthentication,
   authorizationHeaders: AuthenticationHeaders,
   body: PaymentMessageRequest | PaymentMessageResponse,
   typeDefinition: EIP712TypeDefinition
@@ -67,7 +67,7 @@ export async function verifySignature(
 }
 
 export async function verifyRequestSignature(
-  chainHandler: ChainHandler,
+  chainHandler: ChainHandlerForAuthentication,
   authorizationHeaders: AuthenticationHeaders,
   body: PaymentMessageRequest
 ): Promise<[boolean, ErrorObject[]]> {
