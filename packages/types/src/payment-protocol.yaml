@@ -48,26 +48,27 @@ paths:
       operationId: getPaymentInfo
       deprecated: false
       summary: Get Payment Info
-      description: Allows the wallet to obtain payment information from First, given
+      description:
+        Allows the wallet to obtain payment information from First, given
         a reference id. In most cases, this would be the first method invoked by the
         wallet
       tags:
         - Payments
-      parameters: [ ]
+      parameters: []
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/GetPaymentInfoResponse"
-        '404':
+        "404":
           description: The method does not exist / is not available
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
-        '400':
+        "400":
           description: One or more parameters are invalid (including reference ID not found)
           content:
             application/json:
@@ -88,25 +89,26 @@ paths:
       operationId: initCharge
       deprecated: false
       summary: Init Charge
-      description: This functionality allows the wallet to initiate the payment process
+      description:
+        This functionality allows the wallet to initiate the payment process
         with First, based on the payment details provided.
       tags:
         - Payments
-      parameters: [ ]
+      parameters: []
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/InitChargeResponse"
-        '404':
+        "404":
           description: The method does not exist / is not available
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
-        '400':
+        "400":
           description: One or more parameters are invalid (including reference ID not found)
           content:
             application/json:
@@ -133,21 +135,21 @@ paths:
       description: Allows the wallet to indicate the payment was put on- chain and is ready for settlement. The wallet is expected to submit a transaction on-chain
       tags:
         - Payments
-      parameters: [ ]
+      parameters: []
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ReadyForSettlementResponse"
-        '404':
+        "404":
           description: The method does not exist / is not available
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
-        '400':
+        "400":
           description: One or more parameters are invalid (including reference ID not found)
           content:
             application/json:
@@ -172,21 +174,21 @@ paths:
       description: Allows the wallet to abort a payment
       tags:
         - Payments
-      parameters: [ ]
+      parameters: []
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/AbortResponse"
-        '404':
+        "404":
           description: The method does not exist / is not available
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
-        '400':
+        "400":
           description: One or more parameters are invalid (including reference ID not found)
           content:
             application/json:
@@ -204,7 +206,7 @@ paths:
             schema:
               "$ref": "#/components/schemas/Abort"
 
-x-headers: [ ]
+x-headers: []
 components:
   schemas:
     JsonRpcProtocol:
@@ -219,7 +221,7 @@ components:
           description: Request ID
         jsonrpc:
           type: string
-          default: '2.0'
+          default: "2.0"
           description: JSON-RPC Version (2.0)
     JsonRpcRequired:
       allOf:
@@ -262,6 +264,17 @@ components:
             - type: boolean
             - type: integer
             - type: number
+    JsonRpcInvalidRequestError:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcError"
+        - type: object
+          properties:
+            code:
+              type: integer
+              format: int32
+              enum:
+                - -32600
+              description: Invalid request
     JsonRpcMethodNotFoundError:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcError"
@@ -402,7 +415,8 @@ components:
         message: Signature header missing or could not be verified
     ReferenceId:
       type: string
-      description: Unique reference ID of this payment. This value should be globally
+      description:
+        Unique reference ID of this payment. This value should be globally
         unique
       format: uuid
     GetPaymentInfo:
@@ -497,7 +511,7 @@ components:
           description: Address line 2 - apartment, unit, etc.
         postalCode:
           type: string
-          example: '94103'
+          example: "94103"
           description: ZIP or postal code
         state:
           type: string
@@ -520,7 +534,8 @@ components:
       properties:
         idValue:
           type: string
-          description: Indicates the national ID value - for example, a social security
+          description:
+            Indicates the national ID value - for example, a social security
             number
         country:
           type: string
@@ -596,7 +611,7 @@ components:
           type: string
           format: hex
           description: The blockchain address of the receiver account
-          example: '0x9A648e76bCa0Bc3A0Ac44C37Db6Af133B57b8896'
+          example: "0x9A648e76bCa0Bc3A0Ac44C37Db6Af133B57b8896"
         businessData:
           "$ref": "#/components/schemas/BusinessData"
     PaymentAction:
@@ -614,25 +629,29 @@ components:
               minimum: 0
               format: uint64
               example: 452
-              description: Amount of the transfer. Base units are the same as for on-chain
+              description:
+                Amount of the transfer. Base units are the same as for on-chain
                 transactions for this currency.
             - type: string
-              example: '100000000000000000'
-              description: A string representation of the Amount of the transfer. Base units are the same as for on-chain
+              example: "100000000000000000"
+              description:
+                A string representation of the Amount of the transfer. Base units are the same as for on-chain
                 transactions for this currency. Strings should be used only for BigNumbers
         currency:
           type: string
           enum:
             - cUSD
           default: cUSD
-          description: One of the supported on-chain currency types, e.g. cUSD. At
+          description:
+            One of the supported on-chain currency types, e.g. cUSD. At
             the moment, cUSD is the only allowed value.
         action:
           type: string
           enum:
             - charge
           default: charge
-          description: This value indicates the requested action to perform. At the
+          description:
+            This value indicates the requested action to perform. At the
             moment, charge is the only allowed value.
         timestamp:
           type: integer
@@ -757,7 +776,6 @@ components:
     AbortResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcProtocol"
-
 
 tags:
   - name: Payments

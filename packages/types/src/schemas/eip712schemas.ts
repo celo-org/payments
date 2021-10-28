@@ -184,6 +184,14 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     ],
     bigNumbers: [],
   },
+  JsonRpcInvalidRequestError: {
+    name: "JsonRpcInvalidRequestError",
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
+    bigNumbers: [],
+  },
   JsonRpcInvalidSignatureError: {
     name: "JsonRpcInvalidSignatureError",
     schema: [

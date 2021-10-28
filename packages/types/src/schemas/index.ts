@@ -18,6 +18,7 @@ export * from "./JsonRpcError";
 export * from "./JsonRpcErrorResponse";
 export * from "./JsonRpcInvalidCommandTypeError";
 export * from "./JsonRpcInvalidParameterError";
+export * from "./JsonRpcInvalidRequestError";
 export * from "./JsonRpcInvalidSignatureError";
 export * from "./JsonRpcMethodNotFoundError";
 export * from "./JsonRpcMissingInformationError";
