@@ -42,16 +42,16 @@ celocli account:register --from $accountAddress -k $privateKey
 
 For the server to know about your DEK, your account created above _needs_ to be [registered](https://docs.celo.org/command-line-interface/account#celocli-accountregister) and have the public key of your DEK [registered too](https://docs.celo.org/command-line-interface/account#celocli-accountregister-data-encryption-key).
 
-To do this, these commands may be useful:
+##### Why do you need a DEK?
+
+First, some context: the payment SDK is meant to be used within Valora initially, and they already handle creating keys and accounts under the hood for the user. However, it's important to understand why you need to sign with a different key than the root key of your account. Generally we want a separation of concerns when dealing with private keys, they should do one thing and one thing only. Your account key, as it can move funds, is like the keys to the castle and should be kept as cold as possible. Your DEK, vote signing key, etc are less sensitive a
+
+In order to do that, this command may be useful:
 
 ```
 # Register a public data encryption key
 celocli account:register-data-encryption-key --from $accountAddress -k privateKey --publicKey <DEK_PUBLIC_KEY>
 ```
-
-TODO: explain why the private key generated above in `account:new` can't be used as a DEK and a different private key needs to be used.
-
-TODO: add an easy way to generate a DEK or to bypass it completely
 
 ## How to run each package
 
@@ -67,7 +67,5 @@ You can run `yarn start` to run the server with hot-reloading enabled. It will r
 
 Run the payment CLI in interactive mode `yarn cli init -p <PRIVATE_KEY> -d <DEK> -u http://localhost:3000 -r SIMPLE` from the root of the repository. You can also see the full list of available flags via `yarn cli init --help` and all available commands via `yarn cli help`.
 You may also omit all the flags to run the command interactively.
-
-TODO: add an option to add the dek interactively
 
 The reference servers implements two types of payments: KYC and SIMPLE, you try both via the `-r` flag. If you decide to implement a new purchase example, you can find them in the folder `packages/server/src/storage/items`.
