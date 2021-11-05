@@ -6,7 +6,7 @@ import {
   InitChargeRequest,
   OffchainHeaders,
   OffchainJsonSchema,
-  PaymentMessageRequest,
+  PaymentMessage,
   PaymentMessageResponse,
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
@@ -25,15 +25,29 @@ export interface AuthenticationHeaders {
   [OffchainHeaders.ADDRESS]: string;
 }
 
+function extractHeader(headers: AuthenticationHeaders, headerName: string) {
+  if (Object.keys(headers).includes(headerName)) {
+    return headers[headerName];
+  }
+
+  if (Object.keys(headers).includes(headerName.toLowerCase())) {
+    return headers[headerName.toLowerCase()];
+  }
+
+  return headers[headerName.toUpperCase()];
+}
+
 export async function verifySignature(
   chainHandler: ChainHandlerForAuthentication,
   authorizationHeaders: AuthenticationHeaders,
-  body: PaymentMessageRequest | PaymentMessageResponse,
+  body: PaymentMessage | PaymentMessageResponse,
   typeDefinition: EIP712TypeDefinition
 ): Promise<[boolean, ErrorObject[]]> {
-  const signature =
-    authorizationHeaders[OffchainHeaders.SIGNATURE.toLowerCase()];
-  const account = authorizationHeaders[OffchainHeaders.ADDRESS.toLowerCase()];
+  const signature = extractHeader(
+    authorizationHeaders,
+    OffchainHeaders.SIGNATURE
+  );
+  const account = extractHeader(authorizationHeaders, OffchainHeaders.ADDRESS);
 
   try {
     const [isSchemaValid, schemaErrors] = validateSchema(body, typeDefinition);
@@ -64,7 +78,7 @@ export async function verifySignature(
 export async function verifyRequestSignature(
   chainHandler: ChainHandlerForAuthentication,
   authorizationHeaders: AuthenticationHeaders,
-  body: PaymentMessageRequest
+  body: PaymentMessage
 ): Promise<[boolean, ErrorObject[]]> {
   const method = body.method.toString();
 
@@ -79,7 +93,7 @@ export async function verifyRequestSignature(
 }
 
 export function validateSchema(
-  body: PaymentMessageRequest | PaymentMessageResponse,
+  body: PaymentMessage | PaymentMessageResponse,
   typeDefinition: EIP712TypeDefinition
 ): [boolean, ErrorObject[]] {
   if (
@@ -95,7 +109,7 @@ export function validateSchema(
   return [true, []];
 }
 
-export async function validateRequestSchema(body: PaymentMessageRequest) {
+export async function validateRequestSchema(body: PaymentMessage) {
   const method = body.method.toString();
   const typeDefinition = getTypeDefinitionByMethod(method);
   if (

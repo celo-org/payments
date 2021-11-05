@@ -5,6 +5,7 @@ import {
   EIP712TypedData,
   EIP712Types,
 } from "@celo/payments-types";
+import { sortTypedData } from "./sort-functions";
 
 function scanTypedSchema(
   message: EIP712ObjectValue,
@@ -49,7 +50,7 @@ export function buildTypedPaymentRequest(
   schema: EIP712Parameter[],
   chainId: number
 ): EIP712TypedData {
-  const schemaBag: EIP712Types = {};
+  let schemaBag: EIP712Types = {};
   scanTypedSchema(message, schema, schemaBag, "Request");
 
   const typedData = {
@@ -70,5 +71,5 @@ export function buildTypedPaymentRequest(
     message,
   };
 
-  return typedData;
+  return sortTypedData(typedData);
 }

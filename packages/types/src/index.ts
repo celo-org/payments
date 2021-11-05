@@ -5,6 +5,7 @@ import {
   GetPaymentInfoResponse,
   InitChargeRequest,
   InitChargeResponse,
+  JsonRpcProtocol,
   ReadyForSettlementRequest,
   ReadyForSettlementResponse,
 } from "./schemas";
@@ -24,3 +25,5 @@ export type PaymentMessageResponse =
   | InitChargeResponse
   | ReadyForSettlementResponse
   | AbortResponse;
+
+export type PaymentMessage = JsonRpcProtocol & PaymentMessageRequest;

@@ -43,7 +43,7 @@ export async function getKit(): Promise<ContractKit> {
   if (context["kit"]) return context["kit"];
 
   const keys = await getAccountKeys();
-  Object.assign(context, ...keys);
+  Object.assign(context, keys);
   context["kit"] = createKitFromPrivateKey(
     keys["privateKey"],
     keys["dataEncryptionKey"]

@@ -27,6 +27,63 @@ info:
     * `uint64` is indicated as `uint256`
     * `addresses` are treated as `strings`
 
+    Before signing a message, one must sort it alphabetically (ordering by the object keys), to ensure signature consistency.<br/>
+    For the `types` property, the array should be sorted using the name parameters of every field<br/>
+    For an example, even if the message is 
+    ```json
+    {
+      types: {
+        EIP712Domain: [
+          { name: 'version', type: 'string' },
+          { name: 'name', type: 'string' },
+          { name: 'chainId', type: 'uint256' },
+        ],
+        GetPaymentInfoParams: [{ name: 'referenceId', type: 'string' }],
+        Request: [
+          { name: 'method', type: 'string' },
+          { name: 'id', type: 'int256' },
+          { name: 'params', type: 'GetPaymentInfoParams' },
+          { name: 'jsonrpc', type: 'string' },
+        ],
+      },
+      domain: { name: 'Celo Payments', version: '1', chainId: 44787 },
+      primaryType: 'Request',
+      message: {
+        id: 106072111072212,
+        jsonrpc: '2.0',
+        method: 'getPaymentInfo',
+        params: { referenceId: '00000000-0000-0000-0000000000' },
+      }
+    }
+    ```
+    The signature is expected to be calculated from:
+    ```json
+    {
+      domain: { name: 'Celo Payments', version: '1', chainId: 44787 },
+      message: {
+        id: 106072111072212,
+        jsonrpc: '2.0',
+        method: 'getPaymentInfo',
+        params: { referenceId: '00000000-0000-0000-0000000000' },
+      },
+      primaryType: 'Request',
+      types: {
+        EIP712Domain: [
+          { name: 'chainId', type: 'uint256' },
+          { name: 'name', type: 'string' },
+          { name: 'version', type: 'string' },
+        ],
+        GetPaymentInfoParams: [{ name: 'referenceId', type: 'string' }],
+        Request: [
+          { name: 'id', type: 'int256' },
+          { name: 'jsonrpc', type: 'string' },
+          { name: 'method', type: 'string' },
+          { name: 'params', type: 'GetPaymentInfoParams' },
+        ],
+      }
+    }
+    ``` 
+
     Every offchain message must include an HTTP `X-Signature` and `X-Address` headers:<br/>
     * `X-Signature` contains the EIP712 signature
     * `X-Address` contains the sending wallet address
