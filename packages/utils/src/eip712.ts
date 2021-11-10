@@ -2,8 +2,8 @@ import {
   EIP712ObjectValue,
   EIP712Parameter,
   EIP712Schemas,
-  EIP712TypedData,
   EIP712Types,
+  EIP712TypedData,
 } from "@celo/payments-types";
 import { sortTypedData } from "./sort-functions";
 

@@ -82,7 +82,7 @@ export default class Init extends Command {
 
       const kit = createKitFromPrivateKey(testnet, privateKey, dek);
 
-      const txHandler = new ContractKitTransactionHandler(kit);
+      const chainHandler = new ContractKitTransactionHandler(kit);
 
       if (!deepLink) {
         deepLink = await cli.prompt(
@@ -91,7 +91,7 @@ export default class Init extends Command {
         );
       }
       if (deepLink) {
-        charge = Charge.fromDeepLink(deepLink, txHandler);
+        charge = Charge.fromDeepLink(deepLink, chainHandler);
       } else {
         if (!referenceId) {
           referenceId = await cli.prompt("Enter a purchase reference ID");
@@ -100,7 +100,12 @@ export default class Init extends Command {
           apiBase = await cli.prompt("Enter a PSP base URL");
         }
 
-        charge = new Charge(apiBase, referenceId, txHandler, useAuthentication);
+        charge = new Charge(
+          apiBase,
+          referenceId,
+          chainHandler,
+          useAuthentication
+        );
       }
 
       cli.info("");

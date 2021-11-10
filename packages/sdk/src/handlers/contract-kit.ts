@@ -49,23 +49,6 @@ export class ContractKitTransactionHandler implements ChainHandler {
       await this.kit.contracts.getGasPriceMinimum();
     const gasPriceMinimum = await gasPriceMinimumWrapper.gasPriceMinimum();
 
-    // const data = txo.encodeABI();
-    // const params = {
-    //   to: stableTokenAddress,
-    //   from: contractKit.kit.defaultAccount,
-    //   gasPrice: disbursement.gasPrice,
-    //   gas: disbursement.estimatedGasPerTransfer,
-    //   data,
-    //   chainId: contractKit.chainId,
-    //   nonce: transfers[i].nonce,
-    //   feeCurrency: stableTokenAddress,
-    //   gatewayFeeRecipient: '0x',
-    //   gatewayFee: '0x0',
-    //   common: '0x',
-    //   chain: '0x',
-    //   hardfork: '0x',
-    // };
-
     const { txo } = stable.transfer(
       info.receiver.accountAddress,
       info.action.amount.toString()
