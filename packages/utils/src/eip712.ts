@@ -1,18 +1,66 @@
-import { PaymentMessageRequest } from "@celo/payments-types";
+import {
+  EIP712ObjectValue,
+  EIP712Parameter,
+  EIP712Schemas,
+  EIP712Types,
+  EIP712TypedData,
+} from "@celo/payments-types";
+import { sortTypedData } from "./sort-functions";
+
+function scanTypedSchema(
+  message: EIP712ObjectValue,
+  schema: EIP712Parameter[],
+  schemasBag: EIP712Types,
+  schemaBagName: string
+) {
+  Object.entries(message).forEach(([propName, value]) => {
+    // not allowed in JSON anyway...
+    if (value === undefined) {
+      return;
+    }
+    const parameter = schema.find(({ name }) => name === propName);
+    if (!parameter) {
+      throw new Error(
+        `Unknown EIP712 type of parameter ${parameter}, for message value ${propName}: ${value}`
+      );
+    }
+
+    if (!schemasBag[schemaBagName]) {
+      schemasBag[schemaBagName] = [];
+    }
+    schemasBag[schemaBagName].push(parameter);
+
+    if (["string", "uint256", "int256", "bool"].includes(parameter.type)) {
+      return;
+    }
+
+    const type = EIP712Schemas[parameter.type].schema;
+    if (!type) {
+      throw new Error(
+        `Unknown EIP712 type of parameter ${JSON.stringify(parameter)}`
+      );
+    }
+
+    scanTypedSchema(value, type, schemasBag, parameter.type);
+  });
+}
 
 export function buildTypedPaymentRequest(
-  message: PaymentMessageRequest,
+  message: any,
+  schema: EIP712Parameter[],
   chainId: number
-) {
-  const encodedMessage = JSON.stringify(message);
-  return {
+): EIP712TypedData {
+  let schemaBag: EIP712Types = {};
+  scanTypedSchema(message, schema, schemaBag, "Request");
+
+  const typedData = {
     types: {
       EIP712Domain: [
         { name: "name", type: "string" },
         { name: "version", type: "string" },
         { name: "chainId", type: "uint256" },
       ],
-      Request: [{ name: "encodedMessage", type: "string" }],
+      ...schemaBag,
     },
     primaryType: "Request",
     domain: {
@@ -20,8 +68,8 @@ export function buildTypedPaymentRequest(
       version: "1",
       chainId,
     },
-    message: {
-      encodedMessage,
-    },
+    message,
   };
+
+  return sortTypedData(typedData);
 }

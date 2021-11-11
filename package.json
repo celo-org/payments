@@ -15,6 +15,7 @@
     "build": "lerna run build",
     "postinstall": "lerna bootstrap",
     "start": "yarn lerna run start --stream",
+    "setup:server": "yarn --cwd ./packages/server setup",
     "cli": "yarn build && yarn --cwd ./packages/cli cli",
     "generate-web-models": "yarn --cwd ./packages/types web-models:build",
     "publish": "./scripts/deploy"
@@ -30,8 +31,5 @@
     "lerna": "^4.0.0",
     "prettier": "^2.3.2",
     "typescript": "^4.4.3"
-  },
-  "resolutions": {
-    "@celo/utils": "1.2.0"
   }
 }
