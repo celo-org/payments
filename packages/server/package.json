@@ -3,14 +3,19 @@
   "version": "0.0.4-dev",
   "scripts": {
     "start": "ts-node-dev ./bin/index.ts",
+    "setup": "ts-node-dev bin/setup.ts",
     "build": "tsc -b ."
   },
   "dependencies": {
+    "@celo/payments-sdk": "0.0.4-dev",
     "@celo/payments-types": "0.0.4-dev",
     "@celo/payments-utils": "0.0.0",
     "@celo/utils": "1.3.1",
     "@hapi/hapi": "^20.1.5",
-    "abi-decoder": "^2.4.0"
+    "abi-decoder": "^2.4.0",
+    "ajv": "^8.6.3",
+    "bignumber.js": "^9.0.1",
+    "ethereumjs-util": "^7.1.2"
   },
   "devDependencies": {
     "ts-node-dev": "^1.1.8"

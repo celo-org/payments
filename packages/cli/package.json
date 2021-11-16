@@ -27,6 +27,7 @@
     "@celo/payments-types": "0.0.4-dev",
     "@oclif/command": "^1.8.0",
     "@oclif/plugin-help": "^3.2.2",
+    "bignumber.js": "^9.0.1",
     "cli-ux": "^5.6.3"
   }
 }

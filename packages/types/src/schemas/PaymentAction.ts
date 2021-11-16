@@ -1,15 +1,13 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import BigNumber from "bignumber.js";
 
 /**
  * Information regarding the type of payment and payment amount
  */
 export type PaymentAction = {
-    /**
-     * Amount of the transfer. Base units are the same as for on-chain transactions for this currency.
-     */
-    amount: number;
+    amount: BigNumber;
     /**
      * One of the supported on-chain currency types, e.g. cUSD. At the moment, cUSD is the only allowed value.
      */

@@ -1,11 +1,14 @@
-import { newKit } from "@celo/contractkit";
 import cli from "cli-ux";
 import { Command, flags } from "@oclif/command";
 import { Charge, ContractKitTransactionHandler } from "@celo/payments-sdk";
 import { AbortCodes, PaymentInfo } from "@celo/payments-types";
-import { getAccount } from "../helpers";
-import { CeloAccountPrivateKeyFilePath } from "../helpers/create-account";
+import { getAccountKeys } from "../helpers";
+import {
+  CeloAccountPrivateKeyFilePath,
+  createKitFromPrivateKey,
+} from "../helpers/create-account";
 import { OnchainFailureError } from "@celo/payments-sdk/build/main/errors/onchain-failure";
+import { privateToPublic } from "ethereumjs-util";
 
 export default class Init extends Command {
   static description = "Create a charge and interactively submit it";
@@ -29,7 +32,7 @@ export default class Init extends Command {
       description: "Private key of the purchaser",
     }),
     dek: flags.string({
-      char: "d",
+      char: "e",
       description: "Private DEK of the purchaser",
     }),
     testnet: flags.boolean({
@@ -41,124 +44,138 @@ export default class Init extends Command {
       char: "d",
       description: "A deep link presented by the merchant",
     }),
+    dontUseAuthentication: flags.boolean({
+      char: "a",
+      default: false,
+      description:
+        "Do not authenticate and verify every off-chain command and response",
+    }),
   };
 
   async run() {
     let {
-      flags: { privateKey, testnet, referenceId, apiBase, deepLink, dek },
+      flags: {
+        privateKey,
+        testnet,
+        referenceId,
+        apiBase,
+        deepLink,
+        dek,
+        dontUseAuthentication,
+      },
     } = this.parse(Init);
     let charge: Charge;
+    const useAuthentication = !dontUseAuthentication;
 
-    if (!privateKey) {
-      privateKey = await cli.prompt(
-        "Enter a private key to sign transactions with",
-        { type: "hide", required: false }
-      );
-      if (!privateKey) {
-        cli.info(
-          `No private key! generating new one (or using the one save @ ${CeloAccountPrivateKeyFilePath})...`
-        );
-        privateKey = (await getAccount()).privateKey;
-        cli.info(`privateKey: ${privateKey}`);
-      }
-    }
-
-    if (!dek || dek === privateKey) {
-      dek = await cli.prompt("Enter a DEK" , { type: "hide" })
-    }
-
-    const kit = newKit(
-      testnet
-        ? "https://alfajores-forno.celo-testnet.org"
-        : "https://forno.celo.org"
-    );
-    kit.addAccount(privateKey);
-    kit.addAccount(dek);
-    const [defaultAccount] = kit.getWallet().getAccounts();
-    kit.defaultAccount = defaultAccount;
-
-    const txHandler = new ContractKitTransactionHandler(kit);
-
-    if (!deepLink) {
-      deepLink = await cli.prompt(
-        "Enter a deep link or press <Enter> to skip",
-        { required: false }
-      );
-    }
-    if (deepLink) {
-      charge = Charge.fromDeepLink(deepLink, txHandler);
-    } else {
-      if (!referenceId) {
-        referenceId = await cli.prompt("Enter a purchase reference ID");
-      }
-      if (!apiBase) {
-        apiBase = await cli.prompt("Enter a PSP base URL");
-      }
-
-      charge = new Charge(apiBase, referenceId, txHandler);
-    }
-
-    cli.info("");
-    cli.info("Payment link details:");
-    cli.info(`PSP API base url: ${charge.apiBase}`);
-    cli.info(`Payment reference id: ${charge.referenceId}`);
-
-    const info: PaymentInfo = await charge.getInfo();
-    cli.info(JSON.stringify(info, null, 2));
-
-    const accountsContract = await kit.contracts.getAccounts();
-    const receiverUrl = await accountsContract.getMetadataURL(
-      info.receiver.accountAddress
-    );
-    cli.info("Receiver URL as registered in the blockchain:", receiverUrl);
-
-    const confirmedByTheUser = await cli.confirm("Continue with payment?");
-
-    if (!confirmedByTheUser) {
-      await charge.abort(AbortCodes.CUSTOMER_DECLINED);
-      return;
-    }
-
-    const defaultPayerData = { phoneNumber: "12345678" };
-    await cli.info("The default payer data is:");
-    await cli.info(JSON.stringify(defaultPayerData, null, 2));
-
-    const customPayerData = await cli.prompt(
-      "Enter a payer data (json) or press <Enter> to skip",
-      { required: false, default: undefined }
-    );
-    if (customPayerData) {
-      // TODO: validate customPayerData is in a valid payer data structure
-    }
-
-    // No need for further user approval to continue the flow
     try {
-      await charge.submit(
-        customPayerData ? JSON.parse(customPayerData) : defaultPayerData
-      );
-    } catch (e) {
-      if (e instanceof OnchainFailureError) {
-        const sendAbort = await cli.confirm(
-          "Submitting onchain transaction failed. Send abort to merchant?"
+      privateKey =
+        privateKey ?? (await Init.getPrivateKey("privateKey", testnet));
+      if (useAuthentication) {
+        dek = dek ?? (await Init.getPrivateKey("dataEncryptionKey", testnet));
+        const dekPublicKey = privateToPublic(Buffer.from(dek.slice(2), "hex"));
+        cli.info(`DEK public key: ${dekPublicKey.toString("hex")}`);
+      } else {
+        cli.warn(
+          "Not using DEK for authentication. No command or response will be signed or verified."
         );
-        if (sendAbort) {
-          const codeStr = await cli.prompt(
-            "Abort code to send [default: could_not_put_transaction]: ",
-            { default: "could_not_put_transaction" }
+      }
+
+      const kit = createKitFromPrivateKey(testnet, privateKey, dek);
+      const chainHandler = new ContractKitTransactionHandler(kit);
+
+      if (!deepLink) {
+        deepLink = await cli.prompt(
+          "Enter a deep link or press <Enter> to skip",
+          { required: false }
+        );
+      }
+      if (deepLink) {
+        charge = Charge.fromDeepLink(deepLink, chainHandler);
+      } else {
+        if (!referenceId) {
+          referenceId = await cli.prompt("Enter a purchase reference ID");
+        }
+        if (!apiBase) {
+          apiBase = await cli.prompt("Enter a PSP base URL");
+        }
+
+        charge = new Charge(
+          apiBase,
+          referenceId,
+          chainHandler,
+          useAuthentication
+        );
+      }
+
+      cli.info("");
+      cli.info("Payment link details:");
+      cli.info(`PSP API base url: ${charge.apiBase}`);
+      cli.info(`Payment reference id: ${charge.referenceId}`);
+
+      const info: PaymentInfo = await charge.getInfo();
+      cli.info(JSON.stringify(info, null, 2));
+
+      const confirmedByTheUser = await cli.confirm("Continue with payment?");
+
+      if (!confirmedByTheUser) {
+        await charge.abort(AbortCodes.CUSTOMER_DECLINED);
+        return;
+      }
+
+      const defaultPayerData = { phoneNumber: "12345678" };
+      await cli.info("The default payer data is:");
+      await cli.info(JSON.stringify(defaultPayerData, null, 2));
+
+      const customPayerData = await cli.prompt(
+        "Enter a payer data (json) or press <Enter> to skip",
+        { required: false, default: undefined }
+      );
+      if (customPayerData) {
+        // TODO: validate customPayerData is in a valid payer data structure
+      }
+
+      // No need for further user approval to continue the flow
+      try {
+        await charge.submit(
+          customPayerData ? JSON.parse(customPayerData) : defaultPayerData
+        );
+      } catch (e) {
+        if (e instanceof OnchainFailureError) {
+          const sendAbort = await cli.confirm(
+            "Submitting onchain transaction failed. Send abort to merchant?"
           );
-          let code = AbortCodes.COULD_NOT_PUT_TRANSACTION;
-          switch (codeStr) {
-            case "insufficient_funds":
-              code = AbortCodes.INSUFFICIENT_FUNDS;
-              break;
-            case "could_not_put_transaction":
-            default:
-              code = AbortCodes.COULD_NOT_PUT_TRANSACTION;
+          if (sendAbort) {
+            const codeStr = await cli.prompt(
+              "Abort code to send [default: could_not_put_transaction]: ",
+              { default: "could_not_put_transaction" }
+            );
+            let code;
+            switch (codeStr) {
+              case "insufficient_funds":
+                code = AbortCodes.INSUFFICIENT_FUNDS;
+                break;
+              case "could_not_put_transaction":
+              default:
+                code = AbortCodes.COULD_NOT_PUT_TRANSACTION;
+            }
+            await charge.abort(code);
           }
-          await charge.abort(code);
         }
       }
+    } catch (e: unknown) {
       console.error(e);
     }
+  }
+
+  private static async getPrivateKey(
+    keyName: string,
+    testnet: boolean
+  ): Promise<string> {
+    cli.info(
+      `${keyName} -> Using the one save @ ${CeloAccountPrivateKeyFilePath} (or generating a new one)...`
+    );
+    const key = (await getAccountKeys(testnet))[keyName];
+    cli.info(`${keyName}: ${key}`);
+    return key;
   }
 }

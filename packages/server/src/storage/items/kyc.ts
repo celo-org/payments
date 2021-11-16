@@ -1,5 +1,7 @@
-import { ADDRESS } from "../../config";
 import { PaymentAction, PaymentInfo } from "@celo/payments-types";
+import BigNumber from "bignumber.js";
+import { getKit } from "../../services";
+import { ContractKitTransactionHandler } from "@celo/payments-sdk";
 
 export const KYC: PaymentInfo = {
   requiredPayerData: {
@@ -21,7 +23,7 @@ export const KYC: PaymentInfo = {
     },
   },
   receiver: {
-    accountAddress: ADDRESS,
+    accountAddress: "",
     businessData: {
       name: "Acme Autos",
       legalName: "Acme Autos LLC",
@@ -36,7 +38,7 @@ export const KYC: PaymentInfo = {
     },
   },
   action: {
-    amount: 0.2,
+    amount: new BigNumber(10).pow(17).multipliedBy(2),
     currency: PaymentAction.currency.C_USD,
     action: PaymentAction.action.CHARGE,
     timestamp: Date.now(),
@@ -44,3 +46,8 @@ export const KYC: PaymentInfo = {
   referenceId: "00000000-0000-0000-0000000000",
   description: "Mock purchase",
 };
+
+getKit().then((kit) => {
+  const chainHandler = new ContractKitTransactionHandler(kit);
+  KYC.receiver.accountAddress = chainHandler.getSendingAddress();
+});

@@ -12,15 +12,21 @@ import { ChainHandler } from './interface';
  */
 export class ContractKitTransactionHandler implements ChainHandler {
   private signedTransaction?: EncodedTransaction;
+  private readonly blockchainAddress;
+  private readonly dekAddress;
 
   constructor(private readonly kit: ContractKit) {
-    if (!kit.defaultAccount) {
+    [this.blockchainAddress, this.dekAddress] = this.kit
+      .getWallet()
+      .getAccounts();
+
+    if (!this.blockchainAddress) {
       throw new Error('Missing defaultAccount');
     }
   }
 
   getSendingAddress() {
-    return this.kit.defaultAccount;
+    return this.blockchainAddress;
   }
 
   private async getSignedTransaction(
@@ -43,36 +49,19 @@ export class ContractKitTransactionHandler implements ChainHandler {
       await this.kit.contracts.getGasPriceMinimum();
     const gasPriceMinimum = await gasPriceMinimumWrapper.gasPriceMinimum();
 
-    // const data = txo.encodeABI();
-    // const params = {
-    //   to: stableTokenAddress,
-    //   from: contractKit.kit.defaultAccount,
-    //   gasPrice: disbursement.gasPrice,
-    //   gas: disbursement.estimatedGasPerTransfer,
-    //   data,
-    //   chainId: contractKit.chainId,
-    //   nonce: transfers[i].nonce,
-    //   feeCurrency: stableTokenAddress,
-    //   gatewayFeeRecipient: '0x',
-    //   gatewayFee: '0x0',
-    //   common: '0x',
-    //   chain: '0x',
-    //   hardfork: '0x',
-    // };
-
     const { txo } = stable.transfer(
       info.receiver.accountAddress,
-      this.kit.web3.utils.toWei(info.action.amount.toString())
+      info.action.amount.toString()
     );
 
     this.signedTransaction = await wallet.signTransaction({
       to: stable.address,
-      from: this.kit.defaultAccount,
+      from: this.blockchainAddress,
       gas: 100_000,
       gasPrice: gasPriceMinimum.times(50).toString(),
       chainId: await this.kit.connection.chainId(),
       nonce: await this.kit.connection.getTransactionCount(
-        this.kit.defaultAccount
+        this.blockchainAddress
       ),
       data: txo.encodeABI(),
       feeCurrency: stable.address,
@@ -100,12 +89,20 @@ export class ContractKitTransactionHandler implements ChainHandler {
   }
 
   async signTypedPaymentRequest(typedData: EIP712TypedData) {
-    const [, dek] = this.kit.getWallet().getAccounts();
-
-    return serializeSignature(await this.kit.signTypedData(dek, typedData));
+    if (this.dekAddress) {
+      return serializeSignature(
+        await this.kit.signTypedData(this.dekAddress, typedData)
+      );
+    }
+    return undefined;
   }
 
   async getChainId() {
     return this.kit.web3.eth.getChainId();
+  }
+
+  async getDataEncryptionKey(account: string): Promise<string> {
+    const accounts = await this.kit.contracts.getAccounts();
+    return accounts.getDataEncryptionKey(account);
   }
 }
