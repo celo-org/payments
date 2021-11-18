@@ -141,25 +141,7 @@ export default class Init extends Command {
         );
       } catch (e) {
         if (e instanceof OnchainFailureError) {
-          const sendAbort = await cli.confirm(
-            "Submitting onchain transaction failed. Send abort to merchant?"
-          );
-          if (sendAbort) {
-            const codeStr = await cli.prompt(
-              "Abort code to send [default: could_not_put_transaction]: ",
-              { default: "could_not_put_transaction" }
-            );
-            let code;
-            switch (codeStr) {
-              case "insufficient_funds":
-                code = AbortCodes.INSUFFICIENT_FUNDS;
-                break;
-              case "could_not_put_transaction":
-              default:
-                code = AbortCodes.COULD_NOT_PUT_TRANSACTION;
-            }
-            await charge.abort(code);
-          }
+          cli.info(`Onchain Failure: ${e.code}`);
         }
       }
     } catch (e: unknown) {
