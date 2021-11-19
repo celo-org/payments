@@ -334,7 +334,7 @@ export class Charge {
       await this.submitTransactionOnChain();
     } catch (e) {
       if (e instanceof OnchainFailureError) {
-        this.abort(e.code);
+        await this.abort(e.code);
         throw e;
       }
     }
