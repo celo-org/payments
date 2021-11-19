@@ -329,10 +329,16 @@ export class Charge {
     }
 
     await this.initCharge(payerData);
-
     await this.readyForSettlement();
 
-    await this.submitTransactionOnChain();
+    try {
+      await this.submitTransactionOnChain();
+    } catch (e) {
+      if (e instanceof OnchainFailureError) {
+        await this.abort(e.code);
+        throw e;
+      }
+    }
   }
 
   /**
