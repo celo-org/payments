@@ -313,7 +313,10 @@ export class Charge {
       await this.chainHandler.submitTransaction(this.paymentInfo);
     } catch (e) {
       // TODO: retries?
-      throw new OnchainFailureError(AbortCodes.COULD_NOT_PUT_TRANSACTION);
+      throw new OnchainFailureError(
+        AbortCodes.COULD_NOT_PUT_TRANSACTION,
+        e.message
+      );
     }
   }
 
@@ -336,8 +339,8 @@ export class Charge {
     } catch (e) {
       if (e instanceof OnchainFailureError) {
         await this.abort(e.code);
-        throw e;
       }
+      throw e;
     }
   }
 
