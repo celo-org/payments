@@ -328,9 +328,10 @@ export class Charge {
       throw new Error('getInfo() has not been called');
     }
 
+    await this.initCharge(payerData);
+    await this.readyForSettlement();
+
     try {
-      await this.initCharge(payerData);
-      await this.readyForSettlement();
       await this.submitTransactionOnChain();
     } catch (e) {
       if (e instanceof OnchainFailureError) {
