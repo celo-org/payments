@@ -19,7 +19,7 @@ import {
 } from '@celo/payments-types';
 import { randomInt } from 'crypto';
 import { OnchainFailureError } from './errors/onchain-failure';
-import { ChainHandler } from './handlers';
+import { ContractKitTransactionHandler } from './handlers';
 import { fetchWithRetries, parseDeepLink, verifySignature } from './helpers';
 import { buildTypedPaymentRequest } from '@celo/payments-utils';
 import BigNumber from 'bignumber.js';
@@ -46,7 +46,7 @@ export class Charge {
   constructor(
     public apiBase: string,
     public referenceId: string,
-    private chainHandler: ChainHandler,
+    private chainHandler: ContractKitTransactionHandler,
     private useAuthentication: boolean
   ) {}
 
@@ -61,7 +61,7 @@ export class Charge {
    */
   static fromDeepLink(
     deepLink: string,
-    chainHandler: ChainHandler,
+    chainHandler: ContractKitTransactionHandler,
     useAuthentication: boolean = true
   ) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
@@ -307,6 +307,10 @@ export class Charge {
   async submitTransactionOnChain() {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
+    }
+
+    if (!(await this.chainHandler.hasSufficientBalance(this.paymentInfo))) {
+      throw new OnchainFailureError(AbortCodes.INSUFFICIENT_FUNDS);
     }
 
     try {
