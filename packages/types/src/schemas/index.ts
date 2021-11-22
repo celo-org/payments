@@ -27,6 +27,7 @@ export * from "./JsonRpcProtocol";
 export * from "./JsonRpcReferenceIdNotFoundError";
 export * from "./JsonRpcRequired";
 export * from "./JsonRpcRiskChecksFailedError";
+export * from "./JsonRpcSuccessResponse";
 export * from "./JsonRpcUnspecifiedError";
 export * from "./NationalIdData";
 export * from "./PayerData";

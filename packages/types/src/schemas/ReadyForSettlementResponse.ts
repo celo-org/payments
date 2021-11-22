@@ -2,6 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcProtocol } from './JsonRpcProtocol';
+import type { JsonRpcSuccessResponse } from './JsonRpcSuccessResponse';
 
-export type ReadyForSettlementResponse = JsonRpcProtocol;
+export type ReadyForSettlementResponse = JsonRpcSuccessResponse;

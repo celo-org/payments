@@ -29,7 +29,7 @@ info:
 
     Before signing a message, one must sort it alphabetically (ordering by the object keys), to ensure signature consistency.<br/>
     For the `types` property, the array should be sorted using the name parameters of every field<br/>
-    For an example, even if the message is 
+    For an example, even if the message is
     ```json
     {
       types: {
@@ -82,7 +82,7 @@ info:
         ],
       }
     }
-    ``` 
+    ```
 
     Every offchain message must include an HTTP `X-Signature` and `X-Address` headers:<br/>
     * `X-Signature` contains the EIP712 signature
@@ -290,6 +290,23 @@ components:
             method:
               type: string
               description: Method name
+    JsonRpcSuccessResponse:
+      type: object
+      required:
+        - id
+        - jsonrpc
+        - result
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Request ID
+        jsonrpc:
+          type: string
+          default: "2.0"
+          description: JSON-RPC Version (2.0)
+        result:
+          type: 'null'
     JsonRpcErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcProtocol"
@@ -503,8 +520,10 @@ components:
           "$ref": "#/components/schemas/GetPaymentInfoParams"
     GetPaymentInfoResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - "$ref": "#/components/schemas/JsonRpcSuccessResponse"
         - type: object
+          required:
+            - result
           properties:
             result:
               "$ref": "#/components/schemas/PaymentInfo"
@@ -763,7 +782,7 @@ components:
           "$ref": "#/components/schemas/PayerData"
     InitChargeResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - "$ref": "#/components/schemas/JsonRpcSuccessResponse"
     ReadyForSettlement:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcRequired"
@@ -791,7 +810,7 @@ components:
           "$ref": "#/components/schemas/ReadyForSettlementParams"
     ReadyForSettlementResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - "$ref": "#/components/schemas/JsonRpcSuccessResponse"
     Abort:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcRequired"
@@ -832,7 +851,7 @@ components:
           "$ref": "#/components/schemas/AbortParams"
     AbortResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - "$ref": "#/components/schemas/JsonRpcSuccessResponse"
 
 tags:
   - name: Payments
