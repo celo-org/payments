@@ -72,6 +72,13 @@ export class ContractKitTransactionHandler implements ChainHandler {
     return this.signedTransaction;
   }
 
+  async hasSufficientBalance(info: PaymentInfo) {
+    const { currency, amount: amntToSpend } = info.action;
+    const sender = this.getSendingAddress();
+    const balances = await this.kit.getTotalBalance(sender);
+    return balances[currency].gte(amntToSpend);
+  }
+
   async computeTransactionHash(info: PaymentInfo) {
     const {
       tx: { hash },
