@@ -204,12 +204,20 @@ function guessValueTypeName(property: Symbol): [Type, string] {
     if (!declarations || declarations.length === 0) {
       return [undefined, undefined];
     }
+    let bestGuess = 'any';
+    let bestDeclaration = declarations[0];
     for (const dec of declarations as PropertySignature[]) {
       const tryType = dec.getTypeNode().getText();
       if (["string", "number"].includes(tryType)) {
         return [dec.getTypeNode().getType(), tryType];
       }
+      if (tryType !== 'null') {
+        bestGuess = tryType;
+        bestDeclaration = dec;
+      }
     }
+    console.log('return guess', [bestDeclaration, bestGuess]);
+    return [(bestDeclaration as PropertySignature).getTypeNode().getType(), bestGuess];
   }
   const signature = valueDeclaration
     .getSymbol()
@@ -303,6 +311,7 @@ function generateEip712Schemas(modelFilePath: string, modelFiles: string[]) {
       };
       for (let property of typeProperties) {
         let [underlyingType, valueTypeName] = guessValueTypeName(property);
+        console.log('after guess', {typeName, valueTypeName, text: underlyingType.getText(), name: property.getName()});
         if (!underlyingType) continue;
 
         if (underlyingType.isEnum()) {
@@ -318,6 +327,7 @@ function generateEip712Schemas(modelFilePath: string, modelFiles: string[]) {
         }
         const isBigNumberField = valueTypeName === "BigNumber";
         valueTypeName = renameTypeNameToEip712(valueTypeName);
+        console.log({typeName, valueTypeName, name: property.getName()});
 
         if (valueTypeName) {
           const fieldName = property.getName();

@@ -2,9 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcProtocol } from './JsonRpcProtocol';
+import type { JsonRpcSuccessResponse } from './JsonRpcSuccessResponse';
 import type { PaymentInfo } from './PaymentInfo';
 
-export type GetPaymentInfoResponse = (JsonRpcProtocol & {
-    result?: PaymentInfo,
+export type GetPaymentInfoResponse = (JsonRpcSuccessResponse & {
+    result: PaymentInfo,
 });
