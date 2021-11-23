@@ -277,6 +277,8 @@ function renameTypeNameToEip712(typeName: string) {
       return "int256";
     case "BigNumber":
       return "uint256";
+    case "null":
+      return "string";
     default:
       return typeName;
   }
