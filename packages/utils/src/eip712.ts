@@ -30,7 +30,7 @@ function scanTypedSchema(
     }
     schemasBag[schemaBagName].push(parameter);
 
-    if (["string", "uint256", "int256", "bool"].includes(parameter.type)) {
+    if (["string", "uint256", "int256", "bool", "null"].includes(parameter.type)) {
       return;
     }
 
