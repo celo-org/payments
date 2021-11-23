@@ -185,7 +185,7 @@ export class Charge {
       const resultParamater = responseTypeDefinition.schema.find(
         (p) => p.name === 'result'
       );
-      if (resultParamater && resultParamater.type) {
+      if (resultParamater && resultParamater.type && resultParamater.type !== "string") {
         const baseType = resultParamater.type;
         this.parseWithBigNumbers(result, baseType);
       }
