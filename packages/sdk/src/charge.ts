@@ -18,7 +18,7 @@ import {
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
 import { OnchainFailureError } from './errors/onchain-failure';
-import { ContractKitTransactionHandler } from './handlers';
+import { ChainHandler } from './handlers';
 import { fetchWithRetries, parseDeepLink, verifySignature } from './helpers';
 import { buildTypedPaymentRequest } from '@celo/payments-utils';
 import BigNumber from 'bignumber.js';
@@ -41,12 +41,14 @@ export class Charge {
    * @param referenceId reference ID of the charge
    * @param chainHandler handler to abstract away chain interaction semantics
    * @param useAuthentication
+   * @param retries
    */
   constructor(
     public apiBase: string,
     public referenceId: string,
-    private chainHandler: ContractKitTransactionHandler,
-    private useAuthentication: boolean
+    private chainHandler: ChainHandler,
+    private useAuthentication: boolean,
+    private retries= 3,
   ) {}
 
   /**
@@ -56,15 +58,17 @@ export class Charge {
    * @param deepLink encoded URI with `apiBase` and `referenceId`
    * @param chainHandler handler to abstract away chain interaction semantics
    * @param useAuthentication should all off-chain commands be signed and verified
+   * @param retries
    * @returns an instance of the Payments class
    */
   static fromDeepLink(
     deepLink: string,
-    chainHandler: ContractKitTransactionHandler,
-    useAuthentication = true
+    chainHandler: ChainHandler,
+    useAuthentication = true,
+    retries= 3,
   ) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
-    return new Charge(apiBase, referenceId, chainHandler, useAuthentication);
+    return new Charge(apiBase, referenceId, chainHandler, useAuthentication, retries);
   }
 
   /**
@@ -77,7 +81,7 @@ export class Charge {
   private async request(
     message: PaymentMessageRequest,
     requestTypeDefinition: EIP712TypeDefinition,
-    responseTypeDefinition: EIP712TypeDefinition
+    responseTypeDefinition: EIP712TypeDefinition,
   ) {
     const requestId = Math.floor(Math.random() * 281474976710655)
     Object.assign(message, {
@@ -110,7 +114,8 @@ export class Charge {
       body: JSON.stringify(message),
       headers,
     };
-    const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
+    const response = await fetchWithRetries(`${this.apiBase}/rpc`, request, this.retries);
+
     const jsonResponse = await response.json();
 
     if (this.useAuthentication) {
@@ -223,7 +228,7 @@ export class Charge {
    *
    * @returns
    */
-  getInfo = async () => {
+  async getInfo(): Promise<PaymentInfo> {
     const getPaymentInfoRequest: GetPaymentInfoRequest = {
       method: GetPaymentInfoRequest.method.value,
       params: {
@@ -249,7 +254,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  initCharge = async (payerData: PayerData): Promise<void> => {
+  async initCharge(payerData: PayerData): Promise<void> {
     // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo
@@ -281,7 +286,7 @@ export class Charge {
    * @returns
    */
 
-  readyForSettlement = async () => {
+  async readyForSettlement() {
     const readyForSettlementRequest: ReadyForSettlementRequest = {
       method: ReadyForSettlementRequest.method.value,
       params: {
@@ -302,7 +307,7 @@ export class Charge {
    *
    * @returns
    */
-   submitTransactionOnChain = async () => {
+  async submitTransactionOnChain() {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
@@ -349,7 +354,7 @@ export class Charge {
   /**
    * Aborts a request
    */
-  abort = async (code: AbortCodes, message?: string) =>  {
+  async abort(code: AbortCodes, message?: string) {
     const abortRequest: AbortRequest = {
       method: AbortRequest.method.value,
       params: {
