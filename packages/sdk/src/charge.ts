@@ -42,12 +42,14 @@ export class Charge {
    * @param referenceId reference ID of the charge
    * @param chainHandler handler to abstract away chain interaction semantics
    * @param useAuthentication
+   * @param retries
    */
   constructor(
     public apiBase: string,
     public referenceId: string,
     private chainHandler: ChainHandler,
-    private useAuthentication: boolean
+    private useAuthentication: boolean,
+    private retries= 3,
   ) {}
 
   /**
@@ -57,15 +59,17 @@ export class Charge {
    * @param deepLink encoded URI with `apiBase` and `referenceId`
    * @param chainHandler handler to abstract away chain interaction semantics
    * @param useAuthentication should all off-chain commands be signed and verified
+   * @param retries
    * @returns an instance of the Payments class
    */
   static fromDeepLink(
     deepLink: string,
     chainHandler: ChainHandler,
-    useAuthentication: boolean = true
+    useAuthentication = true,
+    retries= 3,
   ) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
-    return new Charge(apiBase, referenceId, chainHandler, useAuthentication);
+    return new Charge(apiBase, referenceId, chainHandler, useAuthentication, retries);
   }
 
   /**
@@ -78,7 +82,7 @@ export class Charge {
   private async request(
     message: PaymentMessageRequest,
     requestTypeDefinition: EIP712TypeDefinition,
-    responseTypeDefinition: EIP712TypeDefinition
+    responseTypeDefinition: EIP712TypeDefinition,
   ) {
     const requestId = randomInt(281474976710655);
     Object.assign(message, {
@@ -111,7 +115,7 @@ export class Charge {
       body: JSON.stringify(message),
       headers,
     };
-    const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
+    const response = await fetchWithRetries(`${this.apiBase}/rpc`, request, this.retries);
 
     const jsonResponse = await response.json();
 
