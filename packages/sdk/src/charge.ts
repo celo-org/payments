@@ -49,7 +49,7 @@ export class Charge {
     public referenceId: string,
     private chainHandler: ChainHandler,
     private useAuthentication: boolean,
-    private retries= 3,
+    private retries = 3
   ) {}
 
   /**
@@ -66,10 +66,16 @@ export class Charge {
     deepLink: string,
     chainHandler: ChainHandler,
     useAuthentication = true,
-    retries= 3,
+    retries = 3
   ) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
-    return new Charge(apiBase, referenceId, chainHandler, useAuthentication, retries);
+    return new Charge(
+      apiBase,
+      referenceId,
+      chainHandler,
+      useAuthentication,
+      retries
+    );
   }
 
   /**
@@ -82,7 +88,7 @@ export class Charge {
   private async request(
     message: PaymentMessageRequest,
     requestTypeDefinition: EIP712TypeDefinition,
-    responseTypeDefinition: EIP712TypeDefinition,
+    responseTypeDefinition: EIP712TypeDefinition
   ) {
     const requestId = randomInt(281474976710655);
     Object.assign(message, {
@@ -115,7 +121,11 @@ export class Charge {
       body: JSON.stringify(message),
       headers,
     };
-    const response = await fetchWithRetries(`${this.apiBase}/rpc`, request, this.retries);
+    const response = await fetchWithRetries(
+      `${this.apiBase}/rpc`,
+      request,
+      this.retries
+    );
 
     const jsonResponse = await response.json();
 
@@ -185,7 +195,7 @@ export class Charge {
       const resultParamater = responseTypeDefinition.schema.find(
         (p) => p.name === 'result'
       );
-      if (resultParamater && resultParamater.type && resultParamater.type !== "string") {
+      if (resultParamater && resultParamater.type && result !== '') {
         const baseType = resultParamater.type;
         this.parseWithBigNumbers(result, baseType);
       }
