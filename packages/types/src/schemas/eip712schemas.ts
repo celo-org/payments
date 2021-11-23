@@ -50,7 +50,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "id", type: "int256" },
       { name: "jsonrpc", type: "string" },
-      { name: "result", type: "null" },
+      { name: "result", type: "string" },
     ],
     bigNumbers: [],
   },
@@ -141,7 +141,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "id", type: "int256" },
       { name: "jsonrpc", type: "string" },
-      { name: "result", type: "null" },
+      { name: "result", type: "string" },
     ],
     bigNumbers: [],
   },
@@ -256,7 +256,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "id", type: "int256" },
       { name: "jsonrpc", type: "string" },
-      { name: "result", type: "null" },
+      { name: "result", type: "string" },
     ],
     bigNumbers: [],
   },
@@ -345,7 +345,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "id", type: "int256" },
       { name: "jsonrpc", type: "string" },
-      { name: "result", type: "null" },
+      { name: "result", type: "string" },
     ],
     bigNumbers: [],
   },
