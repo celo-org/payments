@@ -5,11 +5,13 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcRiskChecksFailedErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * The risk checks did not pass successfully
-     *
-     */
-    code?: JsonRpcRiskChecksFailedErrorResponse.code,
+    error?: {
+        /**
+         * The risk checks did not pass successfully
+         *
+         */
+        code?: JsonRpcRiskChecksFailedErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcRiskChecksFailedErrorResponse {

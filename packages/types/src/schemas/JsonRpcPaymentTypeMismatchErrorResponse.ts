@@ -5,11 +5,13 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcPaymentTypeMismatchErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * Consumer tried to invoke an action that is irrelevant for the payment type
-     *
-     */
-    code?: JsonRpcPaymentTypeMismatchErrorResponse.code,
+    error?: {
+        /**
+         * Consumer tried to invoke an action that is irrelevant for the payment type
+         *
+         */
+        code?: JsonRpcPaymentTypeMismatchErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcPaymentTypeMismatchErrorResponse {

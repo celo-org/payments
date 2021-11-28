@@ -5,11 +5,13 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcInvalidCommandTypeErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
-     *
-     */
-    code?: JsonRpcInvalidCommandTypeErrorResponse.code,
+    error?: {
+        /**
+         * When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
+         *
+         */
+        code?: JsonRpcInvalidCommandTypeErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcInvalidCommandTypeErrorResponse {

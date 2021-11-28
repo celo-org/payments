@@ -5,11 +5,13 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcUnspecifiedErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * Unspecified error
-     *
-     */
-    code?: JsonRpcUnspecifiedErrorResponse.code,
+    error?: {
+        /**
+         * Unspecified error
+         *
+         */
+        code?: JsonRpcUnspecifiedErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcUnspecifiedErrorResponse {

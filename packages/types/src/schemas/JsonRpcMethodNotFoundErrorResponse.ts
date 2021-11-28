@@ -5,10 +5,12 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcMethodNotFoundErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * Method not found
-     */
-    code?: JsonRpcMethodNotFoundErrorResponse.code,
+    error?: {
+        /**
+         * Method not found
+         */
+        code?: JsonRpcMethodNotFoundErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcMethodNotFoundErrorResponse {

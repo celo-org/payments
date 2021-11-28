@@ -5,11 +5,13 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcInvalidSignatureErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * Signature header missing or could not be verified
-     *
-     */
-    code?: JsonRpcInvalidSignatureErrorResponse.code,
+    error?: {
+        /**
+         * Signature header missing or could not be verified
+         *
+         */
+        code?: JsonRpcInvalidSignatureErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcInvalidSignatureErrorResponse {
