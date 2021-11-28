@@ -7,10 +7,10 @@ import {
   GetPaymentInfoRequest,
   InitChargeRequest,
   JsonRpcErrorResponse,
-  JsonRpcInvalidParameterError,
-  JsonRpcMethodNotFoundError,
-  JsonRpcReferenceIdNotFoundError,
-  JsonRpcRiskChecksFailedError,
+  JsonRpcInvalidParameterErrorResponse,
+  JsonRpcMethodNotFoundErrorResponse,
+  JsonRpcReferenceIdNotFoundErrorResponse,
+  JsonRpcRiskChecksFailedErrorResponse,
   OffchainHeaders,
   PayerData,
   PaymentInfo,
@@ -166,16 +166,16 @@ export class Charge {
       const jsonError = jsonResponse as JsonRpcErrorResponse;
       let name = 'JsonRpcError';
       switch (jsonError.error.code) {
-        case JsonRpcReferenceIdNotFoundError.code.value:
+        case JsonRpcReferenceIdNotFoundErrorResponse.code.value:
           name = 'ReferenceIdNotFoundError';
           break;
-        case JsonRpcInvalidParameterError.code.value:
+        case JsonRpcInvalidParameterErrorResponse.code.value:
           name = 'InvalidParameterError';
           break;
-        case JsonRpcRiskChecksFailedError.code.value:
+        case JsonRpcRiskChecksFailedErrorResponse.code.value:
           name = 'RiskChecksFailedError';
           break;
-        case JsonRpcMethodNotFoundError.code.value:
+        case JsonRpcMethodNotFoundErrorResponse.code.value:
           name = 'MethodNotFoundError';
           break;
       }
@@ -195,7 +195,7 @@ export class Charge {
       const resultParamater = responseTypeDefinition.schema.find(
         (p) => p.name === 'result'
       );
-      if (resultParamater && resultParamater.type && result !== '') {
+      if (resultParamater && resultParamater.type && !!result) {
         const baseType = resultParamater.type;
         this.parseWithBigNumbers(result, baseType);
       }

@@ -161,6 +161,8 @@ export default class Init extends Command {
             }
             await charge.abort(code);
           }
+        } else {
+          throw e;
         }
       }
     } catch (e: unknown) {
