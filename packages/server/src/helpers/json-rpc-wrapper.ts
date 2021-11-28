@@ -3,10 +3,10 @@ import {
   EIP712Schemas,
   EIP712TypeDefinition,
   JsonRpcError,
-  JsonRpcInvalidSignatureError,
-  JsonRpcMethodNotFoundError,
+  JsonRpcInvalidSignatureErrorResponse,
+  JsonRpcMethodNotFoundErrorResponse,
   JsonRpcProtocol,
-  JsonRpcReferenceIdNotFoundError,
+  JsonRpcReferenceIdNotFoundErrorResponse,
   OffchainHeaders,
 } from "@celo/payments-types";
 import { buildTypedPaymentRequest } from "@celo/payments-utils";
@@ -79,11 +79,11 @@ export async function jsonRpcError(
 ) {
   let httpCode = 500;
   switch (jsonRpcError.code) {
-    case JsonRpcReferenceIdNotFoundError.code.value:
+    case JsonRpcReferenceIdNotFoundErrorResponse.code.value:
       httpCode = 404;
       break;
-    case JsonRpcInvalidSignatureError.code.value:
-    case JsonRpcMethodNotFoundError.code.value:
+    case JsonRpcInvalidSignatureErrorResponse.code.value:
+    case JsonRpcMethodNotFoundErrorResponse.code.value:
       httpCode = 400;
       break;
   }
@@ -102,16 +102,10 @@ export function methodNotFound(
   jsonRpcRequestId: number,
   chainHandler: ChainHandler
 ) {
-  const methodNotFoundError = <JsonRpcMethodNotFoundError>{
-    code: JsonRpcMethodNotFoundError.code.value,
+  return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
+    code: JsonRpcMethodNotFoundErrorResponse.code.value,
     message: "JSON-RPC method not found",
-  };
-  return jsonRpcError(
-    apiResponse,
-    jsonRpcRequestId,
-    chainHandler,
-    methodNotFoundError
-  );
+  });
 }
 
 export function paymentNotFound(
@@ -120,19 +114,13 @@ export function paymentNotFound(
   chainHandler: ChainHandler,
   referenceId?: string
 ) {
-  const paymentNotFoundError = <JsonRpcReferenceIdNotFoundError>{
-    code: JsonRpcReferenceIdNotFoundError.code.value,
+  return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
+    code: JsonRpcReferenceIdNotFoundErrorResponse.code.value,
     message: "Reference id not found",
     data: {
       referenceId,
     },
-  };
-  return jsonRpcError(
-    apiResponse,
-    jsonRpcRequestId,
-    chainHandler,
-    paymentNotFoundError
-  );
+  });
 }
 
 export function unauthenticatedRequest(
@@ -140,14 +128,8 @@ export function unauthenticatedRequest(
   jsonRpcRequestId: number,
   chainHandler: ChainHandler
 ) {
-  const invalidSignatureError = <JsonRpcInvalidSignatureError>{
-    code: JsonRpcInvalidSignatureError.code.value,
+  return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
+    code: JsonRpcInvalidSignatureErrorResponse.code.value,
     message: "Invalid signature",
-  };
-  return jsonRpcError(
-    apiResponse,
-    jsonRpcRequestId,
-    chainHandler,
-    invalidSignatureError
-  );
+  });
 }
