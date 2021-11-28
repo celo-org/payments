@@ -2,17 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
-export type JsonRpcRiskChecksFailedError = (JsonRpcError & {
+export type JsonRpcRiskChecksFailedErrorResponse = (JsonRpcErrorResponse & {
     /**
      * The risk checks did not pass successfully
      *
      */
-    code?: JsonRpcRiskChecksFailedError.code,
+    code?: JsonRpcRiskChecksFailedErrorResponse.code,
 });
 
-export namespace JsonRpcRiskChecksFailedError {
+export namespace JsonRpcRiskChecksFailedErrorResponse {
 
     /**
      * The risk checks did not pass successfully

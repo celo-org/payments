@@ -2,17 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
-export type JsonRpcReferenceIdNotFoundError = (JsonRpcError & {
+export type JsonRpcReferenceIdNotFoundErrorResponse = (JsonRpcErrorResponse & {
     /**
      * The reference id provided in the request was not found
      *
      */
-    code?: JsonRpcReferenceIdNotFoundError.code,
+    code?: JsonRpcReferenceIdNotFoundErrorResponse.code,
 });
 
-export namespace JsonRpcReferenceIdNotFoundError {
+export namespace JsonRpcReferenceIdNotFoundErrorResponse {
 
     /**
      * The reference id provided in the request was not found

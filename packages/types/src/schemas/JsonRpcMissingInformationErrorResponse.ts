@@ -2,17 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
-export type JsonRpcMissingInformationError = (JsonRpcError & {
+export type JsonRpcMissingInformationErrorResponse = (JsonRpcErrorResponse & {
     /**
      * A mandatory field or element are missing from the request
      *
      */
-    code?: JsonRpcMissingInformationError.code,
+    code?: JsonRpcMissingInformationErrorResponse.code,
 });
 
-export namespace JsonRpcMissingInformationError {
+export namespace JsonRpcMissingInformationErrorResponse {
 
     /**
      * A mandatory field or element are missing from the request
