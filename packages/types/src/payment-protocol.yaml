@@ -343,150 +343,180 @@ components:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32600
-              description: Invalid request
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32600
+                  description: Invalid request
     JsonRpcMethodNotFoundErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32601
-              description: Method not found
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32601
+                  description: Method not found
     JsonRpcInvalidParameterErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32602
-              description: Invalid method parameter(s)
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32602
+                  description: Invalid method parameter(s)
     JsonRpcUnspecifiedErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32000
-              description: |
-                Unspecified error
-      example:
-        code: -32000
-        message: Unspecified error
-        data:
-          referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32000
+                  description: |
+                    Unspecified error
+          example:
+            code: -32000
+            message: Unspecified error
+            data:
+              referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
     JsonRpcReferenceIdNotFoundErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32001
-              description: |
-                The reference id provided in the request was not found
-      example:
-        code: -32001
-        message: The reference id provided in the request was not found
-        data:
-          referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32001
+                  description: |
+                    The reference id provided in the request was not found
+          example:
+            code: -32001
+            message: The reference id provided in the request was not found
+            data:
+              referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
     JsonRpcRiskChecksFailedErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32002
-              description: |
-                The risk checks did not pass successfully
-      example:
-        code: -32002
-        message: The risk checks did not pass successfully
-        data:
-          reason: Sanctions list
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32002
+                  description: |
+                    The risk checks did not pass successfully
+          example:
+            code: -32002
+            message: The risk checks did not pass successfully
+            data:
+              reason: Sanctions list
     JsonRpcMissingInformationErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32003
-              description: |
-                A mandatory field or element are missing from the request
-      example:
-        code: -32003
-        message: A mandatory field or element are missing from the request
-        data:
-          missingFields:
-            - "phoneNumber"
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32003
+                  description: |
+                    A mandatory field or element are missing from the request
+          example:
+            code: -32003
+            message: A mandatory field or element are missing from the request
+            data:
+              missingFields:
+                - "phoneNumber"
     JsonRpcPaymentTypeMismatchErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32004
-              description: |
-                Consumer tried to invoke an action that is irrelevant for the payment type
-      example:
-        code: -32004
-        message: Consumer tried to invoke an action that is irrelevant for the payment type
-        data:
-          requestedAction: capture
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32004
+                  description: |
+                    Consumer tried to invoke an action that is irrelevant for the payment type
+          example:
+            code: -32004
+            message: Consumer tried to invoke an action that is irrelevant for the payment type
+            data:
+              requestedAction: capture
     JsonRpcInvalidCommandTypeErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32005
-              description: |
-                When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
-      example:
-        code: -32005
-        message: ReadyForSettlement sent before payment was initialized
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32005
+                  description: |
+                    When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
+          example:
+            code: -32005
+            message: ReadyForSettlement sent before payment was initialized
     JsonRpcInvalidSignatureErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32006
-              description: |
-                Signature header missing or could not be verified
-      example:
-        code: -32006
-        message: Signature header missing or could not be verified
+            error:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  enum:
+                    - -32006
+                  description: |
+                    Signature header missing or could not be verified
+          example:
+            code: -32006
+            message: Signature header missing or could not be verified
     ReferenceId:
       type: string
       description:

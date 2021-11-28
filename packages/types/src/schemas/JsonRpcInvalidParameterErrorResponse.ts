@@ -5,10 +5,12 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcInvalidParameterErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * Invalid method parameter(s)
-     */
-    code?: JsonRpcInvalidParameterErrorResponse.code,
+    error?: {
+        /**
+         * Invalid method parameter(s)
+         */
+        code?: JsonRpcInvalidParameterErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcInvalidParameterErrorResponse {

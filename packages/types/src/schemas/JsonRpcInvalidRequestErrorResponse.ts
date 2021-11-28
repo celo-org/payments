@@ -5,10 +5,12 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcInvalidRequestErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * Invalid request
-     */
-    code?: JsonRpcInvalidRequestErrorResponse.code,
+    error?: {
+        /**
+         * Invalid request
+         */
+        code?: JsonRpcInvalidRequestErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcInvalidRequestErrorResponse {

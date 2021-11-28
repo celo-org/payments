@@ -5,11 +5,13 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcMissingInformationErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * A mandatory field or element are missing from the request
-     *
-     */
-    code?: JsonRpcMissingInformationErrorResponse.code,
+    error?: {
+        /**
+         * A mandatory field or element are missing from the request
+         *
+         */
+        code?: JsonRpcMissingInformationErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcMissingInformationErrorResponse {

@@ -5,11 +5,13 @@
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
 export type JsonRpcReferenceIdNotFoundErrorResponse = (JsonRpcErrorResponse & {
-    /**
-     * The reference id provided in the request was not found
-     *
-     */
-    code?: JsonRpcReferenceIdNotFoundErrorResponse.code,
+    error?: {
+        /**
+         * The reference id provided in the request was not found
+         *
+         */
+        code?: JsonRpcReferenceIdNotFoundErrorResponse.code,
+    },
 });
 
 export namespace JsonRpcReferenceIdNotFoundErrorResponse {
