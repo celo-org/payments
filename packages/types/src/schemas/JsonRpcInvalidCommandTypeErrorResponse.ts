@@ -2,17 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
-export type JsonRpcInvalidCommandTypeError = (JsonRpcError & {
+export type JsonRpcInvalidCommandTypeErrorResponse = (JsonRpcErrorResponse & {
     /**
      * When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
      *
      */
-    code?: JsonRpcInvalidCommandTypeError.code,
+    code?: JsonRpcInvalidCommandTypeErrorResponse.code,
 });
 
-export namespace JsonRpcInvalidCommandTypeError {
+export namespace JsonRpcInvalidCommandTypeErrorResponse {
 
     /**
      * When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)

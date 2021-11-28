@@ -2,17 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
 
-export type JsonRpcPaymentTypeMismatchError = (JsonRpcError & {
+export type JsonRpcPaymentTypeMismatchErrorResponse = (JsonRpcErrorResponse & {
     /**
      * Consumer tried to invoke an action that is irrelevant for the payment type
      *
      */
-    code?: JsonRpcPaymentTypeMismatchError.code,
+    code?: JsonRpcPaymentTypeMismatchErrorResponse.code,
 });
 
-export namespace JsonRpcPaymentTypeMismatchError {
+export namespace JsonRpcPaymentTypeMismatchErrorResponse {
 
     /**
      * Consumer tried to invoke an action that is irrelevant for the payment type
