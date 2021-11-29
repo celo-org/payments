@@ -3,26 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcPaymentTypeMismatchError } from './JsonRpcPaymentTypeMismatchError';
 
 export type JsonRpcPaymentTypeMismatchErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * Consumer tried to invoke an action that is irrelevant for the payment type
-         *
-         */
-        code?: JsonRpcPaymentTypeMismatchErrorResponse.code,
-    },
+    error?: JsonRpcPaymentTypeMismatchError,
 });
-
-export namespace JsonRpcPaymentTypeMismatchErrorResponse {
-
-    /**
-     * Consumer tried to invoke an action that is irrelevant for the payment type
-     *
-     */
-    export enum code {
-        value = -32004
-    }
-
-
-}

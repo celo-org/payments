@@ -3,24 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcMethodNotFoundError } from './JsonRpcMethodNotFoundError';
 
 export type JsonRpcMethodNotFoundErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * Method not found
-         */
-        code?: JsonRpcMethodNotFoundErrorResponse.code,
-    },
+    error?: JsonRpcMethodNotFoundError,
 });
-
-export namespace JsonRpcMethodNotFoundErrorResponse {
-
-    /**
-     * Method not found
-     */
-    export enum code {
-        value = -32601
-    }
-
-
-}

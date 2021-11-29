@@ -1,16 +1,16 @@
-import { ResponseToolkit } from "@hapi/hapi";
+import {ResponseToolkit} from "@hapi/hapi";
 import {
   EIP712Schemas,
   EIP712TypeDefinition,
   JsonRpcError,
-  JsonRpcInvalidSignatureErrorResponse,
-  JsonRpcMethodNotFoundErrorResponse,
+  JsonRpcInvalidSignatureError,
+  JsonRpcMethodNotFoundError,
   JsonRpcProtocol,
-  JsonRpcReferenceIdNotFoundErrorResponse,
+  JsonRpcReferenceIdNotFoundError,
   OffchainHeaders,
 } from "@celo/payments-types";
-import { buildTypedPaymentRequest } from "@celo/payments-utils";
-import { ChainHandler } from "@celo/payments-sdk";
+import {buildTypedPaymentRequest} from "@celo/payments-utils";
+import {ChainHandler} from "@celo/payments-sdk";
 
 export type JSON = Record<string, any>;
 export type JsonRpcResponse = JsonRpcProtocol & {
@@ -79,11 +79,11 @@ export async function jsonRpcError(
 ) {
   let httpCode = 500;
   switch (jsonRpcError.code) {
-    case JsonRpcReferenceIdNotFoundErrorResponse.code.value:
+    case JsonRpcReferenceIdNotFoundError.code.value:
       httpCode = 404;
       break;
-    case JsonRpcInvalidSignatureErrorResponse.code.value:
-    case JsonRpcMethodNotFoundErrorResponse.code.value:
+    case JsonRpcInvalidSignatureError.code.value:
+    case JsonRpcMethodNotFoundError.code.value:
       httpCode = 400;
       break;
   }
@@ -103,7 +103,7 @@ export function methodNotFound(
   chainHandler: ChainHandler
 ) {
   return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
-    code: JsonRpcMethodNotFoundErrorResponse.code.value,
+    code: JsonRpcMethodNotFoundError.code.value,
     message: "JSON-RPC method not found",
   });
 }
@@ -115,7 +115,7 @@ export function paymentNotFound(
   referenceId?: string
 ) {
   return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
-    code: JsonRpcReferenceIdNotFoundErrorResponse.code.value,
+    code: JsonRpcReferenceIdNotFoundError.code.value,
     message: "Reference id not found",
     data: {
       referenceId,
@@ -129,7 +129,7 @@ export function unauthenticatedRequest(
   chainHandler: ChainHandler
 ) {
   return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
-    code: JsonRpcInvalidSignatureErrorResponse.code.value,
+    code: JsonRpcInvalidSignatureError.code.value,
     message: "Invalid signature",
   });
 }

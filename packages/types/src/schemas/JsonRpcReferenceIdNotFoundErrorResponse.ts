@@ -3,26 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcReferenceIdNotFoundError } from './JsonRpcReferenceIdNotFoundError';
 
 export type JsonRpcReferenceIdNotFoundErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * The reference id provided in the request was not found
-         *
-         */
-        code?: JsonRpcReferenceIdNotFoundErrorResponse.code,
-    },
+    error?: JsonRpcReferenceIdNotFoundError,
 });
-
-export namespace JsonRpcReferenceIdNotFoundErrorResponse {
-
-    /**
-     * The reference id provided in the request was not found
-     *
-     */
-    export enum code {
-        value = -32001
-    }
-
-
-}

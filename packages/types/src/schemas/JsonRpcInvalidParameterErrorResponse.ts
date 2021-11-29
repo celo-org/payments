@@ -3,24 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcInvalidParameterError } from './JsonRpcInvalidParameterError';
 
 export type JsonRpcInvalidParameterErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * Invalid method parameter(s)
-         */
-        code?: JsonRpcInvalidParameterErrorResponse.code,
-    },
+    error?: JsonRpcInvalidParameterError,
 });
-
-export namespace JsonRpcInvalidParameterErrorResponse {
-
-    /**
-     * Invalid method parameter(s)
-     */
-    export enum code {
-        value = -32602
-    }
-
-
-}

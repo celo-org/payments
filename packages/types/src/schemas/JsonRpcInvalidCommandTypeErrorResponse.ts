@@ -3,26 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcInvalidCommandTypeError } from './JsonRpcInvalidCommandTypeError';
 
 export type JsonRpcInvalidCommandTypeErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
-         *
-         */
-        code?: JsonRpcInvalidCommandTypeErrorResponse.code,
-    },
+    error?: JsonRpcInvalidCommandTypeError,
 });
-
-export namespace JsonRpcInvalidCommandTypeErrorResponse {
-
-    /**
-     * When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
-     *
-     */
-    export enum code {
-        value = -32005
-    }
-
-
-}
