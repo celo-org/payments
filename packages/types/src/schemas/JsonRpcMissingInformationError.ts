@@ -2,12 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Any } from './Any';
+
 export type JsonRpcMissingInformationError = {
     /**
      * A mandatory field or element are missing from the request
      *
      */
-    code?: JsonRpcMissingInformationError.code;
+    code: JsonRpcMissingInformationError.code;
+    message?: string;
+    data?: (Any | string | any[] | boolean | number);
 }
 
 export namespace JsonRpcMissingInformationError {

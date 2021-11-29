@@ -164,7 +164,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcInvalidCommandTypeError: {
     name: "JsonRpcInvalidCommandTypeError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcInvalidCommandTypeErrorResponse: {
@@ -178,7 +181,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcInvalidParameterError: {
     name: "JsonRpcInvalidParameterError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcInvalidParameterErrorResponse: {
@@ -192,7 +198,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcInvalidRequestError: {
     name: "JsonRpcInvalidRequestError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcInvalidRequestErrorResponse: {
@@ -206,7 +215,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcInvalidSignatureError: {
     name: "JsonRpcInvalidSignatureError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcInvalidSignatureErrorResponse: {
@@ -220,7 +232,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcMethodNotFoundError: {
     name: "JsonRpcMethodNotFoundError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcMethodNotFoundErrorResponse: {
@@ -234,7 +249,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcMissingInformationError: {
     name: "JsonRpcMissingInformationError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcMissingInformationErrorResponse: {
@@ -248,7 +266,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcPaymentTypeMismatchError: {
     name: "JsonRpcPaymentTypeMismatchError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcPaymentTypeMismatchErrorResponse: {
@@ -270,7 +291,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcReferenceIdNotFoundError: {
     name: "JsonRpcReferenceIdNotFoundError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcReferenceIdNotFoundErrorResponse: {
@@ -293,7 +317,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcRiskChecksFailedError: {
     name: "JsonRpcRiskChecksFailedError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcRiskChecksFailedErrorResponse: {
@@ -316,7 +343,10 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
   },
   JsonRpcUnspecifiedError: {
     name: "JsonRpcUnspecifiedError",
-    schema: [{ name: "code", type: "int256" }],
+    schema: [
+      { name: "code", type: "int256" },
+      { name: "message", type: "string" },
+    ],
     bigNumbers: [],
   },
   JsonRpcUnspecifiedErrorResponse: {
