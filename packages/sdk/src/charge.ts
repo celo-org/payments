@@ -1,4 +1,4 @@
-import { Err, ErrorResult, Ok } from '@celo/base';
+import {Err, ErrorResult, Ok} from '@celo/base';
 import {
   AbortCodes,
   AbortRequest,
@@ -7,10 +7,10 @@ import {
   GetPaymentInfoRequest,
   InitChargeRequest,
   JsonRpcErrorResponse,
-  JsonRpcInvalidParameterErrorResponse,
-  JsonRpcMethodNotFoundErrorResponse,
-  JsonRpcReferenceIdNotFoundErrorResponse,
-  JsonRpcRiskChecksFailedErrorResponse,
+  JsonRpcInvalidParameterError,
+  JsonRpcMethodNotFoundError,
+  JsonRpcReferenceIdNotFoundError,
+  JsonRpcRiskChecksFailedError,
   OffchainHeaders,
   PayerData,
   PaymentInfo,
@@ -166,16 +166,16 @@ export class Charge {
       const jsonError = jsonResponse as JsonRpcErrorResponse;
       let name = 'JsonRpcError';
       switch (jsonError.error.code) {
-        case JsonRpcReferenceIdNotFoundErrorResponse.code.value:
+        case JsonRpcReferenceIdNotFoundError.code.value:
           name = 'ReferenceIdNotFoundError';
           break;
-        case JsonRpcInvalidParameterErrorResponse.code.value:
+        case JsonRpcInvalidParameterError.code.value:
           name = 'InvalidParameterError';
           break;
-        case JsonRpcRiskChecksFailedErrorResponse.code.value:
+        case JsonRpcRiskChecksFailedError.code.value:
           name = 'RiskChecksFailedError';
           break;
-        case JsonRpcMethodNotFoundErrorResponse.code.value:
+        case JsonRpcMethodNotFoundError.code.value:
           name = 'MethodNotFoundError';
           break;
       }

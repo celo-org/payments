@@ -3,26 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcRiskChecksFailedError } from './JsonRpcRiskChecksFailedError';
 
 export type JsonRpcRiskChecksFailedErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * The risk checks did not pass successfully
-         *
-         */
-        code?: JsonRpcRiskChecksFailedErrorResponse.code,
-    },
+    error?: JsonRpcRiskChecksFailedError,
 });
-
-export namespace JsonRpcRiskChecksFailedErrorResponse {
-
-    /**
-     * The risk checks did not pass successfully
-     *
-     */
-    export enum code {
-        value = -32002
-    }
-
-
-}

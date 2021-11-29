@@ -3,26 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcInvalidSignatureError } from './JsonRpcInvalidSignatureError';
 
 export type JsonRpcInvalidSignatureErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * Signature header missing or could not be verified
-         *
-         */
-        code?: JsonRpcInvalidSignatureErrorResponse.code,
-    },
+    error?: JsonRpcInvalidSignatureError,
 });
-
-export namespace JsonRpcInvalidSignatureErrorResponse {
-
-    /**
-     * Signature header missing or could not be verified
-     *
-     */
-    export enum code {
-        value = -32006
-    }
-
-
-}

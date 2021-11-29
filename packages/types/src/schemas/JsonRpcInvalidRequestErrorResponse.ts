@@ -3,24 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcInvalidRequestError } from './JsonRpcInvalidRequestError';
 
 export type JsonRpcInvalidRequestErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * Invalid request
-         */
-        code?: JsonRpcInvalidRequestErrorResponse.code,
-    },
+    error?: JsonRpcInvalidRequestError,
 });
-
-export namespace JsonRpcInvalidRequestErrorResponse {
-
-    /**
-     * Invalid request
-     */
-    export enum code {
-        value = -32600
-    }
-
-
-}

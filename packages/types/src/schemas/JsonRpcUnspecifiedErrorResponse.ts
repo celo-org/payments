@@ -3,26 +3,8 @@
 /* eslint-disable */
 
 import type { JsonRpcErrorResponse } from './JsonRpcErrorResponse';
+import type { JsonRpcUnspecifiedError } from './JsonRpcUnspecifiedError';
 
 export type JsonRpcUnspecifiedErrorResponse = (JsonRpcErrorResponse & {
-    error?: {
-        /**
-         * Unspecified error
-         *
-         */
-        code?: JsonRpcUnspecifiedErrorResponse.code,
-    },
+    error?: JsonRpcUnspecifiedError,
 });
-
-export namespace JsonRpcUnspecifiedErrorResponse {
-
-    /**
-     * Unspecified error
-     *
-     */
-    export enum code {
-        value = -32000
-    }
-
-
-}
