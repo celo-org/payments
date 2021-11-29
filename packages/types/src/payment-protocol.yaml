@@ -347,13 +347,28 @@ components:
           enum:
             - -32600
           description: Invalid request
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcInvalidRequestErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
             error:
-              $ref: "#/components/schemas/JsonRpcInvalidRequestError"
+              allOf:
+                - $ref: "#/components/schemas/JsonRpcInvalidRequestError"
+          required:
+            - error
     JsonRpcMethodNotFoundError:
       type: object
       properties:
@@ -363,6 +378,18 @@ components:
           enum:
             - -32601
           description: Method not found
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcMethodNotFoundErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -370,6 +397,8 @@ components:
           properties:
             error:
               "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+          required:
+            - error
     JsonRpcInvalidParameterError:
       type: object
       properties:
@@ -379,6 +408,18 @@ components:
           enum:
             - -32602
           description: Invalid method parameter(s)
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcInvalidParameterErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -386,6 +427,8 @@ components:
           properties:
             error:
               $ref: "#/components/schemas/JsonRpcInvalidParameterError"
+          required:
+            - error
     JsonRpcUnspecifiedError:
       type: object
       properties:
@@ -396,6 +439,18 @@ components:
             - -32000
           description: |
             Unspecified error
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcUnspecifiedErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -408,6 +463,8 @@ components:
             message: Unspecified error
             data:
               referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+          required:
+            - error
     JsonRpcReferenceIdNotFoundError:
       type: object
       properties:
@@ -418,6 +475,18 @@ components:
             - -32001
           description: |
             The reference id provided in the request was not found
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcReferenceIdNotFoundErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -430,6 +499,8 @@ components:
             message: The reference id provided in the request was not found
             data:
               referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+          required:
+            - error
     JsonRpcRiskChecksFailedError:
       type: object
       properties:
@@ -440,6 +511,18 @@ components:
             - -32002
           description: |
             The risk checks did not pass successfully
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcRiskChecksFailedErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -452,6 +535,8 @@ components:
             message: The risk checks did not pass successfully
             data:
               reason: Sanctions list
+          required:
+            - error
     JsonRpcMissingInformationError:
       type: object
       properties:
@@ -462,6 +547,18 @@ components:
             - -32003
           description: |
             A mandatory field or element are missing from the request
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcMissingInformationErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -475,6 +572,8 @@ components:
             data:
               missingFields:
                 - "phoneNumber"
+          required:
+            - error
     JsonRpcPaymentTypeMismatchError:
       type: object
       properties:
@@ -485,6 +584,18 @@ components:
             - -32004
           description: |
             Consumer tried to invoke an action that is irrelevant for the payment type
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcPaymentTypeMismatchErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -497,6 +608,8 @@ components:
             message: Consumer tried to invoke an action that is irrelevant for the payment type
             data:
               requestedAction: capture
+          required:
+            - error
     JsonRpcInvalidCommandTypeError:
       type: object
       properties:
@@ -507,6 +620,18 @@ components:
             - -32005
           description: |
             When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcInvalidCommandTypeErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -517,6 +642,8 @@ components:
           example:
             code: -32005
             message: ReadyForSettlement sent before payment was initialized
+          required:
+            - error
     JsonRpcInvalidSignatureError:
       type: object
       properties:
@@ -527,6 +654,18 @@ components:
             - -32006
           description: |
             Signature header missing or could not be verified
+        message:
+          type: string
+        data:
+          oneOf:
+            - "$ref": "#/components/schemas/Any"
+            - type: string
+            - type: array
+            - type: boolean
+            - type: integer
+            - type: number
+      required:
+        - code
     JsonRpcInvalidSignatureErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcErrorResponse"
@@ -537,6 +676,8 @@ components:
           example:
             code: -32006
             message: Signature header missing or could not be verified
+          required:
+            - error
     ReferenceId:
       type: string
       description:

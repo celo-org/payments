@@ -2,12 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Any } from './Any';
+
 export type JsonRpcInvalidSignatureError = {
     /**
      * Signature header missing or could not be verified
      *
      */
-    code?: JsonRpcInvalidSignatureError.code;
+    code: JsonRpcInvalidSignatureError.code;
+    message?: string;
+    data?: (Any | string | any[] | boolean | number);
 }
 
 export namespace JsonRpcInvalidSignatureError {
