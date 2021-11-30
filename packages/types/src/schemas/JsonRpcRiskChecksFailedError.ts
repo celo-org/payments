@@ -11,7 +11,7 @@ export type JsonRpcRiskChecksFailedError = {
      */
     code: JsonRpcRiskChecksFailedError.code;
     message?: string;
-    data?: (Any | string | any[] | boolean | number);
+    data?: Any;
 }
 
 export namespace JsonRpcRiskChecksFailedError {

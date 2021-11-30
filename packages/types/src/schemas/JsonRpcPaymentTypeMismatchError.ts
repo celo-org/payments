@@ -11,7 +11,7 @@ export type JsonRpcPaymentTypeMismatchError = {
      */
     code: JsonRpcPaymentTypeMismatchError.code;
     message?: string;
-    data?: (Any | string | any[] | boolean | number);
+    data?: Any;
 }
 
 export namespace JsonRpcPaymentTypeMismatchError {

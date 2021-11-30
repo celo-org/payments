@@ -150,6 +150,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -167,6 +168,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -184,6 +186,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -201,6 +204,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -218,6 +222,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -235,6 +240,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -252,6 +258,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -269,6 +276,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -294,6 +302,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -320,6 +329,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },
@@ -346,6 +356,7 @@ export const EIP712Schemas: EIP712TypeDefinitions = {
     schema: [
       { name: "code", type: "int256" },
       { name: "message", type: "string" },
+      { name: "data", type: "Any" },
     ],
     bigNumbers: [],
   },

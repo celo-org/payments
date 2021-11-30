@@ -11,7 +11,7 @@ export type JsonRpcMissingInformationError = {
      */
     code: JsonRpcMissingInformationError.code;
     message?: string;
-    data?: (Any | string | any[] | boolean | number);
+    data?: Any;
 }
 
 export namespace JsonRpcMissingInformationError {
