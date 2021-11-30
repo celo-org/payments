@@ -10,7 +10,7 @@ export type JsonRpcInvalidRequestError = {
      */
     code: JsonRpcInvalidRequestError.code;
     message?: string;
-    data?: (Any | string | any[] | boolean | number);
+    data?: Any;
 }
 
 export namespace JsonRpcInvalidRequestError {

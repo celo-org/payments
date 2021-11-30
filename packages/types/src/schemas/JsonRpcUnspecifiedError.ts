@@ -11,7 +11,7 @@ export type JsonRpcUnspecifiedError = {
      */
     code: JsonRpcUnspecifiedError.code;
     message?: string;
-    data?: (Any | string | any[] | boolean | number);
+    data?: Any;
 }
 
 export namespace JsonRpcUnspecifiedError {

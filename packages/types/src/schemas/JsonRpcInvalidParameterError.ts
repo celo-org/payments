@@ -10,7 +10,7 @@ export type JsonRpcInvalidParameterError = {
      */
     code: JsonRpcInvalidParameterError.code;
     message?: string;
-    data?: (Any | string | any[] | boolean | number);
+    data?: Any;
 }
 
 export namespace JsonRpcInvalidParameterError {
