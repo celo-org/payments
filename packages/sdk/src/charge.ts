@@ -17,7 +17,7 @@ import {
   PaymentMessageRequest,
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
-import { randomInt } from 'crypto';
+import { v4 as uuid } from 'uuid';
 import { OnchainFailureError } from './errors/onchain-failure';
 import { ContractKitTransactionHandler } from './handlers';
 import { fetchWithRetries, parseDeepLink, verifySignature } from './helpers';
@@ -62,7 +62,7 @@ export class Charge {
   static fromDeepLink(
     deepLink: string,
     chainHandler: ContractKitTransactionHandler,
-    useAuthentication: boolean = true
+    useAuthentication = true
   ) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
     return new Charge(apiBase, referenceId, chainHandler, useAuthentication);
@@ -80,7 +80,7 @@ export class Charge {
     requestTypeDefinition: EIP712TypeDefinition,
     responseTypeDefinition: EIP712TypeDefinition
   ) {
-    const requestId = randomInt(281474976710655);
+    const requestId = uuid();
     Object.assign(message, {
       id: requestId,
       jsonrpc: '2.0',
@@ -177,7 +177,7 @@ export class Charge {
     }
 
     try {
-      let result = jsonResponse.result;
+      const result = jsonResponse.result;
       const resultParamater = responseTypeDefinition.schema.find(
         (p) => p.name === 'result'
       );
@@ -192,8 +192,8 @@ export class Charge {
   }
 
   private parseWithBigNumbers(result: any, type: string) {
-    let child = EIP712Schemas[type];
-    for (let field of child.schema) {
+    const child = EIP712Schemas[type];
+    for (const field of child.schema) {
       if (child.bigNumbers.includes(field.name)) {
         result[field.name] = new BigNumber(result[field.name]);
       }
