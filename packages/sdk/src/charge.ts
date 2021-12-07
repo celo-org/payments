@@ -17,7 +17,6 @@ import {
   PaymentMessageRequest,
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
-import { v4 as uuid } from 'uuid';
 import { OnchainFailureError } from './errors/onchain-failure';
 import { ContractKitTransactionHandler } from './handlers';
 import { fetchWithRetries, parseDeepLink, verifySignature } from './helpers';
@@ -80,7 +79,7 @@ export class Charge {
     requestTypeDefinition: EIP712TypeDefinition,
     responseTypeDefinition: EIP712TypeDefinition
   ) {
-    const requestId = uuid();
+    const requestId = Math.floor(Math.random() * 281474976710655)
     Object.assign(message, {
       id: requestId,
       jsonrpc: '2.0',
@@ -112,7 +111,6 @@ export class Charge {
       headers,
     };
     const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
-
     const jsonResponse = await response.json();
 
     if (this.useAuthentication) {

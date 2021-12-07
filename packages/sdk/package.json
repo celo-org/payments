@@ -47,8 +47,7 @@
     "@types/isomorphic-fetch": "^0.0.35",
     "ajv": "^8.6.3",
     "bignumber.js": "^9.0.1",
-    "isomorphic-fetch": "^3.0.0",
-    "uuid": "^8.3.2"
+    "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
@@ -56,7 +55,6 @@
     "@oclif/command": "^1.8.0",
     "@oclif/plugin-help": "^3.2.2",
     "@types/node": "^16.0.0",
-    "@types/uuid": "^8.3.3",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
     "ava": "^3.12.1",
