@@ -51,8 +51,6 @@ export class ContractKitTransactionHandler implements ChainHandler {
       .getWallet()
       .getAccounts();
 
-    console.log(this.dekAddress, 'dek1');
-
     (async () => {
       const accounts = await this.kit.contracts.getAccounts();
       const res = await accounts.getDataEncryptionKey(this.blockchainAddress);
