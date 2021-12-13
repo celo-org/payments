@@ -4,6 +4,8 @@ import { ContractKit, StableToken } from '@celo/contractkit';
 import { PaymentInfo } from '@celo/payments-types';
 import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
 
+import { pubToAddress } from 'ethereumjs-util';
+
 import { ChainHandler } from './interface';
 import { StableTokenWrapper } from '@celo/contractkit/lib/wrappers/StableTokenWrapper';
 import BigNumber from 'bignumber.js';
@@ -49,6 +51,15 @@ export class ContractKitTransactionHandler implements ChainHandler {
       .getWallet()
       .getAccounts();
 
+    console.log(this.dekAddress, 'dek1');
+
+    (async () => {
+      const accounts = await this.kit.contracts.getAccounts();
+      const res = await accounts.getDataEncryptionKey(this.blockchainAddress);
+      //@ts-ignore
+      this.dekAddress = `0x${pubToAddress(res).toString('hex')}`;
+    })();
+
     if (!this.blockchainAddress) {
       throw new Error('Missing defaultAccount');
     }
@@ -56,7 +67,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
 
   getSendingAddress = () => {
     return this.blockchainAddress;
-  }
+  };
 
   private async getSignedTransaction(
     info: PaymentInfo
@@ -122,14 +133,14 @@ export class ContractKitTransactionHandler implements ChainHandler {
     const sender = this.getSendingAddress();
     const balances = await this.kit.getTotalBalance(sender);
     return balances[currency].gte(amntToSpend);
-  }
+  };
 
   computeTransactionHash = async (info: PaymentInfo) => {
     const {
       tx: { hash },
     } = await this.getSignedTransaction(info);
     return hash;
-  }
+  };
 
   submitTransaction = async (info: PaymentInfo) => {
     const { raw } = await this.getSignedTransaction(info);
@@ -138,7 +149,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
     ).waitReceipt();
 
     return receipt.transactionHash;
-  }
+  };
 
   signTypedPaymentRequest = async (typedData: EIP712TypedData) => {
     if (this.dekAddress) {
@@ -147,14 +158,14 @@ export class ContractKitTransactionHandler implements ChainHandler {
       );
     }
     return undefined;
-  }
+  };
 
   getChainId = () => {
     return this.kit.web3.eth.getChainId();
-  }
+  };
 
   getDataEncryptionKey = async (account: string): Promise<string> => {
     const accounts = await this.kit.contracts.getAccounts();
     return accounts.getDataEncryptionKey(account);
-  }
+  };
 }
