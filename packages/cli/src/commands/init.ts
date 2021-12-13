@@ -73,7 +73,6 @@ export default class Init extends Command {
         privateKey ?? (await Init.getPrivateKey("privateKey", testnet));
       if (useAuthentication) {
         dek = dek ?? (await Init.getPrivateKey("dataEncryptionKey", testnet));
-        console.log("private DEK: ", dek);
         const dekPublicKey = privateToPublic(Buffer.from(dek.slice(2), "hex"));
         cli.info(`DEK public key: ${dekPublicKey.toString("hex")}`);
       } else {
