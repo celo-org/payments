@@ -57,7 +57,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
   async withDekAddress() {
     const accounts = await this.kit.contracts.getAccounts();
     const res = (
-      await await accounts.getDataEncryptionKey(this.blockchainAddress)
+      await accounts.getDataEncryptionKey(this.blockchainAddress)
     ).slice(2);
 
     this.dekAddress = `0x${pubToAddress(Buffer.from(res, 'hex')).toString(
