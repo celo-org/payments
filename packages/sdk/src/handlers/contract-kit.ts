@@ -54,8 +54,9 @@ export class ContractKitTransactionHandler implements ChainHandler {
     }
   }
 
-  async withDekAddress() {
+  withDekAddress = async () => {
     const accounts = await this.kit.contracts.getAccounts();
+
     const res = (
       await accounts.getDataEncryptionKey(this.blockchainAddress)
     ).slice(2);
@@ -69,7 +70,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
     }
 
     return this;
-  }
+  };
 
   getSendingAddress() {
     return this.blockchainAddress;
