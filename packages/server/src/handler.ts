@@ -41,7 +41,9 @@ export async function handle(
   res: ResponseToolkit
 ) {
   if (!chainHandler) {
-    chainHandler = new ContractKitTransactionHandler(await getKit());
+    chainHandler = await new ContractKitTransactionHandler(
+      await getKit()
+    ).withDekAddress();
   }
 
   const [authenticated, response] = await handleAuthentication(

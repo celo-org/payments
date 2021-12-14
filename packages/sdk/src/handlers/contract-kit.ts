@@ -44,28 +44,36 @@ export class ContractKitTransactionHandler implements ChainHandler {
   private static txsStorage: SignedTxRepo = new SignedTxRepo();
   private lastNonce: number;
   private readonly blockchainAddress: string;
-  private readonly dekAddress: string;
+  private dekAddress: string;
 
-  constructor(private readonly kit: ContractKit, public gas = 1_000_000) {
-    [this.blockchainAddress, this.dekAddress] = this.kit
-      .getWallet()
-      .getAccounts();
-
-    (async () => {
-      const accounts = await this.kit.contracts.getAccounts();
-      const res = await accounts.getDataEncryptionKey(this.blockchainAddress);
-      //@ts-ignore
-      this.dekAddress = `0x${pubToAddress(res).toString('hex')}`;
-    })();
+  constructor(private readonly kit: ContractKit) {
+    [this.blockchainAddress] = this.kit.getWallet().getAccounts();
 
     if (!this.blockchainAddress) {
       throw new Error('Missing defaultAccount');
     }
   }
 
-  getSendingAddress = () => {
+  async withDekAddress() {
+    const accounts = await this.kit.contracts.getAccounts();
+    const res = (
+      await await accounts.getDataEncryptionKey(this.blockchainAddress)
+    ).slice(2);
+
+    this.dekAddress = `0x${pubToAddress(Buffer.from(res, 'hex')).toString(
+      'hex'
+    )}`;
+
+    if (!this.dekAddress) {
+      throw new Error('Missing DEK address.');
+    }
+
+    return this;
+  }
+
+  getSendingAddress() {
     return this.blockchainAddress;
-  };
+  }
 
   private async getSignedTransaction(
     info: PaymentInfo
