@@ -223,7 +223,7 @@ export class Charge {
    *
    * @returns
    */
-  async getInfo(): Promise<PaymentInfo> {
+  getInfo = async () => {
     const getPaymentInfoRequest: GetPaymentInfoRequest = {
       method: GetPaymentInfoRequest.method.value,
       params: {
@@ -249,7 +249,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  async initCharge(payerData: PayerData): Promise<void> {
+  initCharge = async (payerData: PayerData): Promise<void> => {
     // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo
@@ -281,7 +281,7 @@ export class Charge {
    * @returns
    */
 
-  async readyForSettlement() {
+  readyForSettlement = async () => {
     const readyForSettlementRequest: ReadyForSettlementRequest = {
       method: ReadyForSettlementRequest.method.value,
       params: {
@@ -302,7 +302,7 @@ export class Charge {
    *
    * @returns
    */
-  async submitTransactionOnChain() {
+   submitTransactionOnChain = async () => {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
@@ -328,7 +328,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  async submit(payerData: PayerData): Promise<void> {
+  submit = async (payerData: PayerData): Promise<void> => {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
@@ -349,7 +349,7 @@ export class Charge {
   /**
    * Aborts a request
    */
-  async abort(code: AbortCodes, message?: string) {
+  abort = async (code: AbortCodes, message?: string) =>  {
     const abortRequest: AbortRequest = {
       method: AbortRequest.method.value,
       params: {

@@ -12,8 +12,8 @@ import { ChainHandler } from './interface';
  */
 export class ContractKitTransactionHandler implements ChainHandler {
   private signedTransaction?: EncodedTransaction;
-  private readonly blockchainAddress;
-  private readonly dekAddress;
+  private readonly blockchainAddress: string;
+  private readonly dekAddress: string;
 
   constructor(private readonly kit: ContractKit) {
     [this.blockchainAddress, this.dekAddress] = this.kit
@@ -25,7 +25,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
     }
   }
 
-  getSendingAddress() {
+  getSendingAddress = () => {
     return this.blockchainAddress;
   }
 
@@ -72,21 +72,21 @@ export class ContractKitTransactionHandler implements ChainHandler {
     return this.signedTransaction;
   }
 
-  async hasSufficientBalance(info: PaymentInfo) {
+  hasSufficientBalance = async (info: PaymentInfo) => {
     const { currency, amount: amntToSpend } = info.action;
     const sender = this.getSendingAddress();
     const balances = await this.kit.getTotalBalance(sender);
     return balances[currency].gte(amntToSpend);
   }
 
-  async computeTransactionHash(info: PaymentInfo) {
+  computeTransactionHash = async (info: PaymentInfo) => {
     const {
       tx: { hash },
     } = await this.getSignedTransaction(info);
     return hash;
   }
 
-  async submitTransaction(info: PaymentInfo) {
+  submitTransaction = async (info: PaymentInfo) => {
     const { raw } = await this.getSignedTransaction(info);
     const receipt = await (
       await this.kit.connection.sendSignedTransaction(raw)
@@ -95,7 +95,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
     return receipt.transactionHash;
   }
 
-  async signTypedPaymentRequest(typedData: EIP712TypedData) {
+  signTypedPaymentRequest = async (typedData: EIP712TypedData) => {
     if (this.dekAddress) {
       return serializeSignature(
         await this.kit.signTypedData(this.dekAddress, typedData)
@@ -104,11 +104,11 @@ export class ContractKitTransactionHandler implements ChainHandler {
     return undefined;
   }
 
-  async getChainId() {
+  getChainId = () => {
     return this.kit.web3.eth.getChainId();
   }
 
-  async getDataEncryptionKey(account: string): Promise<string> {
+  getDataEncryptionKey = async (account: string): Promise<string> => {
     const accounts = await this.kit.contracts.getAccounts();
     return accounts.getDataEncryptionKey(account);
   }
