@@ -1,10 +1,12 @@
 import { serializeSignature } from '@celo/base';
-import { EncodedTransaction } from '@celo/connect';
+import { CeloTxObject, EncodedTransaction } from '@celo/connect';
 import { ContractKit, StableToken } from '@celo/contractkit';
 import { PaymentInfo } from '@celo/payments-types';
 import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
 
 import { ChainHandler } from './interface';
+import { StableTokenWrapper } from '@celo/contractkit/lib/wrappers/StableTokenWrapper';
+import BigNumber from 'bignumber.js';
 
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
@@ -54,22 +56,33 @@ export class ContractKitTransactionHandler implements ChainHandler {
       info.action.amount.toString()
     );
 
-    this.signedTransaction = await wallet.signTransaction({
+    const txParams = await this.getTxParams(stable, gasPriceMinimum, txo);
+    this.signedTransaction = await wallet.signTransaction(txParams);
+
+    return this.signedTransaction;
+  }
+
+  protected async getNonce() {
+    return this.kit.connection.getTransactionCount(this.blockchainAddress);
+  }
+
+  protected async getTxParams(
+    stable: StableTokenWrapper,
+    gasPriceMinimum: BigNumber,
+    txo: CeloTxObject<unknown>
+  ) {
+    return {
       to: stable.address,
       from: this.blockchainAddress,
       gas: 100_000,
       gasPrice: gasPriceMinimum.times(50).toString(),
       chainId: await this.kit.connection.chainId(),
-      nonce: await this.kit.connection.getTransactionCount(
-        this.blockchainAddress
-      ),
+      nonce: await this.getNonce(),
       data: txo.encodeABI(),
       feeCurrency: stable.address,
       gatewayFeeRecipient: '0x',
       gatewayFee: '0x0',
-    });
-
-    return this.signedTransaction;
+    };
   }
 
   async computeTransactionHash(info: PaymentInfo) {
