@@ -343,7 +343,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  submit = async (payerData: PayerData): Promise<void> => {
+  async submit(payerData: PayerData): Promise<void> {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
