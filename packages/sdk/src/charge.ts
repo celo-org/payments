@@ -1,4 +1,4 @@
-import {Err, ErrorResult, Ok} from '@celo/base';
+import { Err, ErrorResult, Ok } from '@celo/base';
 import {
   AbortCodes,
   AbortRequest,
@@ -327,7 +327,7 @@ export class Charge {
       await this.chainHandler.submitTransaction(this.paymentInfo);
     } catch (e) {
       // TODO: retries?
-      throw new OnchainFailureError(AbortCodes.COULD_NOT_PUT_TRANSACTION);
+      throw new OnchainFailureError(AbortCodes.COULD_NOT_PUT_TRANSACTION, e);
     }
   }
 
