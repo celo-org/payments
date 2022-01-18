@@ -11,7 +11,7 @@
     "test:unit": "nyc --silent ava"
   },
   "dependencies": {
-    "@celo/payments-types": "0.0.4-dev",
+    "@celo/payments-types": "0.0.5-dev",
     "bignumber.js": "^9.0.1"
   },
   "devDependencies": {
