@@ -1,4 +1,4 @@
-import {ResponseToolkit} from "@hapi/hapi";
+import { ResponseToolkit } from "@hapi/hapi";
 import {
   EIP712Schemas,
   EIP712TypeDefinition,
@@ -9,8 +9,8 @@ import {
   JsonRpcReferenceIdNotFoundError,
   OffchainHeaders,
 } from "@celo/payments-types";
-import {buildTypedPaymentRequest} from "@celo/payments-utils";
-import {ChainHandler} from "@celo/payments-sdk";
+import { buildTypedPaymentRequest } from "@celo/payments-utils";
+import { ChainHandler } from "@celo/payments-sdk";
 
 export type JSON = Record<string, any>;
 export type JsonRpcResponse = JsonRpcProtocol & {
@@ -18,8 +18,24 @@ export type JsonRpcResponse = JsonRpcProtocol & {
   error?: JsonRpcError;
 };
 
+function serializeWithBigNumbers(
+  result: any,
+  eip712TypeDefinition: EIP712TypeDefinition
+) {
+  const child = eip712TypeDefinition;
+  for (let field of child.schema) {
+    if (child.bigNumbers.includes(field.name)) {
+      result[field.name] = result[field.name].toString();
+    }
+    if (Object.keys(EIP712Schemas).includes(field.type)) {
+      serializeWithBigNumbers(result[field.name], EIP712Schemas[field.type]);
+    }
+  }
+}
+
 export function wrapWithJsonRpc(
   jsonRpcRequestId: number,
+  eip712TypeDefinition: EIP712TypeDefinition,
   result?: JSON,
   error?: JsonRpcError
 ) {
@@ -32,6 +48,7 @@ export function wrapWithJsonRpc(
   } else if (error) {
     response = { ...response, error };
   }
+  serializeWithBigNumbers(response, eip712TypeDefinition);
   return response;
 }
 
@@ -61,7 +78,7 @@ export async function jsonRpcSuccess(
   schema: EIP712TypeDefinition,
   result?: JSON
 ) {
-  const wrappedResult = wrapWithJsonRpc(jsonRpcRequestId, result);
+  const wrappedResult = wrapWithJsonRpc(jsonRpcRequestId, schema, result);
   const response = await offchainSign(
     wrappedResult,
     schema,
@@ -87,7 +104,12 @@ export async function jsonRpcError(
       httpCode = 400;
       break;
   }
-  const error = wrapWithJsonRpc(jsonRpcRequestId, undefined, jsonRpcError);
+  const error = wrapWithJsonRpc(
+    jsonRpcRequestId,
+    EIP712Schemas.JsonRpcErrorResponse,
+    undefined,
+    jsonRpcError
+  );
   const response = await offchainSign(
     error,
     EIP712Schemas.JsonRpcErrorResponse,

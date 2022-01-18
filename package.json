@@ -14,10 +14,10 @@
     "clean:build": "rm -rf packages/**/tsconfig.tsbuildinfo",
     "build": "lerna run build",
     "postinstall": "lerna bootstrap",
-    "start": "yarn lerna run start --stream",
-    "setup:server": "yarn --cwd ./packages/server setup",
-    "cli": "yarn build && yarn --cwd ./packages/cli cli",
-    "generate-web-models": "yarn --cwd ./packages/types web-models:build",
+    "start": "lerna run start --stream --scope=@celo/payments-server",
+    "setup:server": "npm --cwd ./packages/server setup",
+    "cli": "npm run build && npm --prefix=packages/cli run cli -- ",
+    "generate-web-models": "npm --cwd ./packages/types web-models:build",
     "publish": "./scripts/deploy"
   },
   "engines": {

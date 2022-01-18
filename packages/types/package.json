@@ -20,6 +20,7 @@
   "devDependencies": {
     "openapi-typescript-codegen": "^0.9.3",
     "ts-morph": "^12.0.0",
-    "ts-node": "^10.2.1"
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
   }
 }
