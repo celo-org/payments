@@ -23,11 +23,16 @@
     ]
   },
   "dependencies": {
+    "@celo/contractkit": "^1.5.1",
     "@celo/payments-sdk": "0.0.5-dev",
     "@celo/payments-types": "0.0.5-dev",
     "@oclif/command": "^1.8.0",
     "@oclif/plugin-help": "^3.2.2",
     "bignumber.js": "^9.0.1",
-    "cli-ux": "^5.6.3"
+    "cli-ux": "^5.6.3",
+    "ethereumjs-util": "^7.1.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.3"
   }
 }

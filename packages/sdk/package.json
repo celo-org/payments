@@ -43,7 +43,7 @@
     "@celo/connect": "^1.5.1",
     "@celo/contractkit": "^1.5.1",
     "@celo/payments-types": "0.0.5-dev",
-    "@celo/payments-utils": "0.0.0",
+    "@celo/payments-utils": "0.0.5-dev",
     "@types/isomorphic-fetch": "^0.0.35",
     "ajv": "^8.6.3",
     "bignumber.js": "^9.0.1",
@@ -73,7 +73,7 @@
     "prettier": "^2.1.1",
     "standard-version": "^9.0.0",
     "typedoc": "^0.19.0",
-    "typescript": "^4.0.2"
+    "typescript": "^4.4.3"
   },
   "files": [
     "build/main",

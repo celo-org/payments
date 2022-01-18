@@ -7,9 +7,10 @@
     "build": "tsc -b ."
   },
   "dependencies": {
+    "@celo/contractkit": "^1.5.1",
     "@celo/payments-sdk": "0.0.5-dev",
     "@celo/payments-types": "0.0.5-dev",
-    "@celo/payments-utils": "0.0.0",
+    "@celo/payments-utils": "0.0.5-dev",
     "@celo/utils": "^1.5.1",
     "@hapi/hapi": "^20.1.5",
     "abi-decoder": "^2.4.0",
@@ -18,6 +19,7 @@
     "ethereumjs-util": "^7.1.2"
   },
   "devDependencies": {
-    "ts-node-dev": "^1.1.8"
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.4.3"
   }
 }
