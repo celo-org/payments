@@ -13,7 +13,6 @@
     "@celo/utils": "1.2.0",
     "@hapi/hapi": "^20.1.5",
     "abi-decoder": "^2.4.0",
-    "ajv": "^8.6.3",
     "bignumber.js": "^9.0.1",
     "ethereumjs-util": "^7.1.2"
   },

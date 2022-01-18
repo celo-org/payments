@@ -16,17 +16,14 @@ import { verifyEIP712TypedDataSigner } from '@celo/utils/lib/signatureUtils';
 import Ajv, { ErrorObject } from 'ajv';
 import { UnknownMethodError } from '../errors/unknown-method';
 import { ChainHandlerForAuthentication } from '../handlers';
+import { formats } from './schema-formats';
 
-const ajv = new Ajv({ strictSchema: false, validateFormats: false });
-
-let schemaLoaded = false;
-function loadSchema() {
-  if (schemaLoaded) return;
-  if (!schemaLoaded) {
-    ajv.addSchema(OffchainJsonSchema, 'OffchainJsonSchema');
-  }
-  schemaLoaded = true;
-}
+const ajv = new Ajv({
+  strictKeywords: false,
+  unknownFormats: 'ignore',
+  formats: formats,
+});
+ajv.addSchema(OffchainJsonSchema, 'OffchainJsonSchema');
 
 export interface AuthenticationHeaders {
   [OffchainHeaders.SIGNATURE]: string;
@@ -58,10 +55,10 @@ export async function verifySignature(
   const account = extractHeader(authorizationHeaders, OffchainHeaders.ADDRESS);
 
   try {
-    // const [isSchemaValid, schemaErrors] = validateSchema(body, typeDefinition);
-    // if (!isSchemaValid) {
-    //   return [false, schemaErrors];
-    // }
+    const [isSchemaValid, schemaErrors] = validateSchema(body, typeDefinition);
+    if (!isSchemaValid) {
+      return [false, schemaErrors];
+    }
 
     const dek = await chainHandler.getDataEncryptionKey(account);
 
@@ -104,7 +101,6 @@ export function validateSchema(
   body: PaymentMessage | PaymentMessageResponse,
   typeDefinition: EIP712TypeDefinition
 ): [boolean, ErrorObject[]] {
-  loadSchema();
   if (
     !ajv.validate(
       {
@@ -121,7 +117,6 @@ export function validateSchema(
 export async function validateRequestSchema(body: PaymentMessage) {
   const method = body.method.toString();
   const typeDefinition = getTypeDefinitionByMethod(method);
-  loadSchema();
   if (
     !ajv.validate(
       {
