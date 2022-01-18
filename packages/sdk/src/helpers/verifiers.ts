@@ -16,8 +16,13 @@ import { verifyEIP712TypedDataSigner } from '@celo/utils/lib/signatureUtils';
 import Ajv, { ErrorObject } from 'ajv';
 import { UnknownMethodError } from '../errors/unknown-method';
 import { ChainHandlerForAuthentication } from '../handlers';
+import { formats } from './schema-formats';
 
-const ajv = new Ajv({ strictSchema: false, validateFormats: false });
+const ajv = new Ajv({
+  strictKeywords: false,
+  unknownFormats: 'ignore',
+  formats: formats,
+});
 ajv.addSchema(OffchainJsonSchema, 'OffchainJsonSchema');
 
 export interface AuthenticationHeaders {

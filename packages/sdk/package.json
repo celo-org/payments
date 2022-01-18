@@ -45,7 +45,7 @@
     "@celo/payments-types": "0.0.5-dev",
     "@celo/payments-utils": "0.0.5-dev",
     "@types/isomorphic-fetch": "^0.0.35",
-    "ajv": "^8.6.3",
+    "ajv": "^6.12.3",
     "bignumber.js": "^9.0.1",
     "isomorphic-fetch": "^3.0.0"
   },
