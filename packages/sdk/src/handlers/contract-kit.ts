@@ -8,16 +8,25 @@ import { ChainHandler } from './interface';
 import { StableTokenWrapper } from '@celo/contractkit/lib/wrappers/StableTokenWrapper';
 import BigNumber from 'bignumber.js';
 
+interface InfoSignedTransaction {
+  [referenceId: string]: {
+    info: PaymentInfo;
+    encoded: EncodedTransaction;
+    nonce: string;
+  };
+}
+
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
  * as its mechanism to compute transaction hashes and submit transactions.
  */
 export class ContractKitTransactionHandler implements ChainHandler {
-  private signedTransaction?: EncodedTransaction;
+  private txsStorage: SignedTxRepo;
+  private lastNonce: number;
   private readonly blockchainAddress: string;
   private readonly dekAddress: string;
 
-  constructor(private readonly kit: ContractKit) {
+  constructor(private readonly kit: ContractKit, public gas = 1_000_000) {
     [this.blockchainAddress, this.dekAddress] = this.kit
       .getWallet()
       .getAccounts();
@@ -25,6 +34,8 @@ export class ContractKitTransactionHandler implements ChainHandler {
     if (!this.blockchainAddress) {
       throw new Error('Missing defaultAccount');
     }
+
+    this.txsStorage = new SignedTxRepo();
   }
 
   getSendingAddress = () => {
@@ -34,10 +45,15 @@ export class ContractKitTransactionHandler implements ChainHandler {
   private async getSignedTransaction(
     info: PaymentInfo
   ): Promise<EncodedTransaction> {
-    if (this.signedTransaction) {
-      return this.signedTransaction;
-    }
+    return this.txsStorage.getSignedTransaction(
+      info,
+      this.generateSignTransaction.bind(this)
+    );
+  }
 
+  private async generateSignTransaction(
+    info: PaymentInfo
+  ): Promise<EncodedTransaction> {
     const wallet = this.kit.getWallet();
     if (!wallet) {
       throw new Error('Missing wallet');
@@ -57,9 +73,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
     );
 
     const txParams = await this.getTxParams(stable, gasPriceMinimum, txo);
-    this.signedTransaction = await wallet.signTransaction(txParams);
-
-    return this.signedTransaction;
+    return wallet.signTransaction(txParams);
   }
 
   protected async getNonce() {
@@ -71,13 +85,15 @@ export class ContractKitTransactionHandler implements ChainHandler {
     gasPriceMinimum: BigNumber,
     txo: CeloTxObject<unknown>
   ) {
+    const nonce = this.lastNonce ? this.lastNonce++ : await this.getNonce();
+
     return {
       to: stable.address,
       from: this.blockchainAddress,
-      gas: 100_000,
+      gas: this.gas,
       gasPrice: gasPriceMinimum.times(50).toString(),
       chainId: await this.kit.connection.chainId(),
-      nonce: await this.getNonce(),
+      nonce,
       data: txo.encodeABI(),
       feeCurrency: stable.address,
       gatewayFeeRecipient: '0x',
@@ -124,5 +140,23 @@ export class ContractKitTransactionHandler implements ChainHandler {
   getDataEncryptionKey = async (account: string): Promise<string> => {
     const accounts = await this.kit.contracts.getAccounts();
     return accounts.getDataEncryptionKey(account);
+  }
+}
+
+export class SignedTxRepo {
+  private txs: InfoSignedTransaction = {};
+
+  async getSignedTransaction(
+    info: PaymentInfo,
+    signer: (info) => Promise<EncodedTransaction>
+  ): Promise<EncodedTransaction> {
+    if (this.txs.hasOwnProperty(info.referenceId)) {
+      return this.txs[info.referenceId].encoded;
+    }
+
+    const encoded = await signer(info);
+    this.txs[info.referenceId] = { info, encoded, nonce: encoded.tx.nonce };
+
+    return encoded;
   }
 }
