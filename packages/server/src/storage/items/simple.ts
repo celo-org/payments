@@ -43,7 +43,7 @@ export const Simple: PaymentInfo = {
     action: PaymentAction.action.CHARGE,
     timestamp: Date.now(),
   },
-  referenceId: "00000000-0000-0000-0000000000",
+  referenceId: "00000000-0000-0000-0000-000000000000",
   description: "Mock purchase",
 };
 

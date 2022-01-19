@@ -43,7 +43,7 @@ export const KYC: PaymentInfo = {
     action: PaymentAction.action.CHARGE,
     timestamp: Date.now(),
   },
-  referenceId: "00000000-0000-0000-0000000000",
+  referenceId: "00000000-0000-0000-0000-000000000001",
   description: "Mock purchase",
 };
 
