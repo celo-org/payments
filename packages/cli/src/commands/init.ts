@@ -9,6 +9,7 @@ import {
 } from "../helpers/create-account";
 import { OnchainFailureError } from "@celo/payments-sdk/build/main/errors/onchain-failure";
 import { privateToPublic } from "ethereumjs-util";
+import BigNumber from "bignumber.js";
 
 export default class Init extends Command {
   static description = "Create a charge and interactively submit it";
@@ -133,6 +134,12 @@ export default class Init extends Command {
       if (customPayerData) {
         // TODO: validate customPayerData is in a valid payer data structure
       }
+
+      const amount = await cli.prompt(
+        "To change the payment amount, enter it here, or hit <ENTER> to continue with the original amount",
+        { required: false, default: info.action.amount.toString()}
+      );
+      info.action.amount = new BigNumber(amount);
 
       // No need for further user approval to continue the flow
       try {
