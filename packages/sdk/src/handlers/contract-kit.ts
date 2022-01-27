@@ -16,12 +16,30 @@ interface InfoSignedTransaction {
   };
 }
 
+export class SignedTxRepo {
+  private txs: InfoSignedTransaction = {};
+
+  async getSignedTransaction(
+    info: PaymentInfo,
+    signer: (info) => Promise<EncodedTransaction>
+  ): Promise<EncodedTransaction> {
+    if (this.txs.hasOwnProperty(info.referenceId)) {
+      return this.txs[info.referenceId].encoded;
+    }
+
+    const encoded = await signer(info);
+    this.txs[info.referenceId] = { info, encoded, nonce: encoded.tx.nonce };
+
+    return encoded;
+  }
+}
+
 /**
  * Implementation of the TransactionHandler that utilises ContractKit
  * as its mechanism to compute transaction hashes and submit transactions.
  */
 export class ContractKitTransactionHandler implements ChainHandler {
-  private txsStorage: SignedTxRepo;
+  private static txsStorage: SignedTxRepo = new SignedTxRepo();
   private lastNonce: number;
   private readonly blockchainAddress: string;
   private readonly dekAddress: string;
@@ -34,8 +52,6 @@ export class ContractKitTransactionHandler implements ChainHandler {
     if (!this.blockchainAddress) {
       throw new Error('Missing defaultAccount');
     }
-
-    this.txsStorage = new SignedTxRepo();
   }
 
   getSendingAddress = () => {
@@ -45,7 +61,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
   private async getSignedTransaction(
     info: PaymentInfo
   ): Promise<EncodedTransaction> {
-    return this.txsStorage.getSignedTransaction(
+    return ContractKitTransactionHandler.txsStorage.getSignedTransaction(
       info,
       this.generateSignTransaction.bind(this)
     );
@@ -140,23 +156,5 @@ export class ContractKitTransactionHandler implements ChainHandler {
   getDataEncryptionKey = async (account: string): Promise<string> => {
     const accounts = await this.kit.contracts.getAccounts();
     return accounts.getDataEncryptionKey(account);
-  }
-}
-
-export class SignedTxRepo {
-  private txs: InfoSignedTransaction = {};
-
-  async getSignedTransaction(
-    info: PaymentInfo,
-    signer: (info) => Promise<EncodedTransaction>
-  ): Promise<EncodedTransaction> {
-    if (this.txs.hasOwnProperty(info.referenceId)) {
-      return this.txs[info.referenceId].encoded;
-    }
-
-    const encoded = await signer(info);
-    this.txs[info.referenceId] = { info, encoded, nonce: encoded.tx.nonce };
-
-    return encoded;
   }
 }

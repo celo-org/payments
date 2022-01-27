@@ -32,7 +32,7 @@ interface JsonRpcErrorResult extends Error {
  * Charge object for use in the Celo Payments Protocol
  */
 export class Charge {
-  private paymentInfo?: PaymentInfo;
+  public paymentInfo?: PaymentInfo;
 
   /**
    * Instantiates a new charge object for use in the Celo Payments Protocol
