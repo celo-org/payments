@@ -264,7 +264,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  async initCharge(payerData: PayerData): Promise<void> {
+  async initCharge(payerData: PayerData): Promise<string> {
     // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo
@@ -287,6 +287,8 @@ export class Charge {
       EIP712Schemas.InitCharge,
       EIP712Schemas.InitChargeResponse
     );
+
+    return transactionHash;
   }
 
   /**
