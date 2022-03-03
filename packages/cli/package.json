@@ -23,6 +23,7 @@
     ]
   },
   "dependencies": {
+    "@celo/contractkit": "1.2.0",
     "@celo/payments-sdk": "0.0.10-dev",
     "@celo/payments-types": "0.0.10-dev",
     "@oclif/command": "^1.8.0",

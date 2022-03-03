@@ -23,6 +23,7 @@ export interface ChainHandlerForAuthentication {
 }
 
 export interface ChainHandler extends ChainHandlerForAuthentication {
+  hasSufficientBalance: (info: PaymentInfo) => Promise<boolean>;
   /**
    * Compute the transaction hash for a given charge.
    *
