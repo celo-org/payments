@@ -15,9 +15,9 @@
     "build": "lerna run build",
     "postinstall": "lerna bootstrap",
     "start": "lerna run start --stream --scope=@celo/payments-server",
-    "setup:server": "npm --prefix packages/server run setup",
-    "cli": "npm run build && npm --prefix=packages/cli run cli -- ",
-    "generate-web-models": "npm --prefix packages/types run web-models:build",
+    "setup:server": "yarn --cwd packages/server setup",
+    "cli": "yarn build && yarn --cwd packages/cli cli -- ",
+    "generate-web-models": "yarn --cwd packages/types web-models:build",
     "publish": "./scripts/deploy"
   },
   "engines": {

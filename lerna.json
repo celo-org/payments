@@ -1,5 +1,6 @@
 {
-  "version": "0.0.8-dev",
+  "version": "0.0.9-dev",
   "private": true,
-  "npmClient": "npm"
+  "npmClient": "yarn",
+  "useWorkspaces": true
 }

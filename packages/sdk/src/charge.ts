@@ -1,4 +1,4 @@
-import {Err, ErrorResult, Ok} from '@celo/base';
+import { Err, ErrorResult, Ok } from '@celo/base';
 import {
   AbortCodes,
   AbortRequest,
@@ -89,7 +89,7 @@ export class Charge {
     requestTypeDefinition: EIP712TypeDefinition,
     responseTypeDefinition: EIP712TypeDefinition
   ) {
-    const requestId = Math.floor(Math.random() * 281474976710655)
+    const requestId = Math.floor(Math.random() * 281474976710655);
     Object.assign(message, {
       id: requestId,
       jsonrpc: '2.0',
@@ -238,7 +238,7 @@ export class Charge {
    *
    * @returns
    */
-  async getInfo(): Promise<PaymentInfo> {
+  getInfo = async (): Promise<PaymentInfo> => {
     const getPaymentInfoRequest: GetPaymentInfoRequest = {
       method: GetPaymentInfoRequest.method.value,
       params: {
@@ -255,7 +255,7 @@ export class Charge {
     // TODO: schema validation
     this.paymentInfo = response.result as PaymentInfo;
     return this.paymentInfo;
-  }
+  };
 
   /**
    * Performs the InitCharge request of the Celo Payments Protocol to initiate the payment flow
@@ -264,7 +264,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  async initCharge(payerData: PayerData): Promise<string> {
+  initCharge = async (payerData: PayerData): Promise<string> => {
     // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo
@@ -289,7 +289,7 @@ export class Charge {
     );
 
     return transactionHash;
-  }
+  };
 
   /**
    * Performs the ReadyForSettlement request of the Celo Payments Protocol
@@ -298,7 +298,7 @@ export class Charge {
    * @returns
    */
 
-  async readyForSettlement() {
+  readyForSettlement = async () => {
     const readyForSettlementRequest: ReadyForSettlementRequest = {
       method: ReadyForSettlementRequest.method.value,
       params: {
@@ -311,7 +311,7 @@ export class Charge {
       EIP712Schemas.ReadyForSettlement,
       EIP712Schemas.ReadyForSettlementResponse
     );
-  }
+  };
 
   /**
    * Submit the on-chain transaction
@@ -319,7 +319,7 @@ export class Charge {
    *
    * @returns
    */
-  async submitTransactionOnChain(): Promise<string> {
+  submitTransactionOnChain = async (): Promise<string> => {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
@@ -337,7 +337,7 @@ export class Charge {
         e.message
       );
     }
-  }
+  };
 
   /**
    * Performs the InitCharge and ReadyForSettlement requests of the Celo Payments Protocol.
@@ -345,7 +345,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  async submit(payerData: PayerData): Promise<string> {
+  submit = async (payerData: PayerData): Promise<string> => {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
@@ -361,12 +361,12 @@ export class Charge {
       }
       throw e;
     }
-  }
+  };
 
   /**
    * Aborts a request
    */
-  async abort(code: AbortCodes, message?: string) {
+  abort = async (code: AbortCodes, message?: string) => {
     const abortRequest: AbortRequest = {
       method: AbortRequest.method.value,
       params: {
@@ -381,5 +381,5 @@ export class Charge {
       EIP712Schemas.Abort,
       EIP712Schemas.AbortResponse
     );
-  }
+  };
 }
