@@ -1,6 +1,6 @@
 {
   "name": "@celo/payments-utils",
-  "version": "0.0.8-dev",
+  "version": "0.0.9-dev",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -11,7 +11,7 @@
     "test:unit": "nyc --silent ava"
   },
   "dependencies": {
-    "@celo/payments-types": "0.0.8-dev",
+    "@celo/payments-types": "0.0.9-dev",
     "bignumber.js": "^9.0.1"
   },
   "devDependencies": {
