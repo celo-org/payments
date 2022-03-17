@@ -11,6 +11,18 @@ This is the exhaustive list of requirements to run this repository
 - A `CELO` private key for development purposes.
 - A `DEK` for development purposes.
 
+### Project Structure
+
+The following is a short description of each of the package directories:
+
+`packages/cli` - CLI code and scripts that demonstrate the SDK capabilities
+
+`packages/sdk` - the actual SDK implementation code
+
+`packages/server` - an example/reference code that demonstrate how a typical server might use the SDK
+
+`packages/types` - protocol compliant schemas and types
+
 #### Regarding the CELO private key
 
 For one-off uses, simply use `celocli account:new`. To get the CELO CLI, follow the instructions here: https://docs.celo.org/command-line-interface/introduction.
@@ -21,6 +33,8 @@ To make things a bit simpler, I recommend running that command to create a .env 
 # Make sure you're working on alfajores network
 celocli config:set --node https://alfajores-forno.celo-testnet.org/
 
+If this is the first time you're running this command, the script will create a blockchain account/private-key for you and ask you to fund it using Celo faucet. Then this account will be used automatically to pay for the requested payment.
+ 
 # Create an account and store it well formatted in an .env file
 celocli account:new | sed -E 's/: (.+)/="\1"/g' | grep '=' > .env
 source .env

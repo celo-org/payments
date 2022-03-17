@@ -16,8 +16,13 @@ import { verifyEIP712TypedDataSigner } from '@celo/utils/lib/signatureUtils';
 import Ajv, { ErrorObject } from 'ajv';
 import { UnknownMethodError } from '../errors/unknown-method';
 import { ChainHandlerForAuthentication } from '../handlers';
+import { formats } from './schema-formats';
 
-const ajv = new Ajv({ strictSchema: false, validateFormats: false });
+const ajv = new Ajv({
+  strictKeywords: false,
+  unknownFormats: 'ignore',
+  formats: formats,
+});
 
 let schemaLoaded = false;
 function loadSchema() {
@@ -58,10 +63,10 @@ export async function verifySignature(
   const account = extractHeader(authorizationHeaders, OffchainHeaders.ADDRESS);
 
   try {
-    // const [isSchemaValid, schemaErrors] = validateSchema(body, typeDefinition);
-    // if (!isSchemaValid) {
-    //   return [false, schemaErrors];
-    // }
+    const [isSchemaValid, schemaErrors] = validateSchema(body, typeDefinition);
+    if (!isSchemaValid) {
+      return [false, schemaErrors];
+    }
 
     const dek = await chainHandler.getDataEncryptionKey(account);
 

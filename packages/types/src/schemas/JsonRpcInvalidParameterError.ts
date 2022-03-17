@@ -2,14 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { Any } from './Any';
 
-export type JsonRpcInvalidParameterError = (JsonRpcError & {
+export type JsonRpcInvalidParameterError = {
     /**
      * Invalid method parameter(s)
      */
-    code?: JsonRpcInvalidParameterError.code,
-});
+    code: JsonRpcInvalidParameterError.code;
+    message?: string;
+    data?: Any;
+}
 
 export namespace JsonRpcInvalidParameterError {
 

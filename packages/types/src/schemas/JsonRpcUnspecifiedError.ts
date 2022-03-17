@@ -2,15 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { Any } from './Any';
 
-export type JsonRpcUnspecifiedError = (JsonRpcError & {
+export type JsonRpcUnspecifiedError = {
     /**
      * Unspecified error
      *
      */
-    code?: JsonRpcUnspecifiedError.code,
-});
+    code: JsonRpcUnspecifiedError.code;
+    message?: string;
+    data?: Any;
+}
 
 export namespace JsonRpcUnspecifiedError {
 

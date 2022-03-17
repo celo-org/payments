@@ -2,10 +2,40 @@ import {
   EIP712ObjectValue,
   EIP712Parameter,
   EIP712Schemas,
-  EIP712Types,
   EIP712TypedData,
+  EIP712Types,
 } from "@celo/payments-types";
-import { sortTypedData } from "./sort-functions";
+import {sortTypedData} from "./sort-functions";
+import BigNumber from "bignumber.js";
+
+function inspectRawValue(value: EIP712ObjectValue, schemasBag: EIP712Types, schemaBagName: string) {
+  Object.entries(value).forEach(([propName, proValue]) => {
+    if (typeof proValue === 'string') {
+      schemasBag[schemaBagName].push({ name: propName, type: 'string' });
+    } else if (typeof proValue === 'number') {
+      schemasBag[schemaBagName].push({ name: propName, type: 'int256' });
+    } else if (typeof proValue === 'boolean') {
+      schemasBag[schemaBagName].push({ name: propName, type: 'bool' });
+    } else if (proValue instanceof BigNumber) {
+      schemasBag[schemaBagName].push({ name: propName, type: 'int256' });
+    } else if (proValue instanceof Buffer) {
+      schemasBag[schemaBagName].push({ name: propName, type: 'string' });
+    }
+      //TS2367: This condition will always return 'false' since the types
+      // '"string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function"'
+      // and '"EIP712Object"' have no overlap.
+      // else if (typeof proValue === 'EIP712Object') {
+      //   schemasBag[schemasBagName].push({ name: propName, type: 'string' });
+    // }
+    else if (typeof proValue === 'object') {
+      const bagName = propName + '_NestedType';
+      schemasBag[schemaBagName].push({ name: propName, type: bagName });
+      schemasBag[bagName] = [];
+
+      inspectRawValue(proValue, schemasBag, bagName);
+    }
+  });
+}
 
 function scanTypedSchema(
   message: EIP712ObjectValue,
@@ -30,8 +60,12 @@ function scanTypedSchema(
     }
     schemasBag[schemaBagName].push(parameter);
 
-    if (["string", "uint256", "int256", "bool"].includes(parameter.type)) {
+    if (["string", "uint256", "int256", "bool", "null"].includes(parameter.type)) {
       return;
+    }
+
+    if (parameter.type === 'Any') {
+      return inspectRawValue(value, schemasBag, schemaBagName);
     }
 
     const type = EIP712Schemas[parameter.type].schema;
@@ -50,7 +84,7 @@ export function buildTypedPaymentRequest(
   schema: EIP712Parameter[],
   chainId: number
 ): EIP712TypedData {
-  let schemaBag: EIP712Types = {};
+  const schemaBag: EIP712Types = {};
   scanTypedSchema(message, schema, schemaBag, "Request");
 
   const typedData = {

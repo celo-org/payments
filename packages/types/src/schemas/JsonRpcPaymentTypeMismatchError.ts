@@ -2,15 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { Any } from './Any';
 
-export type JsonRpcPaymentTypeMismatchError = (JsonRpcError & {
+export type JsonRpcPaymentTypeMismatchError = {
     /**
      * Consumer tried to invoke an action that is irrelevant for the payment type
      *
      */
-    code?: JsonRpcPaymentTypeMismatchError.code,
-});
+    code: JsonRpcPaymentTypeMismatchError.code;
+    message?: string;
+    data?: Any;
+}
 
 export namespace JsonRpcPaymentTypeMismatchError {
 

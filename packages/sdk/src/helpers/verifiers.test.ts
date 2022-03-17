@@ -32,15 +32,15 @@ test('verifyRequestSignature for valid request', async (t) => {
     mockedChainHandler,
     {
       [OffchainHeaders.SIGNATURE]:
-        '0x1b48361b4982ffe80b74cf80b508ac32ba476e64c397461833963543706a8e2c3d49d1ba7b3dc3c83b15d551bf2dc4b007da9c553a5601f1dfd3245e1ba2e492c5',
+        '0x1b77ded266e4b58deb8bf468801d08744a030958b71cf2c3434bb8fbdd8ca36ca7577e1f9f444bd6f6c2930a8bed1a742b0c9cc7fe400b55983b749956a07c282e',
       [OffchainHeaders.ADDRESS]: SENDING_ADDRESS,
     },
     {
       method: GetPaymentInfoRequest.method.value,
       params: {
-        referenceId: '00000000-0000-0000-0000000000',
+        referenceId: '00000000-0000-0000-0000-000000000000',
       },
-      id: 223077442933971,
+      id: 106767939805099,
       jsonrpc: '2.0',
     }
   );
@@ -55,15 +55,15 @@ test('verifyRequestSignature for valid request without message orders - should p
     mockedChainHandler,
     {
       [OffchainHeaders.SIGNATURE]:
-        '0x1b48361b4982ffe80b74cf80b508ac32ba476e64c397461833963543706a8e2c3d49d1ba7b3dc3c83b15d551bf2dc4b007da9c553a5601f1dfd3245e1ba2e492c5',
+        '0x1b77ded266e4b58deb8bf468801d08744a030958b71cf2c3434bb8fbdd8ca36ca7577e1f9f444bd6f6c2930a8bed1a742b0c9cc7fe400b55983b749956a07c282e',
       [OffchainHeaders.ADDRESS]: SENDING_ADDRESS,
     },
     {
-      id: 223077442933971,
+      id: 106767939805099,
       jsonrpc: '2.0',
       method: GetPaymentInfoRequest.method.value,
       params: {
-        referenceId: '00000000-0000-0000-0000000000',
+        referenceId: '00000000-0000-0000-0000-000000000000',
       },
     }
   );

@@ -1,6 +1,6 @@
 {
   "name": "@celo/payments-types",
-  "version": "0.0.9-dev",
+  "version": "0.0.10-dev",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -11,15 +11,15 @@
     "web-models:build": "ts-node ./scripts/generate-web-models.ts"
   },
   "dependencies": {
-    "@celo/contractkit": "1.2.0",
     "@celo/utils": "1.2.0",
-    "@types/js-yaml": "^4.0.3",
-    "bignumber.js": "^9.0.1",
-    "js-yaml": "^4.1.0"
+    "bignumber.js": "^9.0.1"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.3",
+    "js-yaml": "^4.1.0",
     "openapi-typescript-codegen": "^0.9.3",
     "ts-morph": "^12.0.0",
-    "ts-node": "^10.2.1"
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.3"
   }
 }

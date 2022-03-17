@@ -18,8 +18,24 @@ export type JsonRpcResponse = JsonRpcProtocol & {
   error?: JsonRpcError;
 };
 
+function serializeWithBigNumbers(
+  result: any,
+  eip712TypeDefinition: EIP712TypeDefinition
+) {
+  const child = eip712TypeDefinition;
+  for (let field of child.schema) {
+    if (child.bigNumbers.includes(field.name)) {
+      result[field.name] = result[field.name].toString();
+    }
+    if (Object.keys(EIP712Schemas).includes(field.type)) {
+      serializeWithBigNumbers(result[field.name], EIP712Schemas[field.type]);
+    }
+  }
+}
+
 export function wrapWithJsonRpc(
   jsonRpcRequestId: number,
+  eip712TypeDefinition: EIP712TypeDefinition,
   result?: JSON,
   error?: JsonRpcError
 ) {
@@ -32,6 +48,7 @@ export function wrapWithJsonRpc(
   } else if (error) {
     response = { ...response, error };
   }
+  serializeWithBigNumbers(response, eip712TypeDefinition);
   return response;
 }
 
@@ -61,7 +78,7 @@ export async function jsonRpcSuccess(
   schema: EIP712TypeDefinition,
   result?: JSON
 ) {
-  const wrappedResult = wrapWithJsonRpc(jsonRpcRequestId, result);
+  const wrappedResult = wrapWithJsonRpc(jsonRpcRequestId, schema, result);
   const response = await offchainSign(
     wrappedResult,
     schema,
@@ -87,7 +104,12 @@ export async function jsonRpcError(
       httpCode = 400;
       break;
   }
-  const error = wrapWithJsonRpc(jsonRpcRequestId, undefined, jsonRpcError);
+  const error = wrapWithJsonRpc(
+    jsonRpcRequestId,
+    EIP712Schemas.JsonRpcErrorResponse,
+    undefined,
+    jsonRpcError
+  );
   const response = await offchainSign(
     error,
     EIP712Schemas.JsonRpcErrorResponse,
@@ -102,16 +124,10 @@ export function methodNotFound(
   jsonRpcRequestId: number,
   chainHandler: ChainHandler
 ) {
-  const methodNotFoundError = <JsonRpcMethodNotFoundError>{
+  return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
     code: JsonRpcMethodNotFoundError.code.value,
     message: "JSON-RPC method not found",
-  };
-  return jsonRpcError(
-    apiResponse,
-    jsonRpcRequestId,
-    chainHandler,
-    methodNotFoundError
-  );
+  });
 }
 
 export function paymentNotFound(
@@ -120,19 +136,13 @@ export function paymentNotFound(
   chainHandler: ChainHandler,
   referenceId?: string
 ) {
-  const paymentNotFoundError = <JsonRpcReferenceIdNotFoundError>{
+  return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
     code: JsonRpcReferenceIdNotFoundError.code.value,
     message: "Reference id not found",
     data: {
       referenceId,
     },
-  };
-  return jsonRpcError(
-    apiResponse,
-    jsonRpcRequestId,
-    chainHandler,
-    paymentNotFoundError
-  );
+  });
 }
 
 export function unauthenticatedRequest(
@@ -140,14 +150,8 @@ export function unauthenticatedRequest(
   jsonRpcRequestId: number,
   chainHandler: ChainHandler
 ) {
-  const invalidSignatureError = <JsonRpcInvalidSignatureError>{
+  return jsonRpcError(apiResponse, jsonRpcRequestId, chainHandler, {
     code: JsonRpcInvalidSignatureError.code.value,
     message: "Invalid signature",
-  };
-  return jsonRpcError(
-    apiResponse,
-    jsonRpcRequestId,
-    chainHandler,
-    invalidSignatureError
-  );
+  });
 }

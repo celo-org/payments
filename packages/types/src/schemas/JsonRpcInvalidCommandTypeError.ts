@@ -2,15 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { Any } from './Any';
 
-export type JsonRpcInvalidCommandTypeError = (JsonRpcError & {
+export type JsonRpcInvalidCommandTypeError = {
     /**
      * When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
      *
      */
-    code?: JsonRpcInvalidCommandTypeError.code,
-});
+    code: JsonRpcInvalidCommandTypeError.code;
+    message?: string;
+    data?: Any;
+}
 
 export namespace JsonRpcInvalidCommandTypeError {
 

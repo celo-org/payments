@@ -2,14 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { Any } from './Any';
 
-export type JsonRpcMethodNotFoundError = (JsonRpcError & {
+export type JsonRpcMethodNotFoundError = {
     /**
      * Method not found
      */
-    code?: JsonRpcMethodNotFoundError.code,
-});
+    code: JsonRpcMethodNotFoundError.code;
+    message?: string;
+    data?: Any;
+}
 
 export namespace JsonRpcMethodNotFoundError {
 

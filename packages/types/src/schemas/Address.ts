@@ -8,7 +8,7 @@ export type Address = {
      */
     city?: string;
     /**
-     * Two-letter (ISO country code)[https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2]
+     * Two-letter (ISO 3166-1 country code)[https://en.wikipedia.org/wiki/ISO_3166-1]
      */
     country?: string;
     /**

@@ -2,15 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { Any } from './Any';
 
-export type JsonRpcReferenceIdNotFoundError = (JsonRpcError & {
+export type JsonRpcReferenceIdNotFoundError = {
     /**
      * The reference id provided in the request was not found
      *
      */
-    code?: JsonRpcReferenceIdNotFoundError.code,
-});
+    code: JsonRpcReferenceIdNotFoundError.code;
+    message?: string;
+    data?: Any;
+}
 
 export namespace JsonRpcReferenceIdNotFoundError {
 

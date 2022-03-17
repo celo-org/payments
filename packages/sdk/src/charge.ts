@@ -18,7 +18,7 @@ import {
   ReadyForSettlementRequest,
 } from '@celo/payments-types';
 import { OnchainFailureError } from './errors/onchain-failure';
-import { ContractKitTransactionHandler } from './handlers';
+import { ChainHandler } from './handlers';
 import { fetchWithRetries, parseDeepLink, verifySignature } from './helpers';
 import { buildTypedPaymentRequest } from '@celo/payments-utils';
 import BigNumber from 'bignumber.js';
@@ -32,7 +32,7 @@ interface JsonRpcErrorResult extends Error {
  * Charge object for use in the Celo Payments Protocol
  */
 export class Charge {
-  private paymentInfo?: PaymentInfo;
+  public paymentInfo?: PaymentInfo;
 
   /**
    * Instantiates a new charge object for use in the Celo Payments Protocol
@@ -41,12 +41,14 @@ export class Charge {
    * @param referenceId reference ID of the charge
    * @param chainHandler handler to abstract away chain interaction semantics
    * @param useAuthentication
+   * @param retries
    */
   constructor(
     public apiBase: string,
     public referenceId: string,
-    private chainHandler: ContractKitTransactionHandler,
-    private useAuthentication: boolean
+    private chainHandler: ChainHandler,
+    private useAuthentication: boolean,
+    private retries = 3
   ) {}
 
   /**
@@ -56,15 +58,23 @@ export class Charge {
    * @param deepLink encoded URI with `apiBase` and `referenceId`
    * @param chainHandler handler to abstract away chain interaction semantics
    * @param useAuthentication should all off-chain commands be signed and verified
+   * @param retries
    * @returns an instance of the Payments class
    */
   static fromDeepLink(
     deepLink: string,
-    chainHandler: ContractKitTransactionHandler,
-    useAuthentication = true
+    chainHandler: ChainHandler,
+    useAuthentication = true,
+    retries = 3
   ) {
     const { apiBase, referenceId } = parseDeepLink(deepLink);
-    return new Charge(apiBase, referenceId, chainHandler, useAuthentication);
+    return new Charge(
+      apiBase,
+      referenceId,
+      chainHandler,
+      useAuthentication,
+      retries
+    );
   }
 
   /**
@@ -79,7 +89,7 @@ export class Charge {
     requestTypeDefinition: EIP712TypeDefinition,
     responseTypeDefinition: EIP712TypeDefinition
   ) {
-    const requestId = Math.floor(Math.random() * 281474976710655)
+    const requestId = Math.floor(Math.random() * 281474976710655);
     Object.assign(message, {
       id: requestId,
       jsonrpc: '2.0',
@@ -110,7 +120,12 @@ export class Charge {
       body: JSON.stringify(message),
       headers,
     };
-    const response = await fetchWithRetries(`${this.apiBase}/rpc`, request);
+    const response = await fetchWithRetries(
+      `${this.apiBase}/rpc`,
+      request,
+      this.retries
+    );
+
     const jsonResponse = await response.json();
 
     if (this.useAuthentication) {
@@ -179,7 +194,7 @@ export class Charge {
       const resultParamater = responseTypeDefinition.schema.find(
         (p) => p.name === 'result'
       );
-      if (resultParamater && resultParamater.type) {
+      if (resultParamater && resultParamater.type && !!result) {
         const baseType = resultParamater.type;
         this.parseWithBigNumbers(result, baseType);
       }
@@ -223,7 +238,7 @@ export class Charge {
    *
    * @returns
    */
-  getInfo = async () => {
+  getInfo = async (): Promise<PaymentInfo> => {
     const getPaymentInfoRequest: GetPaymentInfoRequest = {
       method: GetPaymentInfoRequest.method.value,
       params: {
@@ -240,7 +255,7 @@ export class Charge {
     // TODO: schema validation
     this.paymentInfo = response.result as PaymentInfo;
     return this.paymentInfo;
-  }
+  };
 
   /**
    * Performs the InitCharge request of the Celo Payments Protocol to initiate the payment flow
@@ -249,7 +264,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  initCharge = async (payerData: PayerData): Promise<void> => {
+  initCharge = async (payerData: PayerData): Promise<string> => {
     // TODO: validate payerData contains all required fields by this.paymentInfo.requiredPayerData
     const transactionHash = await this.chainHandler.computeTransactionHash(
       this.paymentInfo
@@ -272,7 +287,9 @@ export class Charge {
       EIP712Schemas.InitCharge,
       EIP712Schemas.InitChargeResponse
     );
-  }
+
+    return transactionHash;
+  };
 
   /**
    * Performs the ReadyForSettlement request of the Celo Payments Protocol
@@ -294,7 +311,7 @@ export class Charge {
       EIP712Schemas.ReadyForSettlement,
       EIP712Schemas.ReadyForSettlementResponse
     );
-  }
+  };
 
   /**
    * Submit the on-chain transaction
@@ -302,7 +319,7 @@ export class Charge {
    *
    * @returns
    */
-   submitTransactionOnChain = async () => {
+  submitTransactionOnChain = async (): Promise<string> => {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
@@ -312,7 +329,7 @@ export class Charge {
     }
 
     try {
-      await this.chainHandler.submitTransaction(this.paymentInfo);
+      return await this.chainHandler.submitTransaction(this.paymentInfo);
     } catch (e) {
       // TODO: retries?
       throw new OnchainFailureError(
@@ -320,7 +337,7 @@ export class Charge {
         e.message
       );
     }
-  }
+  };
 
   /**
    * Performs the InitCharge and ReadyForSettlement requests of the Celo Payments Protocol.
@@ -328,7 +345,7 @@ export class Charge {
    * @param payerData
    * @returns
    */
-  submit = async (payerData: PayerData): Promise<void> => {
+  submit = async (payerData: PayerData): Promise<string> => {
     if (!this.paymentInfo) {
       throw new Error('getInfo() has not been called');
     }
@@ -337,19 +354,19 @@ export class Charge {
     await this.readyForSettlement();
 
     try {
-      await this.submitTransactionOnChain();
+      return await this.submitTransactionOnChain();
     } catch (e) {
       if (e instanceof OnchainFailureError) {
         await this.abort(e.code);
       }
       throw e;
     }
-  }
+  };
 
   /**
    * Aborts a request
    */
-  abort = async (code: AbortCodes, message?: string) =>  {
+  abort = async (code: AbortCodes, message?: string) => {
     const abortRequest: AbortRequest = {
       method: AbortRequest.method.value,
       params: {
@@ -364,5 +381,5 @@ export class Charge {
       EIP712Schemas.Abort,
       EIP712Schemas.AbortResponse
     );
-  }
+  };
 }

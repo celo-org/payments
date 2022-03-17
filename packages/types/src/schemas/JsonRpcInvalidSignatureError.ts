@@ -2,15 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { JsonRpcError } from './JsonRpcError';
+import type { Any } from './Any';
 
-export type JsonRpcInvalidSignatureError = (JsonRpcError & {
+export type JsonRpcInvalidSignatureError = {
     /**
      * Signature header missing or could not be verified
      *
      */
-    code?: JsonRpcInvalidSignatureError.code,
-});
+    code: JsonRpcInvalidSignatureError.code;
+    message?: string;
+    data?: Any;
+}
 
 export namespace JsonRpcInvalidSignatureError {
 

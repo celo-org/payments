@@ -29,7 +29,7 @@ info:
 
     Before signing a message, one must sort it alphabetically (ordering by the object keys), to ensure signature consistency.<br/>
     For the `types` property, the array should be sorted using the name parameters of every field<br/>
-    For an example, even if the message is 
+    For an example, even if the message is
     ```json
     {
       types: {
@@ -82,7 +82,7 @@ info:
         ],
       }
     }
-    ``` 
+    ```
 
     Every offchain message must include an HTTP `X-Signature` and `X-Address` headers:<br/>
     * `X-Signature` contains the EIP712 signature
@@ -124,18 +124,18 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundErrorResponse"
         "400":
           description: One or more parameters are invalid (including reference ID not found)
           content:
             application/json:
               schema:
                 oneOf:
-                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
-                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
-                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
-                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
-                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedErrorResponse"
       requestBody:
         content:
           application/json:
@@ -164,21 +164,21 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundErrorResponse"
         "400":
           description: One or more parameters are invalid (including reference ID not found)
           content:
             application/json:
               schema:
                 oneOf:
-                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
-                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
-                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
-                  - "$ref": "#/components/schemas/JsonRpcRiskChecksFailedError"
-                  - "$ref": "#/components/schemas/JsonRpcMissingInformationError"
-                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
-                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
-                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcRiskChecksFailedErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcMissingInformationErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedErrorResponse"
       requestBody:
         content:
           application/json:
@@ -205,19 +205,19 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundErrorResponse"
         "400":
           description: One or more parameters are invalid (including reference ID not found)
           content:
             application/json:
               schema:
                 oneOf:
-                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
-                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
-                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
-                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
-                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
-                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedErrorResponse"
       requestBody:
         content:
           application/json:
@@ -244,19 +244,19 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+                "$ref": "#/components/schemas/JsonRpcMethodNotFoundErrorResponse"
         "400":
           description: One or more parameters are invalid (including reference ID not found)
           content:
             application/json:
               schema:
                 oneOf:
-                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
-                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterError"
-                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundError"
-                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
-                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
-                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedError"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidSignatureErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidParameterErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcReferenceIdNotFoundErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeErrorResponse"
+                  - "$ref": "#/components/schemas/JsonRpcUnspecifiedErrorResponse"
       requestBody:
         content:
           application/json:
@@ -290,6 +290,23 @@ components:
             method:
               type: string
               description: Method name
+    JsonRpcSuccessResponse:
+      type: object
+      required:
+        - id
+        - jsonrpc
+        - result
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Request ID
+        jsonrpc:
+          type: string
+          default: "2.0"
+          description: JSON-RPC Version (2.0)
+        result:
+          type: 'null'
     JsonRpcErrorResponse:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcProtocol"
@@ -314,162 +331,287 @@ components:
         message:
           type: string
         data:
-          oneOf:
-            - "$ref": "#/components/schemas/Any"
-            - type: string
-            - type: array
-            - type: boolean
-            - type: integer
-            - type: number
+          "$ref": "#/components/schemas/Any"
     JsonRpcInvalidRequestError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32600
+          description: Invalid request
+        message:
+          type: string
+        data:
+          "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcInvalidRequestErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32600
-              description: Invalid request
+            error:
+              allOf:
+                - $ref: "#/components/schemas/JsonRpcInvalidRequestError"
+          required:
+            - error
     JsonRpcMethodNotFoundError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32601
+          description: Method not found
+        message:
+          type: string
+        data:
+            "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcMethodNotFoundErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32601
-              description: Method not found
+            error:
+              "$ref": "#/components/schemas/JsonRpcMethodNotFoundError"
+          required:
+            - error
     JsonRpcInvalidParameterError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32602
+          description: Invalid method parameter(s)
+        message:
+          type: string
+        data:
+            "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcInvalidParameterErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32602
-              description: Invalid method parameter(s)
+            error:
+              $ref: "#/components/schemas/JsonRpcInvalidParameterError"
+          required:
+            - error
     JsonRpcUnspecifiedError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32000
+          description: |
+            Unspecified error
+        message:
+          type: string
+        data:
+          "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcUnspecifiedErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32000
-              description: |
-                Unspecified error
-      example:
-        code: -32000
-        message: Unspecified error
-        data:
-          referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+            error:
+              $ref: "#/components/schemas/JsonRpcUnspecifiedError"
+          example:
+            code: -32000
+            message: Unspecified error
+            data:
+              referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+          required:
+            - error
     JsonRpcReferenceIdNotFoundError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32001
+          description: |
+            The reference id provided in the request was not found
+        message:
+          type: string
+        data:
+          "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcReferenceIdNotFoundErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32001
-              description: |
-                The reference id provided in the request was not found
-      example:
-        code: -32001
-        message: The reference id provided in the request was not found
-        data:
-          referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+            error:
+              $ref: "#/components/schemas/JsonRpcReferenceIdNotFoundError"
+          example:
+            code: -32001
+            message: The reference id provided in the request was not found
+            data:
+              referenceId: 5a655425-1d30-4e39-bd26-6b02875f2f0d
+          required:
+            - error
     JsonRpcRiskChecksFailedError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32002
+          description: |
+            The risk checks did not pass successfully
+        message:
+          type: string
+        data:
+          "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcRiskChecksFailedErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32002
-              description: |
-                The risk checks did not pass successfully
-      example:
-        code: -32002
-        message: The risk checks did not pass successfully
-        data:
-          reason: Sanctions list
+            error:
+              $ref: "#/components/schemas/JsonRpcRiskChecksFailedError"
+          example:
+            code: -32002
+            message: The risk checks did not pass successfully
+            data:
+              reason: Sanctions list
+          required:
+            - error
     JsonRpcMissingInformationError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32003
+          description: |
+            A mandatory field or element are missing from the request
+        message:
+          type: string
+        data:
+          "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcMissingInformationErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32003
-              description: |
-                A mandatory field or element are missing from the request
-      example:
-        code: -32003
-        message: A mandatory field or element are missing from the request
-        data:
-          missingFields:
-            - "phoneNumber"
+            error:
+              "$ref": "#/components/schemas/JsonRpcMissingInformationError"
+          example:
+            code: -32003
+            message: A mandatory field or element are missing from the request
+            data:
+              missingFields:
+                - "phoneNumber"
+          required:
+            - error
     JsonRpcPaymentTypeMismatchError:
-      allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
-        - type: object
-          properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32004
-              description: |
-                Consumer tried to invoke an action that is irrelevant for the payment type
-      example:
-        code: -32004
-        message: Consumer tried to invoke an action that is irrelevant for the payment type
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32004
+          description: |
+            Consumer tried to invoke an action that is irrelevant for the payment type
+        message:
+          type: string
         data:
-          requestedAction: capture
+          "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcPaymentTypeMismatchErrorResponse:
+      allOf:
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
+        - type: object
+          properties:
+            error:
+              "$ref": "#/components/schemas/JsonRpcPaymentTypeMismatchError"
+          example:
+            code: -32004
+            message: Consumer tried to invoke an action that is irrelevant for the payment type
+            data:
+              requestedAction: capture
+          required:
+            - error
     JsonRpcInvalidCommandTypeError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32005
+          description: |
+            When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
+        message:
+          type: string
+        data:
+          "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcInvalidCommandTypeErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32005
-              description: |
-                When trying to invoke an action out of its expected order (e.g. The wallet invoked ReadyForSettlement before payment was initialized)
-      example:
-        code: -32005
-        message: ReadyForSettlement sent before payment was initialized
+            error:
+              "$ref": "#/components/schemas/JsonRpcInvalidCommandTypeError"
+          example:
+            code: -32005
+            message: ReadyForSettlement sent before payment was initialized
+          required:
+            - error
     JsonRpcInvalidSignatureError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - -32006
+          description: |
+            Signature header missing or could not be verified
+        message:
+          type: string
+        data:
+          "$ref": "#/components/schemas/Any"
+      required:
+        - code
+    JsonRpcInvalidSignatureErrorResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcError"
+        - "$ref": "#/components/schemas/JsonRpcErrorResponse"
         - type: object
           properties:
-            code:
-              type: integer
-              format: int32
-              enum:
-                - -32006
-              description: |
-                Signature header missing or could not be verified
-      example:
-        code: -32006
-        message: Signature header missing or could not be verified
+            error:
+              "$ref": "#/components/schemas/JsonRpcInvalidSignatureError"
+          example:
+            code: -32006
+            message: Signature header missing or could not be verified
+          required:
+            - error
     ReferenceId:
       type: string
       description:
@@ -503,8 +645,10 @@ components:
           "$ref": "#/components/schemas/GetPaymentInfoParams"
     GetPaymentInfoResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - "$ref": "#/components/schemas/JsonRpcSuccessResponse"
         - type: object
+          required:
+            - result
           properties:
             result:
               "$ref": "#/components/schemas/PaymentInfo"
@@ -556,8 +700,8 @@ components:
           type: string
           example: US
           minLength: 2
-          maxLength: 2
-          description: Two-letter (ISO country code)[https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2]
+          maxLength: 3
+          description: Two-letter (ISO 3166-1 country code)[https://en.wikipedia.org/wiki/ISO_3166-1]
         line1:
           type: string
           example: 1260 Market Street
@@ -763,7 +907,7 @@ components:
           "$ref": "#/components/schemas/PayerData"
     InitChargeResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - "$ref": "#/components/schemas/JsonRpcSuccessResponse"
     ReadyForSettlement:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcRequired"
@@ -791,7 +935,7 @@ components:
           "$ref": "#/components/schemas/ReadyForSettlementParams"
     ReadyForSettlementResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - "$ref": "#/components/schemas/JsonRpcSuccessResponse"
     Abort:
       allOf:
         - "$ref": "#/components/schemas/JsonRpcRequired"
@@ -832,7 +976,7 @@ components:
           "$ref": "#/components/schemas/AbortParams"
     AbortResponse:
       allOf:
-        - "$ref": "#/components/schemas/JsonRpcProtocol"
+        - "$ref": "#/components/schemas/JsonRpcSuccessResponse"
 
 tags:
   - name: Payments
