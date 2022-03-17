@@ -23,7 +23,15 @@ const ajv = new Ajv({
   unknownFormats: 'ignore',
   formats: formats,
 });
-ajv.addSchema(OffchainJsonSchema, 'OffchainJsonSchema');
+
+let schemaLoaded = false;
+function loadSchema() {
+  if (schemaLoaded) return;
+  if (!schemaLoaded) {
+    ajv.addSchema(OffchainJsonSchema, 'OffchainJsonSchema');
+  }
+  schemaLoaded = true;
+}
 
 export interface AuthenticationHeaders {
   [OffchainHeaders.SIGNATURE]: string;
@@ -101,6 +109,7 @@ export function validateSchema(
   body: PaymentMessage | PaymentMessageResponse,
   typeDefinition: EIP712TypeDefinition
 ): [boolean, ErrorObject[]] {
+  loadSchema();
   if (
     !ajv.validate(
       {
@@ -117,6 +126,7 @@ export function validateSchema(
 export async function validateRequestSchema(body: PaymentMessage) {
   const method = body.method.toString();
   const typeDefinition = getTypeDefinitionByMethod(method);
+  loadSchema();
   if (
     !ajv.validate(
       {

@@ -6,6 +6,7 @@ test
 src/**.js
 coverage
 *.log
+package-lock.json
 
 *.tsbuildinfo
 **/lib
@@ -14,4 +15,3 @@ coverage
 
 .history
 .secret
-.DS_Store
