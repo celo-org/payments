@@ -108,6 +108,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
       from: this.blockchainAddress,
       gas: this.gas,
       gasPrice: gasPriceMinimum.times(50).toString(),
+      gasLimit: '400_000',
       chainId: await this.kit.connection.chainId(),
       nonce,
       data: txo.encodeABI(),
