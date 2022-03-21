@@ -102,6 +102,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
     txo: CeloTxObject<unknown>
   ) {
     const nonce = this.lastNonce ? this.lastNonce++ : await this.getNonce();
+    const stableToken = await stable.symbol()
 
     return {
       to: stable.address,
@@ -111,7 +112,7 @@ export class ContractKitTransactionHandler implements ChainHandler {
       chainId: await this.kit.connection.chainId(),
       nonce,
       data: txo.encodeABI(),
-      feeCurrency: stable.address,
+      feeCurrency: stableToken,
       gatewayFeeRecipient: '0x',
       gatewayFee: '0x0',
     };
