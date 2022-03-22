@@ -63,10 +63,10 @@ export async function verifySignature(
   const account = extractHeader(authorizationHeaders, OffchainHeaders.ADDRESS);
 
   try {
-    const [isSchemaValid, schemaErrors] = validateSchema(body, typeDefinition);
-    if (!isSchemaValid) {
-      return [false, schemaErrors];
-    }
+    // const [isSchemaValid, schemaErrors] = validateSchema(body, typeDefinition);
+    // if (!isSchemaValid) {
+    //   return [false, schemaErrors];
+    // }
 
     const dek = await chainHandler.getDataEncryptionKey(account);
 

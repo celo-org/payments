@@ -1,15 +1,15 @@
 {
   "name": "@celo/payments-server",
-  "version": "0.0.10-dev",
+  "version": "0.0.11-dev",
   "scripts": {
     "start": "ts-node-dev ./bin/index.ts",
     "setup": "ts-node-dev bin/setup.ts",
     "build": "tsc -b ."
   },
   "dependencies": {
-    "@celo/payments-sdk": "0.0.10-dev",
-    "@celo/payments-types": "0.0.10-dev",
-    "@celo/payments-utils": "0.0.10-dev",
+    "@celo/payments-sdk": "0.0.11-dev",
+    "@celo/payments-types": "0.0.11-dev",
+    "@celo/payments-utils": "0.0.11-dev",
     "@celo/utils": "1.2.0",
     "@hapi/hapi": "^20.1.5",
     "abi-decoder": "^2.4.0",

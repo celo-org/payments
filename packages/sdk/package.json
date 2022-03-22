@@ -1,6 +1,6 @@
 {
   "name": "@celo/payments-sdk",
-  "version": "0.0.10-dev",
+  "version": "0.0.11-dev",
   "description": "TypeScript implementation of the Celo Payments Protocol",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -42,8 +42,8 @@
     "@celo/base": "1.2.0",
     "@celo/connect": "1.2.0",
     "@celo/contractkit": "1.2.0",
-    "@celo/payments-types": "0.0.10-dev",
-    "@celo/payments-utils": "0.0.10-dev",
+    "@celo/payments-types": "0.0.11-dev",
+    "@celo/payments-utils": "0.0.11-dev",
     "@types/isomorphic-fetch": "^0.0.35",
     "ajv": "^6.12.3",
     "bignumber.js": "^9.0.1",
