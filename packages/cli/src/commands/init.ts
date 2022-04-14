@@ -82,9 +82,7 @@ export default class Init extends Command {
       }
 
       const kit = createKitFromPrivateKey(testnet, privateKey, dek);
-      const chainHandler = await new ContractKitTransactionHandler(
-        kit
-      ).withDekAddress();
+      const chainHandler = new ContractKitTransactionHandler(kit);
 
       if (!deepLink) {
         deepLink = await cli.prompt(

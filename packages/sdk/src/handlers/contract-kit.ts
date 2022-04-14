@@ -44,37 +44,42 @@ export class ContractKitTransactionHandler implements ChainHandler {
   private static txsStorage: SignedTxRepo = new SignedTxRepo();
   private lastNonce: number;
   private readonly blockchainAddress: string;
-  private dekAddress: string;
+  private dekAddressPromise: Promise<string>;
 
-  constructor(private readonly kit: ContractKit) {
+  constructor(private readonly kit: ContractKit, public gas = 1_000_000) {
     [this.blockchainAddress] = this.kit.getWallet().getAccounts();
 
     if (!this.blockchainAddress) {
       throw new Error('Missing defaultAccount');
     }
+
+    void this.initializeDekAddress();
   }
 
-  withDekAddress = async () => {
-    const accounts = await this.kit.contracts.getAccounts();
+  getSendingAddress = () => {
+    return this.blockchainAddress;
+  };
 
+  private initializeDekAddress = async () => {
+    if (!this.dekAddressPromise) {
+      this.dekAddressPromise = this.getDekAddress();
+    }
+
+    await this.dekAddressPromise;
+  };
+
+  private getDekAddress = async () => {
+    const accounts = await this.kit.contracts.getAccounts();
     const res = (
       await accounts.getDataEncryptionKey(this.blockchainAddress)
     ).slice(2);
 
-    this.dekAddress = `0x${pubToAddress(Buffer.from(res, 'hex')).toString(
-      'hex'
-    )}`;
-
-    if (!this.dekAddress) {
+    if (!res) {
       throw new Error('Missing DEK address.');
     }
 
-    return this;
+    return `0x${pubToAddress(Buffer.from(res, 'hex')).toString('hex')}`;
   };
-
-  getSendingAddress() {
-    return this.blockchainAddress;
-  }
 
   private async getSignedTransaction(
     info: PaymentInfo
@@ -159,12 +164,11 @@ export class ContractKitTransactionHandler implements ChainHandler {
   };
 
   signTypedPaymentRequest = async (typedData: EIP712TypedData) => {
-    if (this.dekAddress) {
-      return serializeSignature(
-        await this.kit.signTypedData(this.dekAddress, typedData)
-      );
-    }
-    return undefined;
+    await this.initializeDekAddress();
+
+    return serializeSignature(
+      await this.kit.signTypedData(await this.dekAddressPromise, typedData)
+    );
   };
 
   getChainId = () => {
