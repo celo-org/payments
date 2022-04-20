@@ -12,6 +12,7 @@
     "@celo/payments-utils": "0.0.12-dev",
     "@celo/utils": "1.2.0",
     "@hapi/hapi": "^20.1.5",
+    "@types/hapi__hapi": "^20.0.10",
     "abi-decoder": "^2.4.0",
     "bignumber.js": "^9.0.1",
     "ethereumjs-util": "^7.1.2"

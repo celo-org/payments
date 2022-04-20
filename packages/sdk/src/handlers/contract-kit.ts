@@ -4,6 +4,8 @@ import { ContractKit, StableToken } from '@celo/contractkit';
 import { PaymentInfo } from '@celo/payments-types';
 import { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils';
 
+import { pubToAddress } from 'ethereumjs-util';
+
 import { ChainHandler } from './interface';
 import { StableTokenWrapper } from '@celo/contractkit/lib/wrappers/StableTokenWrapper';
 import BigNumber from 'bignumber.js';
@@ -42,21 +44,42 @@ export class ContractKitTransactionHandler implements ChainHandler {
   private static txsStorage: SignedTxRepo = new SignedTxRepo();
   private lastNonce: number;
   private readonly blockchainAddress: string;
-  private readonly dekAddress: string;
+  private dekAddressPromise: Promise<string>;
 
   constructor(private readonly kit: ContractKit, public gas = 1_000_000) {
-    [this.blockchainAddress, this.dekAddress] = this.kit
-      .getWallet()
-      .getAccounts();
+    [this.blockchainAddress] = this.kit.getWallet().getAccounts();
 
     if (!this.blockchainAddress) {
       throw new Error('Missing defaultAccount');
     }
+
+    void this.initializeDekAddress();
   }
 
   getSendingAddress = () => {
     return this.blockchainAddress;
-  }
+  };
+
+  private initializeDekAddress = async () => {
+    if (!this.dekAddressPromise) {
+      this.dekAddressPromise = this.getDekAddress();
+    }
+
+    await this.dekAddressPromise;
+  };
+
+  private getDekAddress = async () => {
+    const accounts = await this.kit.contracts.getAccounts();
+    const res = (
+      await accounts.getDataEncryptionKey(this.blockchainAddress)
+    ).slice(2);
+
+    if (!res) {
+      throw new Error('Missing DEK address.');
+    }
+
+    return `0x${pubToAddress(Buffer.from(res, 'hex')).toString('hex')}`;
+  };
 
   private async getSignedTransaction(
     info: PaymentInfo
@@ -122,14 +145,14 @@ export class ContractKitTransactionHandler implements ChainHandler {
     const sender = this.getSendingAddress();
     const balances = await this.kit.getTotalBalance(sender);
     return balances[currency].gte(amntToSpend);
-  }
+  };
 
   computeTransactionHash = async (info: PaymentInfo) => {
     const {
       tx: { hash },
     } = await this.getSignedTransaction(info);
     return hash;
-  }
+  };
 
   submitTransaction = async (info: PaymentInfo) => {
     const { raw } = await this.getSignedTransaction(info);
@@ -138,23 +161,22 @@ export class ContractKitTransactionHandler implements ChainHandler {
     ).waitReceipt();
 
     return receipt.transactionHash;
-  }
+  };
 
   signTypedPaymentRequest = async (typedData: EIP712TypedData) => {
-    if (this.dekAddress) {
-      return serializeSignature(
-        await this.kit.signTypedData(this.dekAddress, typedData)
-      );
-    }
-    return undefined;
-  }
+    await this.initializeDekAddress();
+
+    return serializeSignature(
+      await this.kit.signTypedData(await this.dekAddressPromise, typedData)
+    );
+  };
 
   getChainId = () => {
     return this.kit.web3.eth.getChainId();
-  }
+  };
 
   getDataEncryptionKey = async (account: string): Promise<string> => {
     const accounts = await this.kit.contracts.getAccounts();
     return accounts.getDataEncryptionKey(account);
-  }
+  };
 }

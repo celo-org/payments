@@ -5,16 +5,13 @@ import {
 } from "@celo/payments-sdk";
 import {
   Abort,
-  AbortParams,
   GetPaymentInfo,
-  GetPaymentInfoParams,
   InitCharge,
   InitChargeParams,
   JsonRpcMethods,
   ReadyForSettlement,
-  ReadyForSettlementParams,
 } from "@celo/payments-types";
-import { Request, ResponseToolkit } from "@hapi/hapi";
+import { Request, ResponseObject, ResponseToolkit } from "@hapi/hapi";
 import {
   methodNotFound,
   unauthenticatedRequest,
@@ -34,7 +31,11 @@ interface PaymentRequest extends Request {
 }
 
 let chainHandler = undefined;
-export let useAuthentication: boolean = true;
+let useAuthentication = true;
+
+export function setUseAuthentication(flag: boolean) {
+  useAuthentication = flag;
+}
 
 export async function handle(
   { payload, headers }: PaymentRequest,
@@ -53,26 +54,21 @@ export async function handle(
     return response;
   }
 
-  const method = payload.method.toString();
+  const method = payload.method.toString() as JsonRpcMethods;
   switch (method) {
     case JsonRpcMethods.GetInfo:
-      const getPaymentInfoParams = payload.params as GetPaymentInfoParams;
-      return getInfo(payload.id, getPaymentInfoParams, chainHandler, res);
+      return getInfo(payload.id, payload.params, chainHandler, res);
     case JsonRpcMethods.InitCharge:
-      const initChargeParams = payload.params as InitChargeParams;
-      return initCharge(payload.id, initChargeParams, chainHandler, res);
-    case JsonRpcMethods.ReadyForSettlement:
-      const readyForSettlementParams =
-        payload.params as ReadyForSettlementParams;
-      return expectPayment(
+      return initCharge(
         payload.id,
-        readyForSettlementParams,
+        payload.params as InitChargeParams,
         chainHandler,
         res
       );
+    case JsonRpcMethods.ReadyForSettlement:
+      return expectPayment(payload.id, payload.params, chainHandler, res);
     case JsonRpcMethods.Abort:
-      const abortParams = payload.params as AbortParams;
-      return abort(payload.id, abortParams, chainHandler, res);
+      return abort(payload.id, payload.params, chainHandler, res);
     default:
       return methodNotFound(res, payload.id, chainHandler);
   }
@@ -82,7 +78,7 @@ async function handleAuthentication(
   headers: Headers,
   payload: PaymentPayload,
   res: ResponseToolkit
-): Promise<[boolean, any]> {
+): Promise<[true, void] | [false, ResponseObject]> {
   if (useAuthentication) {
     const validSignature = await verifyRequestSignature(
       chainHandler,
