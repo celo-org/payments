@@ -11,8 +11,8 @@
     "web-models:build": "ts-node ./scripts/generate-web-models.ts"
   },
   "dependencies": {
-    "@celo/utils": "1.2.0",
-    "bignumber.js": "^9.0.1"
+    "@celo/utils": "2.3.0",
+    "bignumber.js": "^9.0.1"    
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.3",

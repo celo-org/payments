@@ -10,7 +10,7 @@
     "@celo/payments-sdk": "0.0.12-dev",
     "@celo/payments-types": "0.0.12-dev",
     "@celo/payments-utils": "0.0.12-dev",
-    "@celo/utils": "1.2.0",
+    "@celo/utils": "2.3.0",
     "@hapi/hapi": "^20.1.5",
     "@types/hapi__hapi": "^20.0.10",
     "abi-decoder": "^2.4.0",
