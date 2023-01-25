@@ -67,7 +67,9 @@ function incrementVersion(version, command) {
 }
 
 function removeDevSuffix(version) {
-  return version.endsWith("-dev") ? version.slice(0, 5) : version;
+  return version.endsWith("-dev")
+    ? version.slice(0, version.indexOf("-dev"))
+    : version;
 }
 
 function addDevSuffix(version) {
