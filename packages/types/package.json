@@ -1,6 +1,6 @@
 {
   "name": "@celo/payments-types",
-  "version": "0.0.12-dev",
+  "version": "0.0.14-dev",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -11,8 +11,10 @@
     "web-models:build": "ts-node ./scripts/generate-web-models.ts"
   },
   "dependencies": {
-    "@celo/utils": "3.2.0",
     "bignumber.js": "^9.0.1"
+  },
+  "peerDependencies": {
+    "@celo/utils": ">=2.0.0 <4.0.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.3",
