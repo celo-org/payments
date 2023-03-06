@@ -17,7 +17,7 @@ export default async () => {
         " " +
         request.path +
         " --> " +
-        request.response.statusCode
+        request.raw.res.statusCode
     );
   });
 
